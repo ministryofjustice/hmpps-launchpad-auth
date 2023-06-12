@@ -8,6 +8,7 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.Id
 import java.util.*
+
 @Entity
 class Client {
   @Id
