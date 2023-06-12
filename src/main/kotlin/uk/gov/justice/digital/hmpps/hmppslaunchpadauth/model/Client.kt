@@ -30,4 +30,21 @@ class Client {
   @Column(name = "logo_uri")
   lateinit var logoUri: String
   lateinit var description: String
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as Client
+
+    if (id != other.id) return false
+    return secret == other.secret
+  }
+
+  override fun hashCode(): Int {
+    var result = id.hashCode()
+    result = 31 * result + secret.hashCode()
+    return result
+  }
+
+
 }

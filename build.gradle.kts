@@ -12,6 +12,8 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-web")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.postgresql:postgresql:42.6.0")
+  implementation("org.springframework.boot:spring-boot-starter-test")
+  testImplementation("com.h2database:h2:1.3.148")
 
 }
 

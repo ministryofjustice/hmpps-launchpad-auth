@@ -33,7 +33,7 @@ class ClientService(@Autowired var clientRepository: ClientRepository) {
       validateUri(redirectUri, client.get().registeredRedirectUris)
     }
   }
-  fun validateUri(uri: String, redirectUris: Set<String>) {
+  private fun validateUri(uri: String, redirectUris: Set<String>) {
     try {
       URL(uri)
       validateRedirectUri(uri, redirectUris)
@@ -42,7 +42,7 @@ class ClientService(@Autowired var clientRepository: ClientRepository) {
     }
   }
 
-  fun validateScopes(scopes: String, clientScopeSet: Set<Scope>) {
+  private fun validateScopes(scopes: String, clientScopeSet: Set<Scope>) {
     val scopeSet = scopes.split(",")
     scopeSet.forEach {
       if (!Scope.values().contains(Scope.valueOf(it))) {
@@ -51,7 +51,7 @@ class ClientService(@Autowired var clientRepository: ClientRepository) {
     }
   }
 
-  fun validateRedirectUri(uri: String, redirectUris: Set<String>) {
+  private fun validateRedirectUri(uri: String, redirectUris: Set<String>) {
     if (!redirectUris.contains(uri)) {
       throw ApiException(String.format("uri %s is not valid uri", uri))
     }
