@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppstemplatepackagename.config
+package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.config
 
 import jakarta.validation.ValidationException
 import org.slf4j.LoggerFactory
@@ -8,10 +8,11 @@ import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 
 @RestControllerAdvice
-class HmppsTemplateKotlinExceptionHandler {
-  @ExceptionHandler(ValidationException::class)
+class HmppsLaunchpadAuthExceptionHandler {
+  @ExceptionHandler(value = [ValidationException::class, ApiException::class])
   fun handleValidationException(e: Exception): ResponseEntity<ErrorResponse> {
     log.info("Validation exception: {}", e.message)
     return ResponseEntity

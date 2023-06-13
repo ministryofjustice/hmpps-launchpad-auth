@@ -6,6 +6,13 @@ enum class Scope(val scope: String) {
   USER_BOOKING_READ("user.booking.read");
 
   override fun toString(): String {
-    return super.toString()
+    return scope
   }
+
+  companion object {
+    fun getStringValues(): String {
+      return "${USER_BASIC_READ},${USER_ESTABLISHMENT_READ},${USER_BOOKING_READ}"
+    }
+  }
+
 }

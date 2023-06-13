@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppstemplatepackagename.health
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.boot.info.BuildProperties
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.health.HealthInfo
 import java.util.Properties
 
 class HealthInfoTest {

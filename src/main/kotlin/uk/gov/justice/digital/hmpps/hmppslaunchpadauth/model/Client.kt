@@ -14,13 +14,16 @@ class Client {
   @Id
   lateinit var id: UUID
   lateinit var secret: String
+
   @ElementCollection(targetClass = Scope::class, fetch = FetchType.EAGER)
   @Enumerated(value = EnumType.STRING)
   lateinit var scopes: Set<Scope>
+
   @ElementCollection(targetClass = AuthorizationGrantType::class, fetch = FetchType.EAGER)
   @Enumerated(value = EnumType.STRING)
   @Column(name = "authorized_grant_types")
   lateinit var authorizedGrantTypes: Set<AuthorizationGrantType>
+
   @ElementCollection(targetClass = String::class, fetch = FetchType.EAGER)
   @Enumerated(value = EnumType.STRING)
   @Column(name = "registered_redirect_uris")
@@ -28,6 +31,7 @@ class Client {
   var enabled: Boolean = false;
   var autoApprove: Boolean = false
   lateinit var name: String
+
   @Column(name = "logo_uri")
   lateinit var logoUri: String
   lateinit var description: String
@@ -46,6 +50,4 @@ class Client {
     result = 31 * result + secret.hashCode()
     return result
   }
-
-
 }

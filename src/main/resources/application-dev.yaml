@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: hmpps-template-kotlin
+  codec:
+    max-in-memory-size: 10MB
+  jpa:
+    defer-datasource-initialization: false
+    hibernate:
+      ddl-auto: update
+  #database: launchpad
+  datasource:
+    username: postgres
+    password: password
+    url: jdbc:postgresql://localhost:5432/launchpad

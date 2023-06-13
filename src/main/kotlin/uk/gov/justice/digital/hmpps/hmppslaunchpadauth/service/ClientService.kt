@@ -28,7 +28,6 @@ class ClientService(@Autowired var clientRepository: ClientRepository) {
     if (client.isEmpty) {
       throw ApiException(String.format("Client with client_id %s do not exist", clientId))
     } else {
-      val clientRecord = client.get()
       validateScopes(scope, client.get().scopes)
       validateUri(redirectUri, client.get().registeredRedirectUris)
     }
@@ -43,17 +42,22 @@ class ClientService(@Autowired var clientRepository: ClientRepository) {
   }
 
   private fun validateScopes(scopes: String, clientScopeSet: Set<Scope>) {
-    val scopeSet = scopes.split(",")
-    scopeSet.forEach {
-      if (!Scope.values().contains(Scope.valueOf(it))) {
-        throw ApiException(String.format("Scope %s is not valid scope", it))
-        }
+    var scopeList: List<String>
+    if (scopes.contains(",")) {
+      scopeList = scopes.split(",")
+    } else {
+      scopeList = listOf(scopes)
     }
+    scopeList.forEach { y ->
+        if (!Scope.getStringValues().contains(y)) {
+          throw ApiException(String.format("Scope %s is not valid scope", y))
+        }
+      }
   }
 
   private fun validateRedirectUri(uri: String, redirectUris: Set<String>) {
     if (!redirectUris.contains(uri)) {
-      throw ApiException(String.format("uri %s is not valid uri", uri))
+      throw ApiException(String.format("uri %s is not in registered uri list", uri))
     }
   }
 }

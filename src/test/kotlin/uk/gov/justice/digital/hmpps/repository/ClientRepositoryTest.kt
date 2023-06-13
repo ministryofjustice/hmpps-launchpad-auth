@@ -35,14 +35,14 @@ class ClientRepositoryTest(
   fun tearDown() {
   }
   @Test
-  fun createClient() {
+  fun `create client`() {
     val expected: Client = DataGenerator.buildClient()
     val result = clientRepository.save(expected)
     assertClient(expected, result)
   }
 
   @Test
-  fun updateClient() {
+  fun `update client`() {
     val expected: Client = DataGenerator.buildClient()
     expected.description = "Update Test App"
     val result = clientRepository.save(expected)
@@ -50,7 +50,7 @@ class ClientRepositoryTest(
   }
 
   @Test
-  fun getClientById() {
+  fun `get client by id`() {
     val expected: Client = DataGenerator.buildClient()
     clientRepository.save(expected)
     val result: Optional<Client> = clientRepository.findById(expected.id)
@@ -58,14 +58,14 @@ class ClientRepositoryTest(
   }
 
   @Test
-  fun deleteClientById() {
+  fun `delete client by id`() {
     val expected: Client = DataGenerator.buildClient()
     clientRepository.save(expected)
     expected.description = "Update Test App"
     clientRepository.deleteById(expected.id)
   }
 
-  fun assertClient(result: Client, expected: Client) {
+  private fun assertClient(result: Client, expected: Client) {
     assertEquals(expected.id, result.id)
     assertEquals(expected.autoApprove, result.autoApprove)
     assertEquals(expected.enabled, result.enabled)

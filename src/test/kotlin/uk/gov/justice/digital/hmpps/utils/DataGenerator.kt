@@ -15,6 +15,7 @@ class DataGenerator {
       client.autoApprove = true
       client.enabled = true
       client.logoUri = "http://localhost:8080/test"
+      client.registeredRedirectUris = setOf("http://localhost:8080/test")
       client.name = "Test App"
       client.secret = UUID.randomUUID().toString()
       client.description = "Test App"
