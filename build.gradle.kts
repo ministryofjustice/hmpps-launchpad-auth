@@ -14,6 +14,8 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.postgresql:postgresql:42.6.0")
   implementation("org.springframework.boot:spring-boot-starter-test")
+  implementation("ch.qos.logback:logback-core:1.4.7")
+  implementation("org.slf4j:slf4j-api:2.0.7")
   testImplementation("com.h2database:h2:2.0.204")
 }
 

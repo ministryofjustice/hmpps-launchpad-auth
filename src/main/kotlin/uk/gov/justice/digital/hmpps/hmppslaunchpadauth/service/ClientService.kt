@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
@@ -12,9 +13,7 @@ import java.util.*
 
 @Service
 class ClientService(@Autowired var clientRepository: ClientRepository) {
-  fun findClientById(id: UUID): Optional<Client> {
-    return clientRepository.findById(id)
-  }
+  private val logger = LoggerFactory.getLogger(ClientService::class.java)
 
   fun validateParams(
     clientId: UUID,
@@ -26,7 +25,9 @@ class ClientService(@Autowired var clientRepository: ClientRepository) {
   ) {
     val client: Optional<Client> = clientRepository.findById(clientId)
     if (client.isEmpty) {
-      throw ApiException(String.format("Client with client_id %s do not exist", clientId))
+      val message = String.format("Client with client_id %s do not exist", clientId)
+      logger.info(message)
+      throw ApiException(message)
     } else {
       validateScopes(scope, client.get().scopes)
       validateUri(redirectUri, client.get().registeredRedirectUris)
