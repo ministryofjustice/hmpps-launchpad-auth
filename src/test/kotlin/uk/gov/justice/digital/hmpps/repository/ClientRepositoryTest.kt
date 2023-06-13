@@ -24,9 +24,7 @@ import java.util.*
 @EntityScan("uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model")
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-class ClientRepositoryTest(
-  @Autowired var clientRepository: ClientRepository
-  ) {
+class ClientRepositoryTest(@Autowired var clientRepository: ClientRepository) {
   @BeforeEach
   fun setUp() {
   }
@@ -34,6 +32,7 @@ class ClientRepositoryTest(
   @AfterEach
   fun tearDown() {
   }
+
   @Test
   fun `create client`() {
     val expected: Client = DataGenerator.buildClient()
@@ -75,5 +74,4 @@ class ClientRepositoryTest(
     assertEquals(expected.scopes, result.scopes)
     assertEquals(expected.description, result.description)
   }
-
 }

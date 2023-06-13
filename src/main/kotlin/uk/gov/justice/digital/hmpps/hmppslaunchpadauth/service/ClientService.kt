@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.ClientRepository
@@ -29,7 +30,8 @@ class ClientService(@Autowired var clientRepository: ClientRepository) {
       logger.info(message)
       throw ApiException(message)
     } else {
-      validateScopes(scope, client.get().scopes)
+      validateScopes(scope)
+      validateAuthorizationGrantType(responseType)
       validateUri(redirectUri, client.get().registeredRedirectUris)
     }
   }
@@ -41,21 +43,33 @@ class ClientService(@Autowired var clientRepository: ClientRepository) {
       throw ApiException(String.format("Not a valid uri %s", uri))
     }
   }
-
-  private fun validateScopes(scopes: String, clientScopeSet: Set<Scope>) {
+  private fun validateScopes(scopes: String) {
     var scopeList: List<String>
     if (scopes.contains(",")) {
       scopeList = scopes.split(",")
     } else {
       scopeList = listOf(scopes)
     }
-    scopeList.forEach { y ->
-        if (!Scope.getStringValues().contains(y)) {
-          throw ApiException(String.format("Scope %s is not valid scope", y))
-        }
+    scopeList.forEach { x ->
+      if (!Scope.getStringValues().contains(x)) {
+        throw ApiException(String.format("Scope %s is not valid scope", x))
       }
+    }
   }
 
+  private fun validateAuthorizationGrantType(grants: String) {
+    var grantList: List<String>
+    if (grants.contains(",")) {
+      grantList = grants.split(",")
+    } else {
+      grantList = listOf(grants)
+    }
+    grantList.forEach { x ->
+      if (!AuthorizationGrantType.getStringValues().contains(x)) {
+        throw ApiException(String.format("Grant type %s is not valid grant type", x))
+      }
+    }
+  }
   private fun validateRedirectUri(uri: String, redirectUris: Set<String>) {
     if (!redirectUris.contains(uri)) {
       throw ApiException(String.format("uri %s is not in registered uri list", uri))
