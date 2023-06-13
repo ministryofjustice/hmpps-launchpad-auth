@@ -6,11 +6,11 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import java.util.UUID
 
 class DataGenerator {
-  companion object{
+  companion object {
     fun buildClient(): Client {
-      val client = Client();
-      client.id = UUID.randomUUID();
-      client.scopes = setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ, Scope.USER_ESTABLISHMENT_READ);
+      val client = Client()
+      client.id = UUID.randomUUID()
+      client.scopes = setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ, Scope.USER_ESTABLISHMENT_READ)
       client.authorizedGrantTypes = setOf(AuthorizationGrantType.AUTHORIZATION_CODE, AuthorizationGrantType.REFRESH_TOKEN)
       client.autoApprove = true
       client.enabled = true
@@ -19,7 +19,7 @@ class DataGenerator {
       client.name = "Test App"
       client.secret = UUID.randomUUID().toString()
       client.description = "Test App"
-      return client;
+      return client
     }
   }
 }
