@@ -8,14 +8,8 @@ spring:
   codec:
     max-in-memory-size: 10MB
   jpa:
-    #datasource:
-      #username: postgres
-      #password: password
-      #url: jdbc:postgresql://localhost:5432/launchpad
-    #defer-datasource-initialization: false
     hibernate:
       ddl-auto: update
-  #database: launchpad
   datasource:
     username: sa
     password: password

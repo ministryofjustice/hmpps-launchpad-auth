@@ -68,7 +68,7 @@ class ClientServiceTest {
       clientService.validateParams(
         client.id,
         AuthorizationGrantType.AUTHORIZATION_CODE.toString(),
-        "random.ead.scope.test,random.ead.scope.randomtest,",
+        "random.read.scope.test,random.ead.scope.randomtest,",
         "http://localhost:8080/test",
         UUID.randomUUID().toString(),
         "test",
