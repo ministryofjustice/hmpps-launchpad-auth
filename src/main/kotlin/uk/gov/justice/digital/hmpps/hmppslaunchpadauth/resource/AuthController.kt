@@ -16,7 +16,7 @@ const val CLIENT_ID = "598471b7-0b6e-4922-a27b-6e4083046e98&"
 @RequestMapping("/v1/oauth2")
 class AuthController(var clientService: ClientService) {
   @RequestMapping("/authorize")
-  fun getUser(
+  fun authorizeUser(
     @RequestParam("client_id", required = true) clientId: UUID,
     @RequestParam("response_type", required = true) responseType: String,
     @RequestParam("scope", required = true) scope: String,
