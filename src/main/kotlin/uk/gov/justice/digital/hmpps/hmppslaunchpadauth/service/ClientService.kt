@@ -63,16 +63,18 @@ class ClientService(var clientRepository: ClientRepository) {
     } else {
       scopeList = listOf(scopes)
     }
-    val clientScopesStringValues = Scope.getEnumListStringValues(clientScopes)
+    val clientScopesStringValues = Scope.getStringValuesFromEnumList(clientScopes)
     scopeList.forEach { x ->
-      if (!clientScopesStringValues.contains(x)) {
+      // getStringValuesFromEnumList contains string value separated by comma so make sure scope do not contain any comma
+      if (x.contains(",") || !clientScopesStringValues.contains(x)) {
         throw ApiException(IN_VALID_SCOPE, 400)
       }
     }
   }
 
   private fun validateAuthorizationGrantType(grant: String, clientGrants: Set<AuthorizationGrantType>) {
-    if (!AuthorizationGrantType.getEnumListStringValues(clientGrants).contains(grant)) {
+    // getStringValuesFromEnumList contains string value separated by comma so make sure grant do not contain any comma
+    if (grant.contains(",") || !AuthorizationGrantType.getStringValuesFromEnumList(clientGrants).contains(grant)) {
       throw ApiException(IN_VALID_GRANT, 400)
     }
   }

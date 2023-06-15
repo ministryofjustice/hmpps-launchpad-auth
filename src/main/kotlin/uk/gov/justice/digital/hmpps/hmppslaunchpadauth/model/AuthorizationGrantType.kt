@@ -9,7 +9,7 @@ enum class AuthorizationGrantType(private val grantType: String) {
   }
 
   companion object {
-    fun getEnumListStringValues(grants: Set<AuthorizationGrantType>): String {
+    fun getStringValuesFromEnumList(grants: Set<AuthorizationGrantType>): String {
       var values = ""
       grants.forEach { grant ->
         values = "$values,$grant"
