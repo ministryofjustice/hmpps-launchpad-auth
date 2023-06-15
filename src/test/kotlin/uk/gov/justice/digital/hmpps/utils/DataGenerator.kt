@@ -8,18 +8,18 @@ import java.util.UUID
 class DataGenerator {
   companion object {
     fun buildClient(): Client {
-      val client = Client()
-      client.id = UUID.randomUUID()
-      client.scopes = setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ, Scope.USER_ESTABLISHMENT_READ)
-      client.authorizedGrantTypes = setOf(AuthorizationGrantType.AUTHORIZATION_CODE, AuthorizationGrantType.REFRESH_TOKEN)
-      client.autoApprove = true
-      client.enabled = true
-      client.logoUri = "http://localhost:8080/test"
-      client.registeredRedirectUris = setOf("http://localhost:8080/test")
-      client.name = "Test App"
-      client.secret = UUID.randomUUID().toString()
-      client.description = "Test App"
-      return client
+      return Client(
+        UUID.randomUUID(),
+        UUID.randomUUID().toString(),
+        setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ, Scope.USER_ESTABLISHMENT_READ),
+        setOf(AuthorizationGrantType.AUTHORIZATION_CODE, AuthorizationGrantType.REFRESH_TOKEN),
+        setOf("http://localhost:8080/test"),
+        true,
+        true,
+        "Test App",
+        "http://localhost:8080/test",
+        "Update Test App",
+      )
     }
   }
 }

@@ -42,8 +42,19 @@ class ClientRepositoryTest(@Autowired var clientRepository: ClientRepository) {
 
   @Test
   fun `update client`() {
-    val expected: Client = DataGenerator.buildClient()
-    expected.description = "Update Test App"
+    var expected: Client = DataGenerator.buildClient()
+    expected = Client(
+      expected.id,
+      expected.secret,
+      expected.scopes,
+      expected.authorizedGrantTypes,
+      expected.registeredRedirectUris,
+      expected.enabled,
+      expected.autoApprove,
+      expected.name,
+      expected.logoUri,
+      "Update Test App",
+    )
     val result = clientRepository.save(expected)
     assertClient(expected, result)
   }
@@ -60,7 +71,6 @@ class ClientRepositoryTest(@Autowired var clientRepository: ClientRepository) {
   fun `delete client by id`() {
     val expected: Client = DataGenerator.buildClient()
     clientRepository.save(expected)
-    expected.description = "Update Test App"
     clientRepository.deleteById(expected.id)
   }
 

@@ -1,14 +1,21 @@
 spring:
   application:
-    name: hmpps-template-kotlin
+    name: hmpps-launchpad-auth
   codec:
     max-in-memory-size: 10MB
   jpa:
     defer-datasource-initialization: false
     hibernate:
-      ddl-auto: update
-  #database: launchpad
+      ddl-auto: none
+#change password later when dev environment is set up
   datasource:
     username: postgres
     password: password
     url: jdbc:postgresql://localhost:5432/launchpad
+  flyway:
+    enabled: true
+    url: jdbc:postgresql://localhost:5432/launchpad
+    user: postgres
+    password: password
+    locations: classpath:db/migration
+    baseline-on-migrate: true
