@@ -1,3 +1,6 @@
+azure:
+  baseurl: https://login.microsoftonline.com/103ab093-fd63-4ca9-a293-4aee1490a490/oauth2/v2.0/authorize
+  client-id: 598471b7-0b6e-4922-a27b-6e4083046e98
 spring:
   application:
     name: hmpps-launchpad-auth

@@ -10,8 +10,12 @@ enum class Scope(val scope: String) {
   }
 
   companion object {
-    fun getStringValues(): String {
-      return "$USER_BASIC_READ,$USER_ESTABLISHMENT_READ,$USER_BOOKING_READ"
+    fun getEnumListStringValues(scopes: Set<Scope>): String {
+      var values = ""
+      scopes.forEach { scope ->
+        values = "$values,$scope,"
+      }
+      return values
     }
   }
 }

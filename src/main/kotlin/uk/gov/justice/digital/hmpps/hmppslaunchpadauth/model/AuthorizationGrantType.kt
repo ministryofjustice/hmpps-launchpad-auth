@@ -9,8 +9,12 @@ enum class AuthorizationGrantType(private val grantType: String) {
   }
 
   companion object {
-    fun getStringValues(): String {
-      return "$AUTHORIZATION_CODE,$REFRESH_TOKEN"
+    fun getEnumListStringValues(grants: Set<AuthorizationGrantType>): String {
+      var values = ""
+      grants.forEach { grant ->
+        values = "$values,$grant"
+      }
+      return values
     }
   }
 }

@@ -7,15 +7,15 @@ import java.util.UUID
 
 class DataGenerator {
   companion object {
-    fun buildClient(): Client {
+    fun buildClient(enabled: Boolean, autoApprove: Boolean): Client {
       return Client(
         UUID.randomUUID(),
         UUID.randomUUID().toString(),
         setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ, Scope.USER_ESTABLISHMENT_READ),
         setOf(AuthorizationGrantType.AUTHORIZATION_CODE, AuthorizationGrantType.REFRESH_TOKEN),
         setOf("http://localhost:8080/test"),
-        true,
-        true,
+        enabled,
+        autoApprove,
         "Test App",
         "http://localhost:8080/test",
         "Update Test App",

@@ -35,14 +35,14 @@ class ClientRepositoryTest(@Autowired var clientRepository: ClientRepository) {
 
   @Test
   fun `create client`() {
-    val expected: Client = DataGenerator.buildClient()
+    val expected: Client = DataGenerator.buildClient(true, true)
     val result = clientRepository.save(expected)
     assertClient(expected, result)
   }
 
   @Test
   fun `update client`() {
-    var expected: Client = DataGenerator.buildClient()
+    var expected: Client = DataGenerator.buildClient(false, false)
     expected = Client(
       expected.id,
       expected.secret,
@@ -61,7 +61,7 @@ class ClientRepositoryTest(@Autowired var clientRepository: ClientRepository) {
 
   @Test
   fun `get client by id`() {
-    val expected: Client = DataGenerator.buildClient()
+    val expected: Client = DataGenerator.buildClient(false, false)
     clientRepository.save(expected)
     val result: Optional<Client> = clientRepository.findById(expected.id)
     assertClient(expected, result.get())
@@ -69,7 +69,7 @@ class ClientRepositoryTest(@Autowired var clientRepository: ClientRepository) {
 
   @Test
   fun `delete client by id`() {
-    val expected: Client = DataGenerator.buildClient()
+    val expected: Client = DataGenerator.buildClient(false, false)
     clientRepository.save(expected)
     clientRepository.deleteById(expected.id)
   }
