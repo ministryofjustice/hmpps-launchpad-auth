@@ -1,3 +1,3 @@
 insert into public.client  ("id","authorized_grant_types", "auto_approve",  "description", "enabled", "logo_uri", "name", "registered_redirect_uris", "scopes", "secret")
-values ('071ef628-6dcc-4a63-92d0-f77b1ad8e060','["AUTHORIZATION_CODE", "REFRESH_TOKEN"]',true,'Update Test App',true,'http://localhost:8080/test','Test App','["http://localhost:8080/test"]','["USER_BASIC_READ", "USER_BOOKING_READ", "USER_ESTABLISHMENT_READ"]','48a8794a-0aa3-4d77-b75e-5e76d5349c12'
+values ('071ef628-6dcc-4a63-92d0-f77b1ad8e060','["AUTHORIZATION_CODE", "REFRESH_TOKEN"]',true,'Update Test App',true,'http://localhost:8080/test','Test App','["http://localhost:8080/test"]','["USER_BASIC_READ", "USER_BOOKING_READ", "USER_ESTABLISHMENT_READ"]','$2a$10$oxqWgTvi8LwufJOxUCKPv.hndrUBAGU7stBYQ.dPzcFcVCP/8bFHy'
        );
