@@ -10,13 +10,13 @@ import java.util.*
 
 @RestController
 @RequestMapping("/v1/oauth2")
-class AuthController(var clientService: ClientService) {
+class AuthController(private var clientService: ClientService) {
 
   @Value("\${azure.oauth2-url}")
-  lateinit var azureOauthUrl: String
+  private lateinit var azureOauthUrl: String
 
   @Value("\${azure.client-id}")
-  lateinit var launchpadClientId: String
+  private lateinit var launchpadClientId: String
 
   @RequestMapping("/authorize")
   fun authorize(

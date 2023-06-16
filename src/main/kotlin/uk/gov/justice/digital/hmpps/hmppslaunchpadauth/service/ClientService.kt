@@ -19,7 +19,7 @@ const val BAD_REQUEST_CODE = 400
 const val ACCESS_DENIED_CODE = 403
 
 @Service
-class ClientService(var clientRepository: ClientRepository) {
+class ClientService(private var clientRepository: ClientRepository) {
   private val logger = LoggerFactory.getLogger(ClientService::class.java)
 
   fun validateParams(
