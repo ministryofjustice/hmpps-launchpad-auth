@@ -10,12 +10,13 @@ enum class Scope(val scope: String) {
   }
 
   companion object {
-    fun getStringValuesFromEnumList(scopes: Set<Scope>): String {
-      var values = ""
+    fun isStringMatchEnumValue(value: String, scopes: Set<Scope>): Boolean {
       scopes.forEach { scope ->
-        values = "$values,$scope,"
+        if (value == scope.toString()) {
+          return true
+        }
       }
-      return values
+      return false
     }
   }
 }

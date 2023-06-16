@@ -21,6 +21,8 @@ const val ACCESS_DENIED = "Access denied"
 const val IN_VALID_SCOPE = "The requested scope is invalid or not found."
 const val IN_VALID_GRANT = "The requested response type is invalid or not found."
 const val IN_VALID_REDIRECT_URI = "The requested redirect uri is invalid or not found"
+const val BAD_REQUEST_CODE = 400
+const val ACCESS_DENIED_CODE = 403
 
 @ExtendWith(MockitoExtension::class)
 class ClientServiceTest {
@@ -53,6 +55,19 @@ class ClientServiceTest {
   }
 
   @Test
+  fun `validate params with null state and null nonce`() {
+    Mockito.`when`(clientRepository.findById(client.id)).thenReturn(Optional.of(client))
+    clientService.validateParams(
+      client.id,
+      AuthorizationGrantType.AUTHORIZATION_CODE.toString(),
+      Scope.USER_BASIC_READ.toString(),
+      "http://localhost:8080/test",
+      null,
+      null,
+    )
+  }
+
+  @Test
   fun `validate params when client record do not exist`() {
     val clientId = UUID.randomUUID()
     Mockito.`when`(clientRepository.findById(clientId)).thenReturn(Optional.empty())
@@ -67,7 +82,7 @@ class ClientServiceTest {
       )
     }
     assertEquals(ACCESS_DENIED, exception.message)
-    assertEquals(403, exception.code)
+    assertEquals(ACCESS_DENIED_CODE, exception.code)
   }
 
   @Test
@@ -84,7 +99,7 @@ class ClientServiceTest {
       )
     }
     assertEquals(IN_VALID_REDIRECT_URI, exception.message)
-    assertEquals(400, exception.code)
+    assertEquals(BAD_REQUEST_CODE, exception.code)
   }
 
   @Test
@@ -101,7 +116,7 @@ class ClientServiceTest {
       )
     }
     assertEquals(ACCESS_DENIED, exception.message)
-    assertEquals(403, exception.code)
+    assertEquals(ACCESS_DENIED_CODE, exception.code)
   }
 
   @Test
@@ -118,7 +133,7 @@ class ClientServiceTest {
       )
     }
     assertEquals(IN_VALID_SCOPE, exception.message)
-    assertEquals(400, exception.code)
+    assertEquals(BAD_REQUEST_CODE, exception.code)
   }
 
   @Test
@@ -135,7 +150,7 @@ class ClientServiceTest {
       )
     }
     assertEquals(IN_VALID_GRANT, exception.message)
-    assertEquals(400, exception.code)
+    assertEquals(BAD_REQUEST_CODE, exception.code)
   }
 
   @Test
@@ -152,6 +167,6 @@ class ClientServiceTest {
       )
     }
     assertEquals(IN_VALID_REDIRECT_URI, exception.message)
-    assertEquals(400, exception.code)
+    assertEquals(BAD_REQUEST_CODE, exception.code)
   }
 }

@@ -19,13 +19,13 @@ class AuthController(var clientService: ClientService) {
   lateinit var launchpadClientId: String
 
   @RequestMapping("/authorize")
-  fun authorizeUser(
+  fun authorize(
     @RequestParam("client_id", required = true) clientId: UUID,
     @RequestParam("response_type", required = true) responseType: String,
     @RequestParam("scope", required = true) scope: String,
     @RequestParam("redirect_uri", required = true) redirectUri: String,
-    @RequestParam("state", required = false) state: String,
-    @RequestParam("nonce", required = false) nonce: String,
+    @RequestParam("state", required = false) state: String?,
+    @RequestParam("nonce", required = false) nonce: String?,
   ): RedirectView {
     clientService.validateParams(clientId, responseType, scope, redirectUri, state, nonce)
     // TO DO replace state and nonce according to design doc in later sprint ticket works

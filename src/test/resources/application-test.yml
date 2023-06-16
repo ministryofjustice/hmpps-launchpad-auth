@@ -16,8 +16,6 @@ info.app:
 spring:
   application:
     name: hmpps-launchpad-auth
-  codec:
-    max-in-memory-size: 10MB
   jpa:
     hibernate:
       ddl-auto: update

@@ -15,6 +15,8 @@ const val ACCESS_DENIED = "Access denied"
 const val IN_VALID_SCOPE = "The requested scope is invalid or not found."
 const val IN_VALID_GRANT = "The requested response type is invalid or not found."
 const val IN_VALID_REDIRECT_URI = "The requested redirect uri is invalid or not found"
+const val BAD_REQUEST_CODE = 400
+const val ACCESS_DENIED_CODE = 403
 
 @Service
 class ClientService(var clientRepository: ClientRepository) {
@@ -25,14 +27,14 @@ class ClientService(var clientRepository: ClientRepository) {
     responseType: String,
     scopes: String,
     redirectUri: String,
-    state: String,
-    nonce: String,
+    state: String?,
+    nonce: String?,
   ) {
     val client: Optional<Client> = clientRepository.findById(clientId)
     if (client.isEmpty) {
       val message = String.format("Client with client_id %s does not exist", clientId)
       logger.info(message)
-      throw ApiException(ACCESS_DENIED, 403)
+      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
     } else {
       val clientRecord = client.get()
       isEnabled(clientRecord.enabled)
@@ -44,7 +46,7 @@ class ClientService(var clientRepository: ClientRepository) {
 
   private fun isEnabled(enabled: Boolean) {
     if (!enabled) {
-      throw ApiException(ACCESS_DENIED, 403)
+      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
     }
   }
   private fun validateUri(uri: String, redirectUris: Set<String>) {
@@ -52,35 +54,32 @@ class ClientService(var clientRepository: ClientRepository) {
       URL(uri)
       validateRedirectUri(uri, redirectUris)
     } catch (exception: MalformedURLException) {
-      throw ApiException(IN_VALID_REDIRECT_URI, 400)
+      throw ApiException(IN_VALID_REDIRECT_URI, BAD_REQUEST_CODE)
     }
   }
   private fun validateScopes(scopes: String, clientScopes: Set<Scope>) {
     var scopeList: List<String>
-    val scopeValues = scopes.replace("  ", " ")
-    if (scopeValues.contains(" ")) {
-      scopeList = scopes.split(" ")
+    if (scopes.contains(" ")) {
+      val scopeValues = scopes.replace("\\s+".toRegex(), " ")
+      scopeList = scopeValues.split("\\s".toRegex())
     } else {
       scopeList = listOf(scopes)
     }
-    val clientScopesStringValues = Scope.getStringValuesFromEnumList(clientScopes)
     scopeList.forEach { x ->
-      // getStringValuesFromEnumList contains string value separated by comma so make sure scope do not contain any comma
-      if (x.contains(",") || !clientScopesStringValues.contains(x)) {
-        throw ApiException(IN_VALID_SCOPE, 400)
+      if (!Scope.isStringMatchEnumValue(x, clientScopes)) {
+        throw ApiException(IN_VALID_SCOPE, BAD_REQUEST_CODE)
       }
     }
   }
 
   private fun validateAuthorizationGrantType(grant: String, clientGrants: Set<AuthorizationGrantType>) {
-    // getStringValuesFromEnumList contains string value separated by comma so make sure grant do not contain any comma
-    if (grant.contains(",") || !AuthorizationGrantType.getStringValuesFromEnumList(clientGrants).contains(grant)) {
-      throw ApiException(IN_VALID_GRANT, 400)
+    if (!AuthorizationGrantType.isStringMatchEnumValue(grant, clientGrants)) {
+      throw ApiException(IN_VALID_GRANT, BAD_REQUEST_CODE)
     }
   }
   private fun validateRedirectUri(uri: String, redirectUris: Set<String>) {
     if (!redirectUris.contains(uri)) {
-      throw ApiException(IN_VALID_REDIRECT_URI, 400)
+      throw ApiException(IN_VALID_REDIRECT_URI, BAD_REQUEST_CODE)
     }
   }
 }

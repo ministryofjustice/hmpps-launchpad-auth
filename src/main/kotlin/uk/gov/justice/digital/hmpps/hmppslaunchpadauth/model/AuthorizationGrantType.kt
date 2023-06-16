@@ -9,12 +9,13 @@ enum class AuthorizationGrantType(private val grantType: String) {
   }
 
   companion object {
-    fun getStringValuesFromEnumList(grants: Set<AuthorizationGrantType>): String {
-      var values = ""
+    fun isStringMatchEnumValue(value: String, grants: Set<AuthorizationGrantType>): Boolean {
       grants.forEach { grant ->
-        values = "$values,$grant"
+        if (value == grant.toString()) {
+          return true
+        }
       }
-      return values
+      return false
     }
   }
 }
