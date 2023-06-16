@@ -12,8 +12,8 @@ import java.util.*
 @RequestMapping("/v1/oauth2")
 class AuthController(var clientService: ClientService) {
 
-  @Value("\${azure.baseurl}")
-  lateinit var azureBaseUrl: String
+  @Value("\${azure.oauth2-url}")
+  lateinit var azureOauthUrl: String
 
   @Value("\${azure.client-id}")
   lateinit var launchpadClientId: String
@@ -29,6 +29,6 @@ class AuthController(var clientService: ClientService) {
   ): RedirectView {
     clientService.validateParams(clientId, responseType, scope, redirectUri, state, nonce)
     // TO DO replace state and nonce according to design doc in later sprint ticket works
-    return RedirectView("$azureBaseUrl?response_type=id_token&client_id=$launchpadClientId&scope=openid&state=$state&response_mode=form_post&redirect_uri=$redirectUri&nonce=$nonce")
+    return RedirectView("$azureOauthUrl?response_type=id_token&client_id=$launchpadClientId&scope=openid&state=$state&response_mode=form_post&redirect_uri=$redirectUri&nonce=$nonce")
   }
 }

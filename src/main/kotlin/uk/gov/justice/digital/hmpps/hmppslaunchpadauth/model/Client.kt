@@ -1,13 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model
 
 import jakarta.persistence.Column
-import jakarta.persistence.ElementCollection
 import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.FetchType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.util.*
 
 @Entity
@@ -19,18 +17,15 @@ data class Client(
   @Column(name = "secret")
   val secret: String,
 
-  @ElementCollection(targetClass = Scope::class, fetch = FetchType.EAGER)
-  @Enumerated(value = EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "scopes")
   val scopes: Set<Scope>,
 
-  @ElementCollection(targetClass = AuthorizationGrantType::class, fetch = FetchType.EAGER)
-  @Enumerated(value = EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "authorized_grant_types")
   val authorizedGrantTypes: Set<AuthorizationGrantType>,
 
-  @ElementCollection(targetClass = String::class, fetch = FetchType.EAGER)
-  @Enumerated(value = EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "registered_redirect_uris")
   val registeredRedirectUris: Set<String>,
 

@@ -1,16 +1,3 @@
-insert into public.client  ("id", "auto_approve", "description", "enabled", "logo_uri", "name", "secret")
-values ('179b35cb-9fe8-46cc-b447-ab77d2687224','true','Update Test App',true,'http://localhost:8080/test','Test App','e2d6b6dd-de31-416a-a302-14e615e3b62a');
-
-insert into public.client_authorized_grant_types("client_id", "authorized_grant_types")
-values
-     ('179b35cb-9fe8-46cc-b447-ab77d2687224','REFRESH_TOKEN'),
-     ('179b35cb-9fe8-46cc-b447-ab77d2687224','AUTHORIZATION_CODE');
-
-insert into public.client_scopes("client_id", "scopes")
-values
-    ('179b35cb-9fe8-46cc-b447-ab77d2687224','USER_ESTABLISHMENT_READ'),
-    ('179b35cb-9fe8-46cc-b447-ab77d2687224','USER_BASIC_READ'),
-    ('179b35cb-9fe8-46cc-b447-ab77d2687224','USER_BOOKING_READ');
-
-insert into public.client_registered_redirect_uris("client_id","registered_redirect_uris")
-values ('179b35cb-9fe8-46cc-b447-ab77d2687224','http://localhost:8080/test')
+insert into public.client  ("id","authorized_grant_types", "auto_approve",  "description", "enabled", "logo_uri", "name", "registered_redirect_uris", "scopes", "secret")
+values ('071ef628-6dcc-4a63-92d0-f77b1ad8e060','["AUTHORIZATION_CODE", "REFRESH_TOKEN"]',true,'Update Test App',true,'http://localhost:8080/test','Test App','["http://localhost:8080/test"]','["USER_BASIC_READ", "USER_BOOKING_READ", "USER_ESTABLISHMENT_READ"]','48a8794a-0aa3-4d77-b75e-5e76d5349c12'
+       );
