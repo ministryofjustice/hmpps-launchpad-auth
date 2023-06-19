@@ -1,6 +1,33 @@
 server:
   shutdown: immediate
 
+azure:
+  oauth2-url: https://login.microsoftonline.com/103ab093-fd63-4ca9-a293-4aee1490a490/oauth2/v2.0/authorize
+  client-id: 598471b7-0b6e-4922-a27b-6e4083046e98
+
 management.endpoint:
   health.cache.time-to-live: 0
   info.cache.time-to-live: 0
+
+info.app:
+  name: HMPPS Launchpad Auth
+  version: 1.0
+
+spring:
+  application:
+    name: hmpps-launchpad-auth
+  jpa:
+    hibernate:
+      ddl-auto: update
+  datasource:
+    username: sa
+    password: password
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+  flyway:
+    enabled: false
+
+  jackson:
+    date-format: "yyyy-MM-dd HH:mm:ss"
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
