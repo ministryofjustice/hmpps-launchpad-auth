@@ -6,9 +6,13 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.ClientRepository
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.SsoRequestRepository
 import java.net.MalformedURLException
 import java.net.URL
+import java.time.LocalDateTime
 import java.util.*
 
 const val ACCESS_DENIED = "Access denied"
@@ -19,8 +23,32 @@ const val BAD_REQUEST_CODE = 400
 const val ACCESS_DENIED_CODE = 403
 
 @Service
-class ClientService(private var clientRepository: ClientRepository) {
+class ClientService(private var clientRepository: ClientRepository, private var ssoRequestRepository: SsoRequestRepository) {
   private val logger = LoggerFactory.getLogger(ClientService::class.java)
+
+  fun generateSsoRequest(
+    scopes: Set<Scope>,
+    state: String?,
+    nonce: String?,
+    redirectUri: String,
+    clientId: UUID,
+  ): UUID {
+    val ssoRequest = SsoRequest(
+      UUID.randomUUID(),
+      nonce,
+      LocalDateTime.now(),
+      null,
+      SsoClient(
+        clientId,
+        state,
+        nonce,
+        scopes,
+        redirectUri,
+      ),
+      null
+    )
+    return ssoRequestRepository.save(ssoRequest).id
+  }
 
   fun validateParams(
     clientId: UUID,
@@ -29,7 +57,7 @@ class ClientService(private var clientRepository: ClientRepository) {
     redirectUri: String,
     state: String?,
     nonce: String?,
-  ) {
+  ): UUID {
     val client: Optional<Client> = clientRepository.findById(clientId)
     if (client.isEmpty) {
       val message = String.format("Client with client_id %s does not exist", clientId)
@@ -41,6 +69,7 @@ class ClientService(private var clientRepository: ClientRepository) {
       validateScopes(scopes, clientRecord.scopes)
       validateAuthorizationGrantType(responseType, clientRecord.authorizedGrantTypes)
       validateUri(redirectUri, clientRecord.registeredRedirectUris)
+      return generateSsoRequest(clientRecord.scopes, nonce, state, redirectUri, clientRecord.id)
     }
   }
 
@@ -81,5 +110,9 @@ class ClientService(private var clientRepository: ClientRepository) {
     if (!redirectUris.contains(uri)) {
       throw ApiException(IN_VALID_REDIRECT_URI, BAD_REQUEST_CODE)
     }
+  }
+
+  fun getClientById(id: UUID): Optional<Client> {
+    return clientRepository.findById(id)
   }
 }

@@ -12,6 +12,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
+  implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
   implementation("org.flywaydb:flyway-core:9.19.4")
   implementation("org.postgresql:postgresql:42.6.0")
   implementation("org.springframework.boot:spring-boot-starter-test")

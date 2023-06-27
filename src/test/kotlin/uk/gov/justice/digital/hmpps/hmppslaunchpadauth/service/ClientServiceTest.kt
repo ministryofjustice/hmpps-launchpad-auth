@@ -14,6 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantT
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.ClientRepository
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.SsoRequestRepository
 import uk.gov.justice.digital.hmpps.utils.DataGenerator
 import java.util.*
 
@@ -28,12 +29,14 @@ const val ACCESS_DENIED_CODE = 403
 class ClientServiceTest {
   @Mock
   lateinit var clientRepository: ClientRepository
+  @Mock
+  lateinit var ssoRequestRepository: SsoRequestRepository
   private lateinit var clientService: ClientService
   private lateinit var client: Client
 
   @BeforeEach
   fun setUp() {
-    clientService = ClientService(clientRepository)
+    clientService = ClientService(clientRepository, ssoRequestRepository)
     client = DataGenerator.buildClient(true, true)
   }
 
