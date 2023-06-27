@@ -12,10 +12,11 @@ import org.springframework.web.servlet.view.RedirectView
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ClientService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoRequestService
+import java.net.URL
 import java.util.*
 
 @RestController
-@RequestMapping("")
+@RequestMapping("/v1/oauth2")
 class AuthController(private var clientService: ClientService,
   private var ssoRequestService: SsoRequestService,
   ) {
@@ -26,7 +27,7 @@ class AuthController(private var clientService: ClientService,
   @Value("\${azure.client-id}")
   private lateinit var launchpadClientId: String
 
-  @RequestMapping("/v1/oauth2/authorize")
+  @RequestMapping("/authorize")
   fun authorize(
     @RequestParam("client_id", required = true) clientId: UUID,
     @RequestParam("response_type", required = true) responseType: String,
@@ -42,7 +43,7 @@ class AuthController(private var clientService: ClientService,
   }
 
   // @CrossOrigin("http://localhost:8080")
-  @PostMapping("/launchpad/logged/user/code", produces = ["application/json"], consumes = ["application/x-www-form-urlencoded"])
+  @PostMapping("/callback", produces = ["application/json"], consumes = ["application/x-www-form-urlencoded"])
   fun getUserAuthCode(
     @RequestParam("id_token", required = true) token: String,
     @RequestParam("state", required = true) state: UUID,
@@ -68,8 +69,9 @@ class AuthController(private var clientService: ClientService,
         modelAndView.addObject("approve", true)
         return modelAndView
       } else {
-        val code = ssoRequestService.updateSsoRequestAuthCodeAndUserId(token, state)
-        return ResponseEntity.status(HttpStatus.OK).body(code)
+        val url = ssoRequestService.updateSsoRequestAuthCodeAndUserId(token, state)
+        return RedirectView(url)
+
       }
     } else {
       throw ApiException("null token", 400)

@@ -5,6 +5,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.SsoRequestRepository
+import java.net.URL
 import java.util.*
 
 @Service
@@ -22,7 +23,7 @@ class SsoRequestService(private var ssoRequestRepository: SsoRequestRepository,
     return ssoRequestRepository.findById(id)
   }
 
-  fun updateSsoRequestAuthCodeAndUserId(idToken: String, state: UUID) : UUID {
+  fun updateSsoRequestAuthCodeAndUserId(idToken: String, state: UUID) : String {
     val ssoRequest = ssoRequestRepository.findById(state)
     if (ssoRequest.isPresent) {
       val code = UUID.randomUUID()
@@ -30,7 +31,7 @@ class SsoRequestService(private var ssoRequestRepository: SsoRequestRepository,
       record.authorizationCode = code
       ssoRequestRepository.save(record)
       //record.client.nonce = idToken
-      return code
+      return "${record.client.reDirectUri}code=$code&state=${record.client.state}"
     } else {
       throw ApiException("Access Denied", 403)
     }
