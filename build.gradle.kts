@@ -13,9 +13,15 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+  implementation("com.microsoft.azure:azure-storage:8.6.2")
+  implementation("com.auth0:java-jwt:3.16.0")
+  implementation("io.jsonwebtoken:jjwt:0.9.1")
+  implementation("org.json:json:20230618")
   implementation("org.flywaydb:flyway-core:9.19.4")
   implementation("org.postgresql:postgresql:42.6.0")
   implementation("org.springframework.boot:spring-boot-starter-test")
+  implementation("javax.xml.bind:jaxb-api:2.3.0")
+
   testImplementation("com.h2database:h2:2.0.204")
 }
 

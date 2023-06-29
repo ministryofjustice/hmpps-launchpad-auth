@@ -3,9 +3,11 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.SsoRequestRepository
-import java.net.URL
+import java.time.LocalDateTime
 import java.util.*
 
 @Service
@@ -23,41 +25,59 @@ class SsoRequestService(private var ssoRequestRepository: SsoRequestRepository,
     return ssoRequestRepository.findById(id)
   }
 
-  fun updateSsoRequestAuthCodeAndUserId(idToken: String, state: UUID) : String {
+  fun generateSsoRequest(
+    scopes: Set<Scope>,
+    state: String?,
+    nonce: String?,
+    redirectUri: String,
+    clientId: UUID,
+  ): UUID {
+    val ssoRequest = SsoRequest(
+      UUID.randomUUID(),
+      nonce,
+      LocalDateTime.now(),
+      null,
+      SsoClient(
+        clientId,
+        state,
+        nonce,
+        scopes,
+        redirectUri,
+      ),
+      null
+    )
+    return createSsoRequest(ssoRequest).id
+  }
+
+  fun updateSsoRequestAuthCodeAndUserId(userId: String, state: UUID) : String {
     val ssoRequest = ssoRequestRepository.findById(state)
     if (ssoRequest.isPresent) {
       val code = UUID.randomUUID()
       val record = ssoRequest.get()
-      record.authorizationCode = code
-      ssoRequestRepository.save(record)
-      //record.client.nonce = idToken
-      return "${record.client.reDirectUri}code=$code&state=${record.client.state}"
+      if (record.authorizationCode == null ) {
+        record.authorizationCode = code
+      } else {
+        throw ApiException("Resubmittion not allowed", 400)
+      }
+      record.userId = userId
+      updateSsoRequest(record)
+      return "${record.client.reDirectUri}?code=$code&state=${record.client.state}"
     } else {
       throw ApiException("Access Denied", 403)
     }
   }
 
-  private fun getSsoRequest(state: UUID): Optional<SsoRequest> {
-    return ssoRequestRepository.findById(state)
-  }
-
-  fun validateAutoApprove(state: UUID): Boolean {
-    val ssoRequest = getSsoRequest(state)
+  fun getSsoRequestScopes(id: UUID): Set<Scope> {
+    val ssoRequest = ssoRequestRepository.findById(id)
     if (ssoRequest.isPresent) {
-      val clientId = ssoRequest.get().client.id
-      val client = clientService.getClientById(clientId)
-      if (client.isPresent) {
-        return client.get().autoApprove
-      } else {
-        throw ApiException("Client not found", 400)
-      }
+      return ssoRequest.get().client.scopes
     } else {
       throw ApiException("SsoRequest not found", 400)
     }
   }
 
   fun getClient(id: UUID): Client {
-    val ssoRequest = getSsoRequest(id)
+    val ssoRequest = getSsoRequestById(id)
     if (ssoRequest.isPresent) {
       val clientId = ssoRequest.get().client.id
       val client = clientService.getClientById(clientId)
@@ -70,4 +90,5 @@ class SsoRequestService(private var ssoRequestRepository: SsoRequestRepository,
       throw ApiException("SsoRequest not found", 400)
     }
   }
+
 }

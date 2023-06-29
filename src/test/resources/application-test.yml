@@ -3,7 +3,9 @@ server:
 
 azure:
   oauth2-url: https://login.microsoftonline.com/103ab093-fd63-4ca9-a293-4aee1490a490/oauth2/v2.0/authorize
+  issuer-url: https://login.microsoftonline.com/103ab093-fd63-4ca9-a293-4aee1490a490/v2.0
   client-id: 598471b7-0b6e-4922-a27b-6e4083046e98
+  launchpad-redirectUri: http://localhost:8080/v1/oauth2/callback
 
 management.endpoint:
   health.cache.time-to-live: 0

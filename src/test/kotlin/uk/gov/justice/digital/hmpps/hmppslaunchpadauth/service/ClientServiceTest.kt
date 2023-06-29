@@ -29,14 +29,12 @@ const val ACCESS_DENIED_CODE = 403
 class ClientServiceTest {
   @Mock
   lateinit var clientRepository: ClientRepository
-  @Mock
-  lateinit var ssoRequestRepository: SsoRequestRepository
   private lateinit var clientService: ClientService
   private lateinit var client: Client
 
   @BeforeEach
   fun setUp() {
-    clientService = ClientService(clientRepository, ssoRequestRepository)
+    clientService = ClientService(clientRepository)
     client = DataGenerator.buildClient(true, true)
   }
 
