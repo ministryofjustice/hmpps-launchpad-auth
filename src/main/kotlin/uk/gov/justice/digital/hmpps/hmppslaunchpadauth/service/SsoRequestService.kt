@@ -49,20 +49,6 @@ class SsoRequestService(private var ssoRequestRepository: SsoRequestRepository,
     return createSsoRequest(ssoRequest)
   }
 
-  /*fun updateSsoRequestAuthCodeAndUserId(userId: String?, state: UUID, ssoRequest: SsoRequest) : String {
-    if (ssoRequest.authorizationCode == null ) {
-      val code = UUID.randomUUID()
-      ssoRequest.authorizationCode = code
-    }
-    val code = UUID.randomUUID()
-    ssoRequest.authorizationCode = code
-    if (userId != null) {
-      ssoRequest.userId = userId
-    }
-    val ssoRequestUpdated =   updateSsoRequest(ssoRequest)
-    return "${ssoRequestUpdated.client.reDirectUri}?code=$code&state=${ssoRequestUpdated.client.state}&nonce=${ssoRequestUpdated.client.nonce}"
-  }*/
-
   fun getSsoRequestScopes(id: UUID): Set<Scope> {
     val ssoRequest = ssoRequestRepository.findById(id)
     if (ssoRequest.isPresent) {

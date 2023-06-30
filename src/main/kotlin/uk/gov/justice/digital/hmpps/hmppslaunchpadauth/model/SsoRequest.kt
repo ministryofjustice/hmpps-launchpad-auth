@@ -12,7 +12,7 @@ import java.util.*
 data class SsoRequest(
   @Id
   val id: UUID,
-  val nonce: String?,
+  val nonce: String,
   val createdDate: LocalDateTime,
   var authorizationCode: UUID?,
   @JdbcTypeCode(SqlTypes.JSON)

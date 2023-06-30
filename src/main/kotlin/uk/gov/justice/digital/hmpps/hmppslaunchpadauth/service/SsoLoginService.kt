@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
@@ -24,6 +25,8 @@ class SsoLoginService(
 
   @Value("\${azure.issuer-url}")
   private lateinit var issuerUrl: String
+
+  private val logger = LoggerFactory.getLogger(SsoLoginService::class.java)
 
   fun initiateSsoLogin(
     clientId: UUID,
@@ -71,9 +74,11 @@ class SsoLoginService(
         val updatedSsoRequest = ssoRequestService.updateSsoRequest(ssoRequest)
         return buildClientRedirectUrl(updatedSsoRequest)
       } else {
+        logger.warn(String.format("Form re-submittion ", ssoRequest.client.id))
         throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
       }
     } else {
+      logger.warn(String.format("State send on callback url do not exist %s", state))
       throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
     }
   }

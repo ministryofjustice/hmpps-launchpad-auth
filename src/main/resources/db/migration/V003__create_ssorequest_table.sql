@@ -4,8 +4,8 @@ create table public.sso_request
         primary key,
     authorization_code uuid,
     client             jsonb,
-    created_date       timestamp(6),
-    nonce              varchar(255),
+    created_date       timestamp(6) not null ,
+    nonce              varchar(255) not null,
     user_id            varchar(255)
 );
 
