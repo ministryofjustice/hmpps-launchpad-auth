@@ -52,7 +52,7 @@ class DataGenerator {
       return Jwts.builder()
         .setIssuer("Stormpath")
         .setSubject("login")
-        .setAudience("598471b7-0b6e-4922-a27b-6e4083046e98")
+        .setAudience("test audience")
         .claim("preferred_username", "testuser@test.com")
         .claim("name", "Varun Kumar")
         .claim("scope", "openid")
