@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.view.RedirectView
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ClientService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoLoginService
@@ -29,20 +28,19 @@ class AuthController(private var clientService: ClientService,
     @RequestParam("nonce", required = false) nonce: String?,
   ): RedirectView {
     val url = ssoLoginService.initiateSsoLogin(clientId, responseType, scope, redirectUri, state, nonce)
+    println(url)
     return RedirectView(url)
   }
 
-  // @CrossOrigin("http://localhost:8080")
   @PostMapping("/callback", produces = ["application/json"], consumes = ["application/x-www-form-urlencoded"])
   fun getUserAuthCode(
     @RequestParam("id_token", required = false) token: String?,
     @RequestParam("state", required = true) state: UUID,
     @RequestParam("approve", required = false) approve: Boolean = false,
   ): Any {
-    if (token != null) {
-      println(token)
       val client  = ssoRequestService.getClient(state)
-      if (!client.autoApprove && !approve) {
+      if (!client.autoApprove && token != null) {
+        ssoLoginService.generateAndUpdateSsoRequestWithAuthorizationCode(token, state, client.autoApprove)
         val modelAndView = ModelAndView("user_approval")
         modelAndView.addObject("token", token)
         modelAndView.addObject("state", state)
@@ -52,12 +50,12 @@ class AuthController(private var clientService: ClientService,
         modelAndView.addObject("description", client.description)
         modelAndView.addObject("approve", true)
         return modelAndView
+      } else if (!client.autoApprove && token == null){
+        val url = ssoLoginService.generateAndUpdateSsoRequestWithAuthorizationCode(null, state, client.autoApprove)
+        return RedirectView(url)
       } else {
-        val url = ssoLoginService.generateAndUpdateSsoRequestWithAuthorizationCode(token, state)
+        val url = ssoLoginService.generateAndUpdateSsoRequestWithAuthorizationCode(token, state, client.autoApprove)
         return RedirectView(url)
       }
-    } else {
-      throw ApiException("Access Denied", 403)
-    }
   }
 }

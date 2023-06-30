@@ -1,15 +1,13 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
@@ -17,7 +15,9 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.utils.DataGenerator
 import java.net.URL
 import java.time.Instant
@@ -27,62 +27,133 @@ import java.util.*
 @EnableAutoConfiguration
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-class SsoLoginServiceTest {
+class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginService) {
   @MockBean
   private lateinit var ssoRequestService: SsoRequestService
+
   @MockBean
   private lateinit var clientService: ClientService
+
   @MockBean
   private lateinit var tokenProcessor: TokenProcessor
-  @Autowired
-  private lateinit var ssoLoginService: SsoLoginService
 
-  private val ssoRequest = DataGenerator.buildSsoRequest();
-
+  private lateinit var ssoRequest: SsoRequest
 
   @BeforeEach
-    fun setUp() {
-    }
+  fun setUp() {
+    ssoRequest = DataGenerator.buildSsoRequest()
+  }
 
+  @AfterEach
+  fun tearDown() {
+  }
 
-
-    @AfterEach
-    fun tearDown() {
-    }
-
-    @Test
-    fun initiateSsoLogin() {
-      Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
-      Mockito.doNothing().`when`(clientService).validateParams(
-        ssoRequest.client.id,
-        "code",
-        Scope.USER_BASIC_READ.toString() + " " +Scope.USER_BOOKING_READ.toString(),
-        ssoRequest.client.reDirectUri,
+  @Test
+  fun initiateSsoLogin() {
+    Mockito.`when`(
+      ssoRequestService.generateSsoRequest(
+        setOf(Scope.USER_BASIC_READ),
         ssoRequest.id.toString(),
-        "",
-      )
-      val url = ssoLoginService.initiateSsoLogin(
-        ssoRequest.client.id,
-        "code",
-        Scope.USER_BASIC_READ.toString() + " " + Scope.USER_BOOKING_READ.toString(),
+        ssoRequest.client.nonce,
         ssoRequest.client.reDirectUri,
-        ssoRequest.id.toString(),
-        "",
-      )
-      val result = URL(url)
-      assertNotNull(result)
-    }
+        ssoRequest.client.id,
+      ),
+    ).thenReturn(ssoRequest)
+    Mockito.doNothing().`when`(clientService).validateParams(
+      ssoRequest.client.id,
+      "code",
+      Scope.USER_BASIC_READ.toString(),
+      ssoRequest.client.reDirectUri,
+      ssoRequest.id.toString(),
+      ssoRequest.client.nonce,
+    )
+    val url = ssoLoginService.initiateSsoLogin(
+      ssoRequest.client.id,
+      "code",
+      Scope.USER_BASIC_READ.toString(),
+      ssoRequest.client.reDirectUri,
+      ssoRequest.id.toString(),
+      ssoRequest.client.nonce,
+    )
+    val result = URL(url)
+    assertNotNull(result)
+  }
 
-    @Test
-    fun generateAndUpdateSsoRequestWithAuthorizationCode() {
-      val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600))
-      Mockito.`when`(ssoRequestService.updateSsoRequestAuthCodeAndUserId("vrnkmr110@outlook.com", ssoRequest.id)).thenReturn(ssoRequest.client.reDirectUri)
-      Mockito.`when`(tokenProcessor.getUserId(token)).thenReturn("vrnkmr110@outlook.com")
-      val url = ssoLoginService.generateAndUpdateSsoRequestWithAuthorizationCode(
-        token,
+  @Test
+  fun generateAndUpdateSsoRequestWithAuthorizationCodeWhenAutoApproved() {
+    val nonce = UUID.randomUUID()
+    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce)
+    ssoRequest.userId = null
+    ssoRequest.authorizationCode = null
+    Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
+    Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
+    Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn("testuser@test.com")
+    val url = ssoLoginService.generateAndUpdateSsoRequestWithAuthorizationCode(
+      token,
+      ssoRequest.id,
+      true,
+    )
+    val result = URL(url)
+    assertNotNull(result)
+  }
+
+  @Test
+  fun generateAndUpdateSsoRequestWithAuthorizationCodeWhenNotAutoApproved() {
+    val nonce = UUID.randomUUID()
+    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce)
+    ssoRequest.userId = null
+    ssoRequest.authorizationCode = null
+    Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
+    Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
+    Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn("testuser@test.com")
+    val url = ssoLoginService.generateAndUpdateSsoRequestWithAuthorizationCode(
+      token,
+      ssoRequest.id,
+      false,
+    )
+    val result = URL(url)
+    assertNotNull(result)
+  }
+
+  @Test
+  fun generateAndUpdateSsoRequestWithAuthorizationCodeWhenAfterUserApproved() {
+    ssoRequest.authorizationCode = null
+    Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
+    Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
+    val url = ssoLoginService.generateAndUpdateSsoRequestWithAuthorizationCode(
+      null,
+      ssoRequest.id,
+      false,
+    )
+    val result = URL(url)
+    assertNotNull(result)
+  }
+
+  @Test
+  fun generateAndUpdateSsoRequestWithAuthorizationCodeWhenFormReSubmitted() {
+    Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
+    val exception = assertThrows(ApiException::class.java) {
+      ssoLoginService.generateAndUpdateSsoRequestWithAuthorizationCode(
+        null,
         ssoRequest.id,
+        false,
       )
-      val result = URL(url)
-      assertNotNull(result)
     }
+    assertEquals(ACCESS_DENIED, exception.message)
+    assertEquals(ACCESS_DENIED_CODE, exception.code)
+  }
+
+  @Test
+  fun generateAndUpdateSsoRequestWithAuthorizationCodeWhenSsoRequestRecordNotFound() {
+    Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.empty())
+    val exception = assertThrows(ApiException::class.java) {
+      ssoLoginService.generateAndUpdateSsoRequestWithAuthorizationCode(
+        null,
+        ssoRequest.id,
+        false,
+      )
+    }
+    assertEquals(ACCESS_DENIED, exception.message)
+    assertEquals(ACCESS_DENIED_CODE, exception.code)
+  }
 }

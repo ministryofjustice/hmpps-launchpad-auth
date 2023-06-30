@@ -12,7 +12,7 @@ import java.util.*
 
 @Service
 class SsoRequestService(private var ssoRequestRepository: SsoRequestRepository,
-                         private var clientService: ClientService) {
+                        private var clientService: ClientService) {
   fun createSsoRequest(ssoRequest: SsoRequest): SsoRequest {
     return ssoRequestRepository.save(ssoRequest)
   }
@@ -31,10 +31,10 @@ class SsoRequestService(private var ssoRequestRepository: SsoRequestRepository,
     nonce: String?,
     redirectUri: String,
     clientId: UUID,
-  ): UUID {
+  ): SsoRequest {
     val ssoRequest = SsoRequest(
       UUID.randomUUID(),
-      nonce,
+      UUID.randomUUID().toString(),
       LocalDateTime.now(),
       null,
       SsoClient(
@@ -46,33 +46,29 @@ class SsoRequestService(private var ssoRequestRepository: SsoRequestRepository,
       ),
       null
     )
-    return createSsoRequest(ssoRequest).id
+    return createSsoRequest(ssoRequest)
   }
 
-  fun updateSsoRequestAuthCodeAndUserId(userId: String, state: UUID) : String {
-    val ssoRequest = ssoRequestRepository.findById(state)
-    if (ssoRequest.isPresent) {
+  /*fun updateSsoRequestAuthCodeAndUserId(userId: String?, state: UUID, ssoRequest: SsoRequest) : String {
+    if (ssoRequest.authorizationCode == null ) {
       val code = UUID.randomUUID()
-      val record = ssoRequest.get()
-      if (record.authorizationCode == null ) {
-        record.authorizationCode = code
-      } else {
-        throw ApiException("Resubmittion not allowed", 400)
-      }
-      record.userId = userId
-      updateSsoRequest(record)
-      return "${record.client.reDirectUri}?code=$code&state=${record.client.state}"
-    } else {
-      throw ApiException("Access Denied", 403)
+      ssoRequest.authorizationCode = code
     }
-  }
+    val code = UUID.randomUUID()
+    ssoRequest.authorizationCode = code
+    if (userId != null) {
+      ssoRequest.userId = userId
+    }
+    val ssoRequestUpdated =   updateSsoRequest(ssoRequest)
+    return "${ssoRequestUpdated.client.reDirectUri}?code=$code&state=${ssoRequestUpdated.client.state}&nonce=${ssoRequestUpdated.client.nonce}"
+  }*/
 
   fun getSsoRequestScopes(id: UUID): Set<Scope> {
     val ssoRequest = ssoRequestRepository.findById(id)
     if (ssoRequest.isPresent) {
       return ssoRequest.get().client.scopes
     } else {
-      throw ApiException("SsoRequest not found", 400)
+      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
     }
   }
 
@@ -84,11 +80,10 @@ class SsoRequestService(private var ssoRequestRepository: SsoRequestRepository,
       if (client.isPresent) {
         return client.get()
       } else {
-        throw ApiException("Client not found", 400)
+        throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
       }
     } else {
-      throw ApiException("SsoRequest not found", 400)
+      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
     }
   }
-
 }

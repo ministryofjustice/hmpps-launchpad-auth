@@ -1,11 +1,13 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import java.util.*
 
-@Service
+@Component
 class SsoLoginService(
   private var clientService: ClientService,
   private var ssoRequestService: SsoRequestService,
@@ -33,19 +35,47 @@ class SsoLoginService(
   ): String {
     clientService.validateParams(clientId, responseType, scopes, redirectUri, state, nonce)
     val scopeSet = cleanScopes(scopes)
-    val ssoRequestId = ssoRequestService.generateSsoRequest(
-      Scope.getEnumsByValues(scopeSet),
-      nonce,
+    val scopesEnums = Scope.getEnumsByValues(scopeSet)
+    val ssoRequest = ssoRequestService.generateSsoRequest(
+      scopesEnums,
       state,
+      nonce,
       redirectUri,
       clientId,
     )
-    return "$azureOauthUrl?response_type=id_token&client_id=$launchpadClientId&scope=openid email profile&state=$ssoRequestId&response_mode=form_post&redirect_uri=$launchpadRedirectUrl&nonce=$nonce"
+    return "$azureOauthUrl?response_type=id_token&client_id=$launchpadClientId&scope=openid email profile&state=${ssoRequest.id}&response_mode=form_post&redirect_uri=$launchpadRedirectUrl&nonce=${ssoRequest.nonce}"
   }
 
-  fun generateAndUpdateSsoRequestWithAuthorizationCode(token: String, state: UUID): String {
-    val userId = tokenProcessor.getUserId(token)
-    return ssoRequestService.updateSsoRequestAuthCodeAndUserId(userId, state)
+  fun generateAndUpdateSsoRequestWithAuthorizationCode(token: String?, state: UUID, autoApprove: Boolean): String {
+    val ssoRequestFound = ssoRequestService.getSsoRequestById(state)
+    if (ssoRequestFound.isPresent) {
+      val ssoRequest = ssoRequestFound.get()
+      // auto approved client
+      if (token != null && ssoRequest.userId == null && ssoRequest.authorizationCode == null && autoApprove) {
+        val userId = ssoRequest.nonce?.let { tokenProcessor.getUserId(token, it) }
+        ssoRequest.userId = userId
+        ssoRequest.authorizationCode = UUID.randomUUID()
+        val updatedSsoRequest = ssoRequestService.updateSsoRequest(ssoRequest)
+        return buildClientRedirectUrl(updatedSsoRequest)
+        // Before User Approval
+      } else if (token != null && ssoRequest.userId == null && ssoRequest.authorizationCode == null && !autoApprove) {
+        val userId = ssoRequest.nonce?.let { tokenProcessor.getUserId(token, it) }
+        ssoRequest.userId = userId
+        ssoRequestService.updateSsoRequest(ssoRequest)
+        val updatedSsoRequest = ssoRequestService.updateSsoRequest(ssoRequest)
+        return buildClientRedirectUrl(updatedSsoRequest)
+        // After user approval
+      } else if (token == null && ssoRequest.userId != null && ssoRequest.authorizationCode == null) {
+        ssoRequest.authorizationCode = UUID.randomUUID()
+        ssoRequestService.updateSsoRequest(ssoRequest)
+        val updatedSsoRequest = ssoRequestService.updateSsoRequest(ssoRequest)
+        return buildClientRedirectUrl(updatedSsoRequest)
+      } else {
+        throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+      }
+    } else {
+      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+    }
   }
 
   private fun cleanScopes(scopes: String): Set<String> {
@@ -57,5 +87,9 @@ class SsoLoginService(
     } else {
       return setOf(scopes)
     }
+  }
+
+  private fun buildClientRedirectUrl(ssoRequest: SsoRequest): String {
+    return "${ssoRequest.client.reDirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}&nonce=${ssoRequest.client.nonce}"
   }
 }

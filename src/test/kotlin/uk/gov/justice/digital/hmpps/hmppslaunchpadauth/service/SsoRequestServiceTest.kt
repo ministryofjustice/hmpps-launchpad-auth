@@ -70,63 +70,8 @@ class SsoRequestServiceTest {
         ssoRequest.client.reDirectUri,
         ssoRequest.client.id
       )
-      assertEquals(ssoRequest.id, result)
+      assertSsoRequest(ssoRequest, result)
     }
-
-    @Test
-    fun updateSsoRequestAuthCodeAndUserId() {
-      ssoRequest.authorizationCode = null
-      Mockito.`when`(ssoRequestRepository.save(ssoRequest)).thenReturn(ssoRequest)
-      val client = Client(
-        ssoRequest.client.id,
-        UUID.randomUUID().toString(),
-        setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ, Scope.USER_ESTABLISHMENT_READ),
-        setOf(AuthorizationGrantType.AUTHORIZATION_CODE, AuthorizationGrantType.REFRESH_TOKEN),
-        setOf("http://localhost:8080/test"),
-        true,
-        true,
-        "Test App",
-        "http://localhost:8080/test",
-        "Update Test App",
-      )
-      //Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
-      Mockito.`when`(ssoRequestRepository.findById(UUID.fromString(ssoRequest.client.state))).thenReturn(Optional.of(ssoRequest))
-      val result = ssoRequest.userId?.let {
-        ssoRequestService.updateSsoRequestAuthCodeAndUserId(
-          ssoRequest.userId.toString(),
-          UUID.fromString(ssoRequest.client.state)
-        )
-      }
-      assertEquals(true, result?.contains("http://localhost:8080/test?"))
-    }
-
-  @Test
-  fun updateSsoRequestAuthCodeAndUserIdWhenAuthCodeAlreadyUsed() {
-    //Mockito.`when`(ssoRequestRepository.save(ssoRequest)).thenReturn(ssoRequest)
-    val client = Client(
-      ssoRequest.client.id,
-      UUID.randomUUID().toString(),
-      setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ, Scope.USER_ESTABLISHMENT_READ),
-      setOf(AuthorizationGrantType.AUTHORIZATION_CODE, AuthorizationGrantType.REFRESH_TOKEN),
-      setOf("http://localhost:8080/test"),
-      true,
-      true,
-      "Test App",
-      "http://localhost:8080/test",
-      "Update Test App",
-    )
-    //Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
-    Mockito.`when`(ssoRequestRepository.findById(UUID.fromString(ssoRequest.client.state))).thenReturn(Optional.of(ssoRequest))
-    val exception = assertThrows(ApiException::class.java) {
-      ssoRequest.userId?.let {
-        ssoRequestService.updateSsoRequestAuthCodeAndUserId(
-          ssoRequest.userId.toString(),
-          UUID.fromString(ssoRequest.client.state)
-        )
-      }
-    }
-    assertEquals(400, exception.code)
-  }
 
     @Test
     fun getClient() {

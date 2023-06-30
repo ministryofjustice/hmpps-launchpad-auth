@@ -1,6 +1,5 @@
 server:
   shutdown: immediate
-
 azure:
   oauth2-url: https://login.microsoftonline.com/103ab093-fd63-4ca9-a293-4aee1490a490/oauth2/v2.0/authorize
   issuer-url: https://login.microsoftonline.com/103ab093-fd63-4ca9-a293-4aee1490a490/v2.0

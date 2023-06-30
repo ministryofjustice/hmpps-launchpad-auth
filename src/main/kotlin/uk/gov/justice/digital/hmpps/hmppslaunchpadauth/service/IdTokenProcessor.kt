@@ -21,7 +21,7 @@ class IdTokenProcessor : TokenProcessor {
   @Value("\${azure.issuer-url}")
   private lateinit var issuerUrl: String
 
-  override fun getUserId(token: String): String {
+  override fun getUserId(token: String, nonce: String): String {
     val decoder = Base64.getUrlDecoder()
     val chunks = token.split(".")
     val payload = String(decoder.decode(chunks[1]))
@@ -29,21 +29,32 @@ class IdTokenProcessor : TokenProcessor {
     val jsonObject = JSONObject(payload)
     validateClient(jsonObject.get("aud") as String)
     validateExpirationTime(jsonObject.get("exp") as Int)
-    return jsonObject.get("preferred_username") as String
+    validateNonce(jsonObject.get("nonce") as String, nonce)
+    val userId = jsonObject.get("preferred_username") as String?
+    if (userId != null) {
+      return userId
+    } else {
+      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+    }
   }
 
   private fun validateClient(clientId: String) {
     if (!clientId.equals(launchpadClientId)) {
-      throw ApiException("Access Denied, invalid client", 403)
+      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+    }
+  }
+
+  private fun validateNonce(nonceToken: String, nonceSsoRequest: String) {
+    if (nonceToken != nonceSsoRequest) {
+      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
     }
   }
 
   private fun validateExpirationTime(time: Int) {
     val instant = Instant.now()
-    val now  = instant.epochSecond
+    val now = instant.epochSecond
     if (now > time) {
-      throw ApiException("Access Denied, expired token", 403)
+      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
     }
   }
-
 }

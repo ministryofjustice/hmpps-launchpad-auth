@@ -46,16 +46,17 @@ class DataGenerator {
       )
     }
 
-    fun jwtBuilder(issue: Instant, exp: Instant): String {
+    fun jwtBuilder(issue: Instant, exp: Instant, nonce: UUID): String {
       val issueDate = Date.from(issue)
       val expDate = Date.from(exp)
       return Jwts.builder()
         .setIssuer("Stormpath")
         .setSubject("login")
         .setAudience("598471b7-0b6e-4922-a27b-6e4083046e98")
-        .claim("preferred_username", "vrnkmr110@outlook.com")
+        .claim("preferred_username", "testuser@test.com")
         .claim("name", "Varun Kumar")
         .claim("scope", "openid")
+        .claim("nonce", nonce)
         .setIssuedAt(issueDate)
         .setExpiration(expDate)
         .signWith(

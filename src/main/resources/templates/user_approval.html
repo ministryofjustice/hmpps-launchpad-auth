@@ -33,7 +33,6 @@
     </div>
     <br th:text="${description}" text="description"/>
     <form action="/v1/oauth2/callback" method="post" id="form_approve">
-      <input hidden="hidden" th:value="${token}" name="id_token"/>
       <input hidden="hidden" th:value="${state}" name="state"/>
       <input hidden="hidden" th:value="${approve}" name="approve"/>
     </form>
