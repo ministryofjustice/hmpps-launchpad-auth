@@ -11,7 +11,6 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.util.*
 
-
 class DataGenerator {
   companion object {
     fun buildClient(enabled: Boolean, autoApprove: Boolean): Client {

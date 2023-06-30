@@ -11,8 +11,10 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Service
-class SsoRequestService(private var ssoRequestRepository: SsoRequestRepository,
-                        private var clientService: ClientService) {
+class SsoRequestService(
+  private var ssoRequestRepository: SsoRequestRepository,
+  private var clientService: ClientService,
+) {
   fun createSsoRequest(ssoRequest: SsoRequest): SsoRequest {
     return ssoRequestRepository.save(ssoRequest)
   }
@@ -23,6 +25,10 @@ class SsoRequestService(private var ssoRequestRepository: SsoRequestRepository,
 
   fun getSsoRequestById(id: UUID): Optional<SsoRequest> {
     return ssoRequestRepository.findById(id)
+  }
+
+  fun deleteSsoRequestById(id: UUID) {
+    ssoRequestRepository.deleteById(id)
   }
 
   fun generateSsoRequest(
@@ -44,7 +50,7 @@ class SsoRequestService(private var ssoRequestRepository: SsoRequestRepository,
         scopes,
         redirectUri,
       ),
-      null
+      null,
     )
     return createSsoRequest(ssoRequest)
   }

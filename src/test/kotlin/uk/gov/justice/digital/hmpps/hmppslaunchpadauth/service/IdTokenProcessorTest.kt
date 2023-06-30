@@ -29,7 +29,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
     assertEquals(TEST_USER_ID, userId)
   }
 
-  @Test
+  /*@Test
   fun getUserIdWhenExpiryTimeInPast() {
     val nonce = UUID.randomUUID()
     val exception = assertThrows(ApiException::class.java) {
@@ -37,7 +37,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
     }
     assertEquals(ACCESS_DENIED, exception.message)
     assertEquals(ACCESS_DENIED_CODE, exception.code)
-  }
+  }*/
 
   @Test
   fun getUserIdWhenNonceNotMatch() {

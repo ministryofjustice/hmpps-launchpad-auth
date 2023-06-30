@@ -6,7 +6,10 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.view.RedirectView
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ACCESS_DENIED
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ACCESS_DENIED_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ClientService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoLoginService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoRequestService
@@ -36,9 +39,10 @@ class AuthController(private var clientService: ClientService,
   fun getUserAuthCode(
     @RequestParam("id_token", required = false) token: String?,
     @RequestParam("state", required = true) state: UUID,
-    @RequestParam("approve", required = false) approve: Boolean = false,
+    @RequestParam("userApproval", required = false) userApproval: String?,
   ): Any {
       val client  = ssoRequestService.getClient(state)
+      // Callback and it requires user approval
       if (!client.autoApprove && token != null) {
         ssoLoginService.generateAndUpdateSsoRequestWithAuthorizationCode(token, state, client.autoApprove)
         val modelAndView = ModelAndView("user_approval")
@@ -48,14 +52,20 @@ class AuthController(private var clientService: ClientService,
         modelAndView.addObject("name", "${client.name} would like to:")
         modelAndView.addObject("scopes", Scope.getTemplateTextByEnums(ssoRequestService.getSsoRequestScopes(state)).sorted())
         modelAndView.addObject("description", client.description)
-        modelAndView.addObject("approve", true)
         return modelAndView
-      } else if (!client.autoApprove && token == null){
+        // Callback and it requires user approval and user approved
+      } else if (!client.autoApprove && token == null && userApproval == "approved") {
         val url = ssoLoginService.generateAndUpdateSsoRequestWithAuthorizationCode(null, state, client.autoApprove)
         return RedirectView(url)
+        // Callback and it requires user approval and user not approved
+      } else if (!client.autoApprove && token == null && userApproval == "cancelled") {
+        ssoLoginService.cancelAccess(state)
+        throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
       } else {
+        // Callback and user approval is not required
         val url = ssoLoginService.generateAndUpdateSsoRequestWithAuthorizationCode(token, state, client.autoApprove)
         return RedirectView(url)
       }
+
   }
 }

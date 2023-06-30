@@ -34,17 +34,18 @@
     <br th:text="${description}" text="description"/>
     <form action="/v1/oauth2/callback" method="post" id="form_approve">
       <input hidden="hidden" th:value="${state}" name="state"/>
-      <input hidden="hidden" th:value="${approve}" name="approve"/>
+      <input hidden="hidden" value="approved" name="userApproval"/>
     </form>
     <form action="/v1/oauth2/callback" method="post" id="form_cancel">
       <input hidden="hidden" th:value="${state}" name="state"/>
+      <input hidden="hidden" value="cancelled" name="userApproval"/>
     </form>
     <div>
       <div>
-        <button style="float: left;border-radius: 5px; background-color: gray" type="submit" form="form_cancel" value="Submit">Cancel</button>
+        <button style="float: left;border-radius: 5px; background-color: gray" type="submit" form="form_cancel" value="Submit">No</button>
       </div>
       <div>
-        <button style="float: right;border-radius: 5px; background-color: cornflowerblue" type="submit" form="form_approve" value="Submit">Allow</button>
+        <button style="float: right;border-radius: 5px; background-color: green" type="submit" form="form_approve" value="Submit">Yes</button>
       </div>
        </div>
   </dialog>

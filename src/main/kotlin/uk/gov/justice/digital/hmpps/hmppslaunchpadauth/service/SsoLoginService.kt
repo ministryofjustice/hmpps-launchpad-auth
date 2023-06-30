@@ -74,6 +74,7 @@ class SsoLoginService(
         val updatedSsoRequest = ssoRequestService.updateSsoRequest(ssoRequest)
         return buildClientRedirectUrl(updatedSsoRequest)
       } else {
+        ssoRequestService.deleteSsoRequestById(ssoRequest.id)
         logger.warn(String.format("Form re-submittion ", ssoRequest.client.id))
         throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
       }
@@ -81,6 +82,11 @@ class SsoLoginService(
       logger.warn(String.format("State send on callback url do not exist %s", state))
       throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
     }
+  }
+
+  fun cancelAccess(state: UUID) {
+    // user cancel approval in sso login user approval dialog
+    ssoRequestService.deleteSsoRequestById(state)
   }
 
   private fun cleanScopes(scopes: String): Set<String> {
@@ -95,6 +101,6 @@ class SsoLoginService(
   }
 
   private fun buildClientRedirectUrl(ssoRequest: SsoRequest): String {
-    return "${ssoRequest.client.reDirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}&nonce=${ssoRequest.client.nonce}"
+    return "${ssoRequest.client.reDirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}"
   }
 }
