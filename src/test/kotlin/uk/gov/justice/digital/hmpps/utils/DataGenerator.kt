@@ -42,7 +42,7 @@ class DataGenerator {
           setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ),
           "http://localhost:8080/test",
         ),
-        "vrnkmr110@outlook.com",
+        "testuser@test.com",
       )
     }
 
@@ -61,7 +61,7 @@ class DataGenerator {
         .setExpiration(expDate)
         .signWith(
           SignatureAlgorithm.HS256,
-          "fli8Q~hiv6mz_nAeSaiMaHqu2K~JMmmdpTMHBbyt",
+          "random secret",
         )
         .compact()
     }
