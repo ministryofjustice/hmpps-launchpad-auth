@@ -1,21 +1,22 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.SsoRequestRepository
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 
 @Service
 class SsoRequestService(
-  private var ssoRequestRepository: SsoRequestRepository,
-  private var clientService: ClientService,
+  private var ssoRequestRepository: SsoRequestRepository
 ) {
+  private val logger = LoggerFactory.getLogger(SsoRequestService::class.java)
   fun createSsoRequest(ssoRequest: SsoRequest): SsoRequest {
+    logger.info(String.format("Sso request created for user of  client: %s", ssoRequest.client.id))
     return ssoRequestRepository.save(ssoRequest)
   }
 
@@ -41,8 +42,8 @@ class SsoRequestService(
     val ssoRequest = SsoRequest(
       UUID.randomUUID(),
       UUID.randomUUID().toString(),
-      LocalDateTime.now(),
-      null,
+      LocalDateTime.now(ZoneOffset.UTC),
+      UUID.randomUUID(),
       SsoClient(
         clientId,
         state,
@@ -53,29 +54,5 @@ class SsoRequestService(
       null,
     )
     return createSsoRequest(ssoRequest)
-  }
-
-  fun getSsoRequestScopes(id: UUID): Set<Scope> {
-    val ssoRequest = ssoRequestRepository.findById(id)
-    if (ssoRequest.isPresent) {
-      return ssoRequest.get().client.scopes
-    } else {
-      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
-    }
-  }
-
-  fun getClient(id: UUID): Client {
-    val ssoRequest = getSsoRequestById(id)
-    if (ssoRequest.isPresent) {
-      val clientId = ssoRequest.get().client.id
-      val client = clientService.getClientById(clientId)
-      if (client.isPresent) {
-        return client.get()
-      } else {
-        throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
-      }
-    } else {
-      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
-    }
   }
 }

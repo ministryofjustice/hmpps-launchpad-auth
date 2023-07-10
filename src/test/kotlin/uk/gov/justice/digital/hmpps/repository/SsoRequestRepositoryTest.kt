@@ -41,7 +41,7 @@ class SsoRequestRepositoryTest(@Autowired private var ssoRequestRepository: SsoR
   }
 
   @Test
-  fun `update ssorequest`() {
+  fun `update sso request`() {
     val expected = DataGenerator.buildSsoRequest()
     expected.authorizationCode = UUID.randomUUID()
     val result = ssoRequestRepository.save(expected)
@@ -49,7 +49,7 @@ class SsoRequestRepositoryTest(@Autowired private var ssoRequestRepository: SsoR
   }
 
   @Test
-  fun `get ssorequest by id`() {
+  fun `get sso request by id`() {
     val expected = DataGenerator.buildSsoRequest()
     expected.authorizationCode = UUID.randomUUID()
     ssoRequestRepository.save(expected)
@@ -58,7 +58,7 @@ class SsoRequestRepositoryTest(@Autowired private var ssoRequestRepository: SsoR
   }
 
   @Test
-  fun `delete ssorequest by id`(){
+  fun `delete sso request by id`(){
     val expected = DataGenerator.buildSsoRequest()
     expected.authorizationCode = UUID.randomUUID()
     ssoRequestRepository.save(expected)
@@ -79,7 +79,7 @@ class SsoRequestRepositoryTest(@Autowired private var ssoRequestRepository: SsoR
     assertEquals(expected.id, result.id)
     assertEquals(expected.state, result.state)
     assertEquals(expected.scopes, result.scopes)
-    assertEquals(expected.reDirectUri, result.reDirectUri)
+    assertEquals(expected.redirectUri, result.redirectUri)
     assertEquals(expected.nonce, result.nonce)
   }
 

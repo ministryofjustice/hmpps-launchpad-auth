@@ -14,7 +14,7 @@ import uk.gov.justice.digital.hmpps.utils.DataGenerator
 import java.time.Instant
 import java.util.*
 
-const val TEST_USER_ID = "testuser@test.com"
+
 
 @SpringBootTest(classes = [IdTokenProcessor::class])
 @EnableAutoConfiguration
@@ -25,26 +25,17 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
   @Test
   fun getUserId() {
     val nonce = UUID.randomUUID()
-    val userId = idTokenProcessor.getUserId(DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce), nonce.toString())
-    assertEquals(TEST_USER_ID, userId)
+    val id = UUID.randomUUID()
+    val userId = idTokenProcessor.getUserId(DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, id), nonce.toString())
+    assertEquals(userId, id.toString())
   }
-
-  /*@Test
-  fun getUserIdWhenExpiryTimeInPast() {
-    val nonce = UUID.randomUUID()
-    val exception = assertThrows(ApiException::class.java) {
-      idTokenProcessor.getUserId(DataGenerator.jwtBuilder(Instant.now(), Instant.now().minusSeconds(3600), nonce), nonce.toString())
-    }
-    assertEquals(ACCESS_DENIED, exception.message)
-    assertEquals(ACCESS_DENIED_CODE, exception.code)
-  }*/
 
   @Test
   fun getUserIdWhenNonceNotMatch() {
     val nonce = UUID.randomUUID()
     val exception = assertThrows(ApiException::class.java) {
       idTokenProcessor.getUserId(
-        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce),
+        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, UUID.randomUUID()),
         UUID.randomUUID().toString(),
       )
     }

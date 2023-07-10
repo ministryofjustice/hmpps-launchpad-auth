@@ -22,21 +22,21 @@
   transform: translate(-50%, -50%);">
   <dialog open style="border-color: grey">
     <div class="text-center">
-      <img th:src="${logo}"  src="logo" width="100" height="100"/>
+      <img th:src="${client.getLogoUri()}"  src="logo" width="100" height="100"/>
     </div>
     <div>
-    <br th:text="${name}" text="name"/>
+    <br th:text="${client.getName()} + ' would like to:'"/>
       <br/>
     </div>
     <div style=" width: 100%" th:each="scope: ${scopes}">
       <p  style="border-bottom: 2px solid black;" th:text="${scope}"/>
     </div>
-    <br th:text="${description}" text="description"/>
-    <form action="/v1/oauth2/callback" method="post" id="form_approve">
+    <br th:text="${client.getDescription()}"/>
+    <form action="/v1/oauth2/authorize-client" method="post" id="form_approve">
       <input hidden="hidden" th:value="${state}" name="state"/>
       <input hidden="hidden" value="approved" name="userApproval"/>
     </form>
-    <form action="/v1/oauth2/callback" method="post" id="form_cancel">
+    <form action="/v1/oauth2/authorize-client" method="post" id="form_cancel">
       <input hidden="hidden" th:value="${state}" name="state"/>
       <input hidden="hidden" value="cancelled" name="userApproval"/>
     </form>
@@ -50,7 +50,5 @@
        </div>
   </dialog>
 </div>
-
-
 </body>
 </html>

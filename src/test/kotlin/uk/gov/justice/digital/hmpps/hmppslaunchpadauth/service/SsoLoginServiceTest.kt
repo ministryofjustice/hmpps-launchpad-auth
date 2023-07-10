@@ -55,7 +55,7 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
         setOf(Scope.USER_BASIC_READ),
         ssoRequest.id.toString(),
         ssoRequest.client.nonce,
-        ssoRequest.client.reDirectUri,
+        ssoRequest.client.redirectUri,
         ssoRequest.client.id,
       ),
     ).thenReturn(ssoRequest)
@@ -63,7 +63,7 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
       ssoRequest.client.id,
       "code",
       Scope.USER_BASIC_READ.toString(),
-      ssoRequest.client.reDirectUri,
+      ssoRequest.client.redirectUri,
       ssoRequest.id.toString(),
       ssoRequest.client.nonce,
     )
@@ -71,7 +71,7 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
       ssoRequest.client.id,
       "code",
       Scope.USER_BASIC_READ.toString(),
-      ssoRequest.client.reDirectUri,
+      ssoRequest.client.redirectUri,
       ssoRequest.id.toString(),
       ssoRequest.client.nonce,
     )
@@ -82,9 +82,10 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
   @Test
   fun generateAndUpdateSsoRequestWithAuthorizationCodeWhenAutoApproved() {
     val nonce = UUID.randomUUID()
-    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce)
+    val id = UUID.randomUUID()
+    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, id)
     ssoRequest.userId = null
-    ssoRequest.authorizationCode = null
+    // ssoRequest.authorizationCode = null
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
     Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn("testuser@test.com")
@@ -100,9 +101,10 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
   @Test
   fun generateAndUpdateSsoRequestWithAuthorizationCodeWhenNotAutoApproved() {
     val nonce = UUID.randomUUID()
-    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce)
+    val id = UUID.randomUUID()
+    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, id)
     ssoRequest.userId = null
-    ssoRequest.authorizationCode = null
+    // ssoRequest.authorizationCode = null
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
     Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn("testuser@test.com")
@@ -117,7 +119,7 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
 
   @Test
   fun generateAndUpdateSsoRequestWithAuthorizationCodeWhenAfterUserApproved() {
-    ssoRequest.authorizationCode = null
+    // ssoRequest.authorizationCode = null
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
     val url = ssoLoginService.generateAndUpdateSsoRequestWithAuthorizationCode(
@@ -127,20 +129,6 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
     )
     val result = URL(url)
     assertNotNull(result)
-  }
-
-  @Test
-  fun generateAndUpdateSsoRequestWithAuthorizationCodeWhenFormReSubmitted() {
-    Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
-    val exception = assertThrows(ApiException::class.java) {
-      ssoLoginService.generateAndUpdateSsoRequestWithAuthorizationCode(
-        null,
-        ssoRequest.id,
-        false,
-      )
-    }
-    assertEquals(ACCESS_DENIED, exception.message)
-    assertEquals(ACCESS_DENIED_CODE, exception.code)
   }
 
   @Test

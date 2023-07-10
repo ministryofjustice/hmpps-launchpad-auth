@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
@@ -37,8 +38,8 @@ class SsoLoginService(
     nonce: String?,
   ): String {
     clientService.validateParams(clientId, responseType, scopes, redirectUri, state, nonce)
-    val scopeSet = cleanScopes(scopes)
-    val scopesEnums = Scope.getEnumsByValues(scopeSet)
+    val scopeSet = Scope.cleanScopes(scopes)
+    val scopesEnums = Scope.getScopesByValues(scopeSet)
     val ssoRequest = ssoRequestService.generateSsoRequest(
       scopesEnums,
       state,
@@ -46,41 +47,29 @@ class SsoLoginService(
       redirectUri,
       clientId,
     )
-    return "$azureOauthUrl?response_type=id_token&client_id=$launchpadClientId&scope=openid email profile&state=${ssoRequest.id}&response_mode=form_post&redirect_uri=$launchpadRedirectUrl&nonce=${ssoRequest.nonce}"
+    return UriComponentsBuilder.fromHttpUrl(azureOauthUrl)
+      .queryParam("response_type", "id_token")
+      .queryParam("client_id", launchpadClientId)
+      // without adding profile in scope token do not contain oid
+      .queryParam("scope", "openid profile")
+      .queryParam("state", ssoRequest.id)
+      .queryParam("nonce", ssoRequest.nonce)
+      .queryParam("response_mode", "form_post")
+      .queryParam("redirect_uri", launchpadRedirectUrl)
+      .build().toString()
   }
 
   fun generateAndUpdateSsoRequestWithAuthorizationCode(token: String?, state: UUID, autoApprove: Boolean): String {
-    val ssoRequestFound = ssoRequestService.getSsoRequestById(state)
-    if (ssoRequestFound.isPresent) {
-      val ssoRequest = ssoRequestFound.get()
-      // auto approved client
-      if (token != null && ssoRequest.userId == null && ssoRequest.authorizationCode == null && autoApprove) {
-        val userId = ssoRequest.nonce?.let { tokenProcessor.getUserId(token, it) }
-        ssoRequest.userId = userId
-        ssoRequest.authorizationCode = UUID.randomUUID()
-        val updatedSsoRequest = ssoRequestService.updateSsoRequest(ssoRequest)
-        return buildClientRedirectUrl(updatedSsoRequest)
-        // Before User Approval
-      } else if (token != null && ssoRequest.userId == null && ssoRequest.authorizationCode == null && !autoApprove) {
-        val userId = ssoRequest.nonce?.let { tokenProcessor.getUserId(token, it) }
-        ssoRequest.userId = userId
-        ssoRequestService.updateSsoRequest(ssoRequest)
-        val updatedSsoRequest = ssoRequestService.updateSsoRequest(ssoRequest)
-        return buildClientRedirectUrl(updatedSsoRequest)
-        // After user approval
-      } else if (token == null && ssoRequest.userId != null && ssoRequest.authorizationCode == null) {
-        ssoRequest.authorizationCode = UUID.randomUUID()
-        ssoRequestService.updateSsoRequest(ssoRequest)
-        val updatedSsoRequest = ssoRequestService.updateSsoRequest(ssoRequest)
-        return buildClientRedirectUrl(updatedSsoRequest)
-      } else {
-        ssoRequestService.deleteSsoRequestById(ssoRequest.id)
-        logger.warn(String.format("Form re-submittion ", ssoRequest.client.id))
-        throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
-      }
-    } else {
+    val ssoRequest= ssoRequestService.getSsoRequestById(state).orElseThrow {
       logger.warn(String.format("State send on callback url do not exist %s", state))
-      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+      ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+    }
+    if (token != null) {
+      // auto approved client
+      return buildClientRedirectUrl(updateSsoRequestWithUserId(token, ssoRequest))
+    } else {
+      // Auto Approve = false and After user approval
+      return buildClientRedirectUrl(ssoRequest)
     }
   }
 
@@ -89,18 +78,16 @@ class SsoLoginService(
     ssoRequestService.deleteSsoRequestById(state)
   }
 
-  private fun cleanScopes(scopes: String): Set<String> {
-    var scopeList: List<String>
-    if (scopes.contains(" ")) {
-      val scopeValues = scopes.replace("\\s+".toRegex(), " ")
-      scopeList = scopeValues.split("\\s".toRegex())
-      return HashSet(scopeList)
-    } else {
-      return setOf(scopes)
-    }
+  private fun buildClientRedirectUrl(ssoRequest: SsoRequest): String {
+    return UriComponentsBuilder.fromHttpUrl(ssoRequest.client.redirectUri)
+      .queryParam("code", ssoRequest.authorizationCode)
+      .queryParamIfPresent("state", Optional.ofNullable(ssoRequest.client.state))
+      .build().toString()
   }
 
-  private fun buildClientRedirectUrl(ssoRequest: SsoRequest): String {
-    return "${ssoRequest.client.reDirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}"
+  private fun updateSsoRequestWithUserId(token: String, ssoRequest: SsoRequest): SsoRequest {
+    val userId = ssoRequest.nonce?.let { tokenProcessor.getUserId(token, it) }
+    ssoRequest.userId = userId
+    return ssoRequestService.updateSsoRequest(ssoRequest)
   }
 }

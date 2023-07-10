@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 
 class DataGenerator {
@@ -32,7 +33,7 @@ class DataGenerator {
       return SsoRequest(
         UUID.randomUUID(),
         UUID.randomUUID().toString(),
-        LocalDateTime.now(),
+        LocalDateTime.now(ZoneOffset.UTC),
         UUID.randomUUID(),
         SsoClient(
           UUID.randomUUID(),
@@ -45,17 +46,18 @@ class DataGenerator {
       )
     }
 
-    fun jwtBuilder(issue: Instant, exp: Instant, nonce: UUID): String {
+    fun jwtBuilder(issue: Instant, exp: Instant, nonce: UUID, userId: UUID): String {
       val issueDate = Date.from(issue)
       val expDate = Date.from(exp)
       return Jwts.builder()
-        .setIssuer("Stormpath")
+        .setIssuer("RandomIssuer")
         .setSubject("login")
         .setAudience("test audience")
-        .claim("preferred_username", "testuser@test.com")
+        //.claim("preferred_username", "testuser@test.com")
         .claim("name", "Varun Kumar")
         .claim("scope", "openid")
         .claim("nonce", nonce)
+        .claim("oid", userId)
         .setIssuedAt(issueDate)
         .setExpiration(expDate)
         .signWith(
