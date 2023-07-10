@@ -48,7 +48,7 @@ class AuthController(private var clientService: ClientService,
     val ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)}
     val client  = clientService.getClientById(ssoRequest.client.id)
       .orElseThrow {ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)}
-    // Callback and it requires user approval
+    // Callback and it requires user approval for client
     if (!client.autoApprove && token != null) {
       ssoLoginService.generateAndUpdateSsoRequestWithUserId(token, state, client.autoApprove)
       val modelAndView = ModelAndView("user_approval")
@@ -57,7 +57,7 @@ class AuthController(private var clientService: ClientService,
       modelAndView.addObject("client", client)
       return modelAndView
     } else {
-      // Callback and user approval is not required
+      // Callback and user approval for client is not required
       val url = ssoLoginService.generateAndUpdateSsoRequestWithUserId(token, state, client.autoApprove)
       return RedirectView(url)
     }
@@ -71,7 +71,7 @@ class AuthController(private var clientService: ClientService,
     if (userApproval == "approved") {
       val url = ssoLoginService.generateAndUpdateSsoRequestWithUserId(null, state, false)
       return RedirectView(url)
-      //  user not approved
+      //  user not approved the client
     } else {
       ssoLoginService.cancelAccess(state)
       throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
