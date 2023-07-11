@@ -49,7 +49,7 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
   }
 
   @Test
-  fun initiateSsoLogin() {
+  fun `test initiate sign in`() {
     Mockito.`when`(
       ssoRequestService.generateSsoRequest(
         setOf(Scope.USER_BASIC_READ),
@@ -80,7 +80,7 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
   }
 
   @Test
-  fun generateAndUpdateSsoRequestWithAuthorizationCodeWhenAutoApproved() {
+  fun `test update sso request with user id when auto approved is true`() {
     val nonce = UUID.randomUUID()
     val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "test@moj.com")
     ssoRequest.userId = null
@@ -97,7 +97,7 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
   }
 
   @Test
-  fun generateAndUpdateSsoRequestWithAuthorizationCodeWhenNotAutoApproved() {
+  fun `test update sso request with user id when auto approved is false`() {
     val nonce = UUID.randomUUID()
     val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "test@moj.com")
     ssoRequest.userId = null
@@ -114,8 +114,7 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
   }
 
   @Test
-  fun generateAndUpdateSsoRequestWithAuthorizationCodeWhenAfterUserApproved() {
-    // ssoRequest.authorizationCode = null
+  fun `test update sso request with user id after user approved`() {
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
     val url = ssoLoginService.updateSsoRequestWithUserId(
@@ -128,7 +127,7 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
   }
 
   @Test
-  fun generateAndUpdateSsoRequestWithAuthorizationCodeWhenSsoRequestRecordNotFound() {
+  fun `test update sso request with user id when sso request not found`() {
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.empty())
     val exception = assertThrows(ApiException::class.java) {
       ssoLoginService.updateSsoRequestWithUserId(
