@@ -52,6 +52,7 @@ class ClientService(private var clientRepository: ClientRepository) {
       throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
     }
   }
+
   private fun validateUri(uri: String, redirectUris: Set<String>) {
     try {
       URL(uri)
@@ -61,6 +62,7 @@ class ClientService(private var clientRepository: ClientRepository) {
       throw ApiException(IN_VALID_REDIRECT_URI, BAD_REQUEST_CODE)
     }
   }
+
   private fun validateScopes(scopes: String, clientScopes: Set<Scope>) {
     var scopeList: List<String>
     if (scopes.contains(" ")) {
@@ -83,6 +85,7 @@ class ClientService(private var clientRepository: ClientRepository) {
       throw ApiException(IN_VALID_GRANT, BAD_REQUEST_CODE)
     }
   }
+
   private fun validateRedirectUri(uri: String, redirectUris: Set<String>) {
     if (!redirectUris.contains(uri)) {
       logger.debug(String.format("Redirect uri not matching with client redirect uri: %s", uri))
