@@ -23,7 +23,7 @@ import java.util.*
 class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProcessor) {
 
   @Test
-  fun getUserId() {
+  fun `test get user id when nonce match`() {
     val nonce = UUID.randomUUID()
     val email = "test@moj.com"
     val userId = idTokenProcessor.getUserId(DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, email), nonce.toString())
@@ -31,7 +31,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
   }
 
   @Test
-  fun `get user id when oid is missing in payload`() {
+  fun `test get user id when email is missing in payload`() {
     val nonce = UUID.randomUUID()
     val exception = assertThrows(ApiException::class.java) {
       idTokenProcessor.getUserId(
@@ -44,7 +44,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
   }
 
   @Test
-  fun getUserIdWhenNonceNotMatch() {
+  fun `test get user id when nonce do not match`() {
     val nonce = UUID.randomUUID()
     val exception = assertThrows(ApiException::class.java) {
       idTokenProcessor.getUserId(
