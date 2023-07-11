@@ -82,13 +82,11 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
   @Test
   fun generateAndUpdateSsoRequestWithAuthorizationCodeWhenAutoApproved() {
     val nonce = UUID.randomUUID()
-    val id = UUID.randomUUID()
-    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, id)
+    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "test@moj.com")
     ssoRequest.userId = null
-    // ssoRequest.authorizationCode = null
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
-    Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn("testuser@test.com")
+    Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn("test@moj.com")
     val url = ssoLoginService.updateSsoRequestWithUserId(
       token,
       ssoRequest.id,
@@ -101,13 +99,11 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
   @Test
   fun generateAndUpdateSsoRequestWithAuthorizationCodeWhenNotAutoApproved() {
     val nonce = UUID.randomUUID()
-    val id = UUID.randomUUID()
-    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, id)
+    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "test@moj.com")
     ssoRequest.userId = null
-    // ssoRequest.authorizationCode = null
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
-    Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn("testuser@test.com")
+    Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn("test@moj.com")
     val url = ssoLoginService.updateSsoRequestWithUserId(
       token,
       ssoRequest.id,

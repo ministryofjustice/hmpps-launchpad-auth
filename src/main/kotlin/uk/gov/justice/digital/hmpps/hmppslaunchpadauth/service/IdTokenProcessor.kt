@@ -18,7 +18,7 @@ class IdTokenProcessor : TokenProcessor {
     val payload = String(decoder.decode(chunks[1]))
     val nonceInIdToken = getClaimFromPayload(payload,"nonce")
     validateNonce(nonceInIdToken, nonce)
-    val userId = getClaimFromPayload(payload,"oid")
+    val userId = getClaimFromPayload(payload,"email")
     if (userId != null) {
       logger.info(String.format("Logged user id : %s", userId))
       return userId

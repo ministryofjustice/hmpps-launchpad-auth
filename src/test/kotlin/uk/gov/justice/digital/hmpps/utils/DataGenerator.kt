@@ -25,7 +25,7 @@ class DataGenerator {
         autoApprove,
         "Test App",
         "http://localhost:8080/test",
-        "Update Test App",
+        "Test App for test environment",
       )
     }
 
@@ -46,7 +46,7 @@ class DataGenerator {
       )
     }
 
-    fun jwtBuilder(issue: Instant, exp: Instant, nonce: UUID, userId: UUID?): String {
+    fun jwtBuilder(issue: Instant, exp: Instant, nonce: UUID, userId: String?): String {
       val issueDate = Date.from(issue)
       val expDate = Date.from(exp)
       return Jwts.builder()
@@ -57,7 +57,7 @@ class DataGenerator {
         .claim("name", "Varun Kumar")
         .claim("scope", "openid")
         .claim("nonce", nonce)
-        .claim("oid", userId)
+        .claim("email", userId)
         .setIssuedAt(issueDate)
         .setExpiration(expDate)
         .signWith(

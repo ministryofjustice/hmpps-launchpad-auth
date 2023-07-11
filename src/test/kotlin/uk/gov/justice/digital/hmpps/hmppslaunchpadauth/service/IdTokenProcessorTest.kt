@@ -25,9 +25,9 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
   @Test
   fun getUserId() {
     val nonce = UUID.randomUUID()
-    val id = UUID.randomUUID()
-    val userId = idTokenProcessor.getUserId(DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, id), nonce.toString())
-    assertEquals(userId, id.toString())
+    val email = "test@moj.com"
+    val userId = idTokenProcessor.getUserId(DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, email), nonce.toString())
+    assertEquals(userId, email)
   }
 
   @Test
@@ -39,7 +39,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
         nonce.toString(),
       )
     }
-    assertEquals("Claim: oid not found", exception.message)
+    assertEquals("Claim: email not found", exception.message)
     assertEquals(500, exception.code)
   }
 
@@ -48,7 +48,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
     val nonce = UUID.randomUUID()
     val exception = assertThrows(ApiException::class.java) {
       idTokenProcessor.getUserId(
-        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, UUID.randomUUID()),
+        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "test@moj.com"),
         UUID.randomUUID().toString(),
       )
     }

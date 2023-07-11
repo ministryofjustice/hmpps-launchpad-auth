@@ -51,7 +51,7 @@ class SsoLoginService(
       .queryParam("response_type", "id_token")
       .queryParam("client_id", launchpadClientId)
       // without adding profile in scope token do not contain oid
-      .queryParam("scope", "openid profile")
+      .queryParam("scope", "openid")
       .queryParam("state", ssoRequest.id)
       .queryParam("nonce", ssoRequest.nonce)
       .queryParam("response_mode", "form_post")
