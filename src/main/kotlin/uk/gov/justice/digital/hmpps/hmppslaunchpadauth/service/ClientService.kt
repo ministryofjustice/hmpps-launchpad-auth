@@ -22,6 +22,10 @@ const val ACCESS_DENIED_CODE = 403
 class ClientService(private var clientRepository: ClientRepository) {
   private val logger = LoggerFactory.getLogger(ClientService::class.java)
 
+  fun getClientById(id: UUID): Optional<Client> {
+    return clientRepository.findById(id)
+  }
+
   fun validateParams(
     clientId: UUID,
     responseType: String,
@@ -30,33 +34,35 @@ class ClientService(private var clientRepository: ClientRepository) {
     state: String?,
     nonce: String?,
   ) {
-    val client: Optional<Client> = clientRepository.findById(clientId)
-    if (client.isEmpty) {
+    val client = clientRepository.findById(clientId).orElseThrow {
       val message = String.format("Client with client_id %s does not exist", clientId)
-      logger.info(message)
-      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
-    } else {
-      val clientRecord = client.get()
-      isEnabled(clientRecord.enabled)
-      validateScopes(scopes, clientRecord.scopes)
-      validateAuthorizationGrantType(responseType, clientRecord.authorizedGrantTypes)
-      validateUri(redirectUri, clientRecord.registeredRedirectUris)
+      logger.error(message)
+      ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
     }
+    logger.info(String.format("Initiate user sign in process for client id: %s", client.id))
+    isEnabled(client.enabled)
+    validateScopes(scopes, client.scopes)
+    validateAuthorizationGrantType(responseType, client.authorizedGrantTypes)
+    validateUri(redirectUri, client.registeredRedirectUris)
   }
 
   private fun isEnabled(enabled: Boolean) {
     if (!enabled) {
+      logger.debug("Client not enabled")
       throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
     }
   }
+
   private fun validateUri(uri: String, redirectUris: Set<String>) {
     try {
       URL(uri)
       validateRedirectUri(uri, redirectUris)
     } catch (exception: MalformedURLException) {
+      logger.error("Not a valid redirect url: %s", uri)
       throw ApiException(IN_VALID_REDIRECT_URI, BAD_REQUEST_CODE)
     }
   }
+
   private fun validateScopes(scopes: String, clientScopes: Set<Scope>) {
     var scopeList: List<String>
     if (scopes.contains(" ")) {
@@ -67,6 +73,7 @@ class ClientService(private var clientRepository: ClientRepository) {
     }
     scopeList.forEach { x ->
       if (!Scope.isStringMatchEnumValue(x, clientScopes)) {
+        logger.debug(String.format("Scope %s not matching with client scope set", x))
         throw ApiException(IN_VALID_SCOPE, BAD_REQUEST_CODE)
       }
     }
@@ -74,11 +81,14 @@ class ClientService(private var clientRepository: ClientRepository) {
 
   private fun validateAuthorizationGrantType(grant: String, clientGrants: Set<AuthorizationGrantType>) {
     if (!AuthorizationGrantType.isStringMatchEnumValue(grant, clientGrants)) {
+      logger.debug(String.format("Authorization grant type %s not matching with client grants", grant))
       throw ApiException(IN_VALID_GRANT, BAD_REQUEST_CODE)
     }
   }
+
   private fun validateRedirectUri(uri: String, redirectUris: Set<String>) {
     if (!redirectUris.contains(uri)) {
+      logger.debug(String.format("Redirect uri not matching with client redirect uri: %s", uri))
       throw ApiException(IN_VALID_REDIRECT_URI, BAD_REQUEST_CODE)
     }
   }
