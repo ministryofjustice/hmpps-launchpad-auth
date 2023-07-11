@@ -86,7 +86,7 @@ class SsoLoginService(
   }
 
   private fun updateSsoRequestWithUserId(token: String, ssoRequest: SsoRequest): SsoRequest {
-    val userId = ssoRequest.nonce?.let { tokenProcessor.getUserId(token, it) }
+    val userId = ssoRequest.nonce?.let { tokenProcessor.getUserId(token, it.toString()) }
     ssoRequest.userId = userId
     return ssoRequestService.updateSsoRequest(ssoRequest)
   }

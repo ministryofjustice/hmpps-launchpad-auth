@@ -16,19 +16,24 @@ class SsoRequestService(
 ) {
   private val logger = LoggerFactory.getLogger(SsoRequestService::class.java)
   fun createSsoRequest(ssoRequest: SsoRequest): SsoRequest {
-    logger.info(String.format("Sso request created for user of  client: %s", ssoRequest.client.id))
-    return ssoRequestRepository.save(ssoRequest)
+    val ssoRequestCreated =  ssoRequestRepository.save(ssoRequest)
+    logger.info(String.format("Creating Sso request  for user of  client: %s", ssoRequestCreated.client.id))
+    return ssoRequestCreated
   }
 
   fun updateSsoRequest(ssoRequest: SsoRequest): SsoRequest {
-    return ssoRequestRepository.save(ssoRequest)
+    val updatedSsoRequest =  ssoRequestRepository.save(ssoRequest)
+    logger.info(String.format("Sso request updated  for user of  client: %s", ssoRequest.client.id))
+    return updatedSsoRequest
   }
 
   fun getSsoRequestById(id: UUID): Optional<SsoRequest> {
+    logger.debug(String.format("Sso request retrieved for id: %s", id))
     return ssoRequestRepository.findById(id)
   }
 
   fun deleteSsoRequestById(id: UUID) {
+    logger.debug(String.format("Sso request deleted for id: %s", id))
     ssoRequestRepository.deleteById(id)
   }
 
@@ -39,9 +44,16 @@ class SsoRequestService(
     redirectUri: String,
     clientId: UUID,
   ): SsoRequest {
+    var authorizationCode: UUID = UUID.randomUUID()
+    var count:Int = ssoRequestRepository.countAuthorizationCodeByValue(authorizationCode)
+    while (count != 0) {
+      logger.debug("Authorization code exist in sso request db record so creating new")
+      authorizationCode = UUID.randomUUID()
+      count = ssoRequestRepository.countAuthorizationCodeByValue(authorizationCode)
+    }
     val ssoRequest = SsoRequest(
       UUID.randomUUID(),
-      UUID.randomUUID().toString(),
+      UUID.randomUUID(),
       LocalDateTime.now(ZoneOffset.UTC),
       UUID.randomUUID(),
       SsoClient(

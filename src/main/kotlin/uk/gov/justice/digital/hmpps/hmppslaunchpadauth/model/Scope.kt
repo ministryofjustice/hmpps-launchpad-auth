@@ -30,7 +30,7 @@ enum class Scope(val scope: String) {
       return scopes
     }
 
-    fun getTemplateTextByEnums(scopes: Set<Scope>): Set<String> {
+    fun getTemplateTextByScopes(scopes: Set<Scope>): Set<String> {
       val template =  HashSet<String>()
       scopes.forEach { scope ->
         if (scope == USER_BASIC_READ) {

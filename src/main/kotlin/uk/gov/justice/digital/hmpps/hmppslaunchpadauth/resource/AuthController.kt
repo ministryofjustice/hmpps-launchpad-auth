@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoRequestService
 import java.util.*
 
 const val MAX_STATE_OR_NONCE_SIZE = 128
+const val SSO_SUPPORTED_RESPONSE_TYPE = "code"
 
 @RestController
 @RequestMapping("/v1/oauth2")
@@ -33,6 +34,7 @@ class AuthController(private var clientService: ClientService,
     @RequestParam("state", required = false)  state: String?,
     @RequestParam("nonce", required = false) nonce: String?,
   ): RedirectView {
+    validateResponseType(responseType)
     validateSize(state, "state")
     validateSize(nonce, "nonce")
     val url = ssoLoginService.initiateSsoLogin(clientId, responseType, scope, redirectUri, state, nonce)
@@ -40,7 +42,7 @@ class AuthController(private var clientService: ClientService,
   }
 
   @PostMapping("/callback", consumes = ["application/x-www-form-urlencoded"])
-  fun getUserAuthCode(
+  fun getAuthCode(
     @RequestParam("id_token", required = false) token: String?,
     @RequestParam("state", required = true) state: UUID,
 
@@ -53,7 +55,7 @@ class AuthController(private var clientService: ClientService,
       ssoLoginService.generateAndUpdateSsoRequestWithUserId(token, state, client.autoApprove)
       val modelAndView = ModelAndView("user_approval")
       modelAndView.addObject("state", state)
-      modelAndView.addObject("scopes", Scope.getTemplateTextByEnums(ssoRequest.client.scopes).sorted())
+      modelAndView.addObject("scopes", Scope.getTemplateTextByScopes(ssoRequest.client.scopes).sorted())
       modelAndView.addObject("client", client)
       return modelAndView
     } else {
@@ -73,17 +75,24 @@ class AuthController(private var clientService: ClientService,
       return RedirectView(url)
       //  user not approved the client
     } else {
+      // delete sso request
       ssoLoginService.cancelAccess(state)
       throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
     }
   }
 
   private fun validateSize(value: String?, paramName: String) {
-    // validate size by string length as optional param can be null or if not null should not exceed 128 max size
+    // validate query param length, optional param can be null or if not null should not exceed 128 max size
     if (value != null) {
       if (value.length > MAX_STATE_OR_NONCE_SIZE) {
         throw ApiException(String.format("%s size exceeds 128 char size limit", paramName), BAD_REQUEST_CODE)
       }
+    }
+  }
+
+  private fun validateResponseType(responseType: String) {
+    if (responseType != SSO_SUPPORTED_RESPONSE_TYPE) {
+      throw ApiException(String.format("Response type: %s is not supported", responseType), 400)
     }
   }
 }

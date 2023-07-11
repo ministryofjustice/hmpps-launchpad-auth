@@ -31,6 +31,19 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
   }
 
   @Test
+  fun `get user id when oid is missing in payload`() {
+    val nonce = UUID.randomUUID()
+    val exception = assertThrows(ApiException::class.java) {
+      idTokenProcessor.getUserId(
+        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, null),
+        nonce.toString(),
+      )
+    }
+    assertEquals("Claim: oid not found", exception.message)
+    assertEquals(500, exception.code)
+  }
+
+  @Test
   fun getUserIdWhenNonceNotMatch() {
     val nonce = UUID.randomUUID()
     val exception = assertThrows(ApiException::class.java) {

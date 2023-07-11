@@ -32,7 +32,7 @@ class DataGenerator {
     fun buildSsoRequest(): SsoRequest {
       return SsoRequest(
         UUID.randomUUID(),
-        UUID.randomUUID().toString(),
+        UUID.randomUUID(),
         LocalDateTime.now(ZoneOffset.UTC),
         UUID.randomUUID(),
         SsoClient(
@@ -46,7 +46,7 @@ class DataGenerator {
       )
     }
 
-    fun jwtBuilder(issue: Instant, exp: Instant, nonce: UUID, userId: UUID): String {
+    fun jwtBuilder(issue: Instant, exp: Instant, nonce: UUID, userId: UUID?): String {
       val issueDate = Date.from(issue)
       val expDate = Date.from(exp)
       return Jwts.builder()
