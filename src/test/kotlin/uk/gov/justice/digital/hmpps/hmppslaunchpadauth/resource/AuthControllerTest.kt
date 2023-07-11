@@ -59,7 +59,6 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
   }
   @Test
   fun `authorize response type is not code`() {
-    // Mockito.`when`(ssoLoginService.initiateSsoLogin(any(), any(), any(), any(), any(), any())).thenReturn("http://localhost:8080/test")
     val exception = assertThrows(ApiException::class.java) {
       authController.authorize(UUID.randomUUID(), "anything", "user.basic.read", "http://randomsite/test","random_state", "random_nonce")
     }
