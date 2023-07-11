@@ -17,7 +17,7 @@ class SsoRequestService(
   private val logger = LoggerFactory.getLogger(SsoRequestService::class.java)
   fun createSsoRequest(ssoRequest: SsoRequest): SsoRequest {
     val ssoRequestCreated =  ssoRequestRepository.save(ssoRequest)
-    logger.info(String.format("Creating Sso request  for user of  client: %s", ssoRequestCreated.client.id))
+    logger.info(String.format("Sso request created for user of  client: %s", ssoRequestCreated.client.id))
     return ssoRequestCreated
   }
 

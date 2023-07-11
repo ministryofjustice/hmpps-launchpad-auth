@@ -89,7 +89,7 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
     Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn("testuser@test.com")
-    val url = ssoLoginService.generateAndUpdateSsoRequestWithUserId(
+    val url = ssoLoginService.updateSsoRequestWithUserId(
       token,
       ssoRequest.id,
       true,
@@ -108,7 +108,7 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
     Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn("testuser@test.com")
-    val url = ssoLoginService.generateAndUpdateSsoRequestWithUserId(
+    val url = ssoLoginService.updateSsoRequestWithUserId(
       token,
       ssoRequest.id,
       false,
@@ -122,7 +122,7 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
     // ssoRequest.authorizationCode = null
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
-    val url = ssoLoginService.generateAndUpdateSsoRequestWithUserId(
+    val url = ssoLoginService.updateSsoRequestWithUserId(
       null,
       ssoRequest.id,
       false,
@@ -135,7 +135,7 @@ class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginServic
   fun generateAndUpdateSsoRequestWithAuthorizationCodeWhenSsoRequestRecordNotFound() {
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.empty())
     val exception = assertThrows(ApiException::class.java) {
-      ssoLoginService.generateAndUpdateSsoRequestWithUserId(
+      ssoLoginService.updateSsoRequestWithUserId(
         null,
         ssoRequest.id,
         false,

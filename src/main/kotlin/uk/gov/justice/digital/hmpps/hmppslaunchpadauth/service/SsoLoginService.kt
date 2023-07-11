@@ -59,7 +59,7 @@ class SsoLoginService(
       .build().toString()
   }
 
-  fun generateAndUpdateSsoRequestWithUserId(token: String?, state: UUID, autoApprove: Boolean): String {
+  fun updateSsoRequestWithUserId(token: String?, state: UUID, autoApprove: Boolean): String {
     val ssoRequest= ssoRequestService.getSsoRequestById(state).orElseThrow {
       logger.warn(String.format("State send on callback url do not exist %s", state))
       ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
