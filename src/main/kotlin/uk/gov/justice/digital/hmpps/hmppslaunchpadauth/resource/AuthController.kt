@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -25,7 +26,7 @@ class AuthController(private var clientService: ClientService,
   private var ssoRequestService: SsoRequestService,
   private var ssoLoginService: SsoLoginService,
   ) {
-  @RequestMapping("/authorize")
+  @GetMapping("/authorize")
   fun authorize(
     @RequestParam("client_id", required = true) clientId: UUID,
     @RequestParam("response_type", required = true) responseType: String,
