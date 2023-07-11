@@ -14,8 +14,6 @@ import uk.gov.justice.digital.hmpps.utils.DataGenerator
 import java.time.Instant
 import java.util.*
 
-
-
 @SpringBootTest(classes = [IdTokenProcessor::class])
 @EnableAutoConfiguration
 @ExtendWith(SpringExtension::class)

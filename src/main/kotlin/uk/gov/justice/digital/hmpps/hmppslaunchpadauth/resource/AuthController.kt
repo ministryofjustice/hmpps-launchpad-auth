@@ -13,7 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ACCESS_DENIED
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ACCESS_DENIED_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.BAD_REQUEST_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ClientService
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoLoginService
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoLogInService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoRequestService
 import java.util.*
 
@@ -23,16 +23,15 @@ const val SSO_SUPPORTED_RESPONSE_TYPE = "code"
 @RestController
 @RequestMapping("/v1/oauth2")
 class AuthController(private var clientService: ClientService,
-  private var ssoRequestService: SsoRequestService,
-  private var ssoLoginService: SsoLoginService,
-  ) {
+                     private var ssoRequestService: SsoRequestService,
+                     private var ssoLoginService: SsoLogInService,) {
   @GetMapping("/authorize")
   fun authorize(
     @RequestParam("client_id", required = true) clientId: UUID,
     @RequestParam("response_type", required = true) responseType: String,
     @RequestParam("scope", required = true) scope: String,
     @RequestParam("redirect_uri", required = true) redirectUri: String,
-    @RequestParam("state", required = false)  state: String?,
+    @RequestParam("state", required = false) state: String?,
     @RequestParam("nonce", required = false) nonce: String?,
   ): RedirectView {
     validateResponseType(responseType)
@@ -50,7 +49,7 @@ class AuthController(private var clientService: ClientService,
     ): Any {
     val ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)}
     val client  = clientService.getClientById(ssoRequest.client.id)
-      .orElseThrow {ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)}
+      .orElseThrow { ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE) }
     // Callback and it requires user approval for client
     if (!client.autoApprove && token != null) {
       ssoLoginService.updateSsoRequestWithUserId(token, state, client.autoApprove)

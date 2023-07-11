@@ -11,9 +11,11 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Entity
-@Table(indexes = [
-  Index(name="ix_authorization_code", columnList = "authorizationCode", unique = true)
-])
+@Table(
+  name = "sso_request",
+  indexes = [
+  Index(name ="ix_authorization_code", columnList = "authorizationCode", unique = true,)
+],)
 data class SsoRequest(
   @Id
   val id: UUID,

@@ -23,11 +23,11 @@ import java.net.URL
 import java.time.Instant
 import java.util.*
 
-@SpringBootTest(classes = [SsoLoginService::class])
+@SpringBootTest(classes = [SsoLogInService::class])
 @EnableAutoConfiguration
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-class SsoLoginServiceTest(@Autowired private var ssoLoginService: SsoLoginService) {
+class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInService) {
   @MockBean
   private lateinit var ssoRequestService: SsoRequestService
 

@@ -10,7 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import java.util.*
 
 @Component
-class SsoLoginService(
+class SsoLogInService(
   private var clientService: ClientService,
   private var ssoRequestService: SsoRequestService,
   private var tokenProcessor: TokenProcessor,
@@ -27,7 +27,7 @@ class SsoLoginService(
   @Value("\${azure.issuer-url}")
   private lateinit var issuerUrl: String
 
-  private val logger = LoggerFactory.getLogger(SsoLoginService::class.java)
+  private val logger = LoggerFactory.getLogger(SsoLogInService::class.java)
 
   fun initiateSsoLogin(
     clientId: UUID,
@@ -55,11 +55,11 @@ class SsoLoginService(
       .queryParam("nonce", ssoRequest.nonce)
       .queryParam("response_mode", "form_post")
       .queryParam("redirect_uri", launchpadRedirectUrl)
-      .build().toString()
+      .build().toUriString()
   }
 
   fun updateSsoRequestWithUserId(token: String?, state: UUID, autoApprove: Boolean): String {
-    val ssoRequest= ssoRequestService.getSsoRequestById(state).orElseThrow {
+    val ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {
       logger.warn(String.format("State send on callback url do not exist %s", state))
       ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
     }
@@ -81,11 +81,11 @@ class SsoLoginService(
     return UriComponentsBuilder.fromHttpUrl(ssoRequest.client.redirectUri)
       .queryParam("code", ssoRequest.authorizationCode)
       .queryParamIfPresent("state", Optional.ofNullable(ssoRequest.client.state))
-      .build().toString()
+      .build().toUriString()
   }
 
   private fun updateSsoRequestWithUserId(token: String, ssoRequest: SsoRequest): SsoRequest {
-    val userId = ssoRequest.nonce?.let { tokenProcessor.getUserId(token, it.toString()) }
+    val userId = tokenProcessor.getUserId(token, ssoRequest.nonce.toString())
     ssoRequest.userId = userId
     return ssoRequestService.updateSsoRequest(ssoRequest)
   }

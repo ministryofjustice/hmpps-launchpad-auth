@@ -7,7 +7,7 @@ enum class Scope(val scope: String) {
   USER_ESTABLISHMENT_READ("user.establishment.read"),
   USER_BOOKING_READ("user.booking.read"),
   USER_CLIENTS_READ("user.clients.read"),
-  USER_CLIENTS_DELETE("user.clients.delete");
+  USER_CLIENTS_DELETE("user.clients.delete"), ;
   override fun toString(): String {
     return scope
   }
@@ -31,7 +31,7 @@ enum class Scope(val scope: String) {
     }
 
     fun getTemplateTextByScopes(scopes: Set<Scope>): Set<String> {
-      val template =  HashSet<String>()
+      val template = HashSet<String>()
       scopes.forEach { scope ->
         if (scope == USER_BASIC_READ) {
           template.add("Your name")
@@ -42,14 +42,14 @@ enum class Scope(val scope: String) {
         if (scope == USER_ESTABLISHMENT_READ) {
           template.add("Details of your prison")
         }
-        if(scope == USER_CLIENTS_READ) {
+        if (scope == USER_CLIENTS_READ) {
           template.add("Apps you’ve allowed access to")
         }
-        if(scope == USER_CLIENTS_DELETE) {
+        if (scope == USER_CLIENTS_DELETE) {
           template.add("Apps you’ve removed access to")
         }
       }
-      return template;
+      return template
     }
 
     fun cleanScopes(scopes: String): Set<String> {
