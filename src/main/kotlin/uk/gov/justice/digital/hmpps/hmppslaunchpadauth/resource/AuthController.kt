@@ -93,7 +93,7 @@ class AuthController(private var clientService: ClientService,
 
   private fun validateResponseType(responseType: String) {
     if (responseType != SSO_SUPPORTED_RESPONSE_TYPE) {
-      throw ApiException(String.format("Response type: %s is not supported", responseType), 400)
+      throw ApiException(String.format("Response type: %s is not supported", responseType), BAD_REQUEST_CODE)
     }
   }
 }
