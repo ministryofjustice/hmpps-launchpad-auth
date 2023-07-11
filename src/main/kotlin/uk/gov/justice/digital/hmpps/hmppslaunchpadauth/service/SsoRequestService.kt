@@ -45,11 +45,11 @@ class SsoRequestService(
     clientId: UUID,
   ): SsoRequest {
     var authorizationCode: UUID = UUID.randomUUID()
-    var count:Int = ssoRequestRepository.countAuthorizationCodeByValue(authorizationCode)
-    while (count != 0) {
+    var ssoRequestRecord = ssoRequestRepository.findSsoRequestByAuthorizationCode(authorizationCode)
+    while (ssoRequestRecord.isPresent) {
       logger.debug("Authorization code exist in sso request db record so creating new")
       authorizationCode = UUID.randomUUID()
-      count = ssoRequestRepository.countAuthorizationCodeByValue(authorizationCode)
+      ssoRequestRecord = ssoRequestRepository.findSsoRequestByAuthorizationCode(authorizationCode)
     }
     val ssoRequest = SsoRequest(
       UUID.randomUUID(),
