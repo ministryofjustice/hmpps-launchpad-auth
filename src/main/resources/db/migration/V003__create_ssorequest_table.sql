@@ -2,7 +2,7 @@ create table public.sso_request (
                                     created_date timestamp(6) without time zone,
                                     authorization_code uuid not null,
                                     id uuid primary key not null,
-                                    nonce character varying(255),
+                                    nonce uuid not null,
                                     user_id character varying(255),
                                     client jsonb
 );
