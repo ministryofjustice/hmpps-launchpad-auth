@@ -14,24 +14,28 @@
   }
 </script>
 
-<body style="background-color: whitesmoke">
-<div style="position: absolute;
-  width: 500px;
-  left: 50%;
-  top: 20%;
-  transform: translate(-50%, -50%);">
-  <dialog open style="border-color: grey">
-    <div class="text-center">
-      <img th:src="${client.getLogoUri()}"  src="logo" width="100" height="100"/>
+<body style="display: flex;width: 1366px;padding: 125px 50px 119px 433px;justify-content: center; align-items: center;background: #FFF;">
+<div style="width: 501px; height: 524px; flex-direction: column; border: 1px solid #0B0D0D; background: #FFF;">
+    <div style="display: flex;justify-content: center; padding-top: 40px;">
+      <img th:src="${client.getLogoUri()}"  src="logo" width="131px" height="98px"/>
+    </div>
+    <div style="margin: 1em">
+      <br><strong>Data Access</strong>
+    </div>
+    <div style="margin: 1em">
+    <br th:text="${client.getName()} + ' will have access to:'"/>
+    </div>
+    <div style="margin: 1em">
+      <ul style=" width: 100%;" >
+        <li th:text="${scope}" th:each="scope: ${scopes}"/>
+      </ul>
     </div>
     <div>
-    <br th:text="${client.getName()} + ' would like to:'"/>
-      <br/>
+      <ul style="list-style-type: none;">
+        <li style="margin:0 0 3px 0;">Is this OK?</li>
+      </ul>
     </div>
-    <div style=" width: 100%" th:each="scope: ${scopes}">
-      <p  style="border-bottom: 2px solid black;" th:text="${scope}"/>
-    </div>
-    <br th:text="${client.getDescription()}"/>
+
     <form action="/v1/oauth2/authorize-client" method="post" id="form_approve">
       <input hidden="hidden" th:value="${state}" name="state"/>
       <input hidden="hidden" value="approved" name="userApproval"/>
@@ -40,15 +44,14 @@
       <input hidden="hidden" th:value="${state}" name="state"/>
       <input hidden="hidden" value="cancelled" name="userApproval"/>
     </form>
-    <div>
+    <div style="display: flex; flex-direction: row; gap: 10px; margin: 1em;">
       <div>
-        <button style="float: left;border-radius: 5px; background-color: gray" type="submit" form="form_cancel" value="Submit">No</button>
+        <button style="width: 62px; height: 51px ;background: #00703C;box-shadow: 0px -2px 0px 0px #002D18 inset; color: #FFFFFF" type="submit" form="form_approve" value="Submit">Yes</button>
       </div>
       <div>
-        <button style="float: right;border-radius: 5px; background-color: green" type="submit" form="form_approve" value="Submit">Yes</button>
+        <button style="width: 62px; height: 51px ;background:  #F3F2F1;box-shadow: 0px -2px 0px 0px #929191 inset;" type="submit" form="form_cancel" value="Submit">No</button>
       </div>
-       </div>
-  </dialog>
+    </div>
 </div>
 </body>
 </html>

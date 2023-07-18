@@ -7,6 +7,9 @@ import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 
 @Component
@@ -14,6 +17,7 @@ class SsoLogInService(
   private var clientService: ClientService,
   private var ssoRequestService: SsoRequestService,
   private var tokenProcessor: TokenProcessor,
+  private var userApprovedClientService: UserApprovedClientService,
 ) {
   @Value("\${azure.oauth2-url}")
   private lateinit var azureOauthUrl: String
@@ -64,10 +68,18 @@ class SsoLogInService(
       ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
     }
     if (token != null) {
-      // auto approved client
+      // auto approved client1
+      val ssoRequest = updateSsoRequestWithUserId(token, ssoRequest)
+      if (ssoRequest.userId != null && autoApprove) {
+        createOrUpdateUserApprovedClient(ssoRequest)
+      }
+
       return buildClientRedirectUrl(updateSsoRequestWithUserId(token, ssoRequest))
     } else {
       // Auto Approve = false and After user approval
+      if (ssoRequest.userId != null) {
+        createOrUpdateUserApprovedClient(ssoRequest)
+      }
       return buildClientRedirectUrl(ssoRequest)
     }
   }
@@ -88,5 +100,33 @@ class SsoLogInService(
     val userId = tokenProcessor.getUserId(token, ssoRequest.nonce.toString())
     ssoRequest.userId = userId
     return ssoRequestService.updateSsoRequest(ssoRequest)
+  }
+
+  private fun createOrUpdateUserApprovedClient(ssoRequest: SsoRequest) {
+    ssoRequest.userId?.let {
+      val userApprovedClientIfExist =   userApprovedClientService
+        .getUserApprovedClientByUserIdAndClientId(
+          it,
+          ssoRequest.client.id,
+          )
+      if (userApprovedClientIfExist.isPresent) {
+        val userApprovedClient = userApprovedClientIfExist.get()
+        if (userApprovedClient.scopes != ssoRequest.client.scopes) {
+          userApprovedClient.scopes = ssoRequest.client.scopes
+          userApprovedClient.lastModifiedDate = LocalDateTime.now(ZoneOffset.UTC)
+          userApprovedClientService.updateUserApprovedClient(userApprovedClient)
+        } else ""
+      } else {
+        val userApprovedClient = UserApprovedClient(
+          UUID.randomUUID(),
+          ssoRequest.userId!!,
+          ssoRequest.client.id,
+          ssoRequest.client.scopes,
+          LocalDateTime.now(ZoneOffset.UTC),
+          LocalDateTime.now(ZoneOffset.UTC),
+        )
+        userApprovedClientService.createUserApprovedClient(userApprovedClient)
+      }
+    }
   }
 }

@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -65,6 +66,17 @@ class DataGenerator {
           "random secret",
         )
         .compact()
+    }
+
+    fun buildUserApprovedClient(userId: String, clientId: UUID, scopes: Set<Scope>): UserApprovedClient {
+      return UserApprovedClient(
+        UUID.randomUUID(),
+        userId,
+        clientId,
+        scopes,
+        LocalDateTime.now(ZoneOffset.UTC),
+        LocalDateTime.now(ZoneOffset.UTC)
+      )
     }
   }
 }

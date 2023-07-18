@@ -55,7 +55,7 @@ class AuthController(private var clientService: ClientService,
       ssoLoginService.updateSsoRequestWithUserId(token, state, client.autoApprove)
       val modelAndView = ModelAndView("user_approval")
       modelAndView.addObject("state", state)
-      modelAndView.addObject("scopes", Scope.getTemplateTextByScopes(ssoRequest.client.scopes).sorted())
+      modelAndView.addObject("scopes", Scope.getTemplateTextByScopes(ssoRequest.client.scopes).sortedDescending())
       modelAndView.addObject("client", client)
       return modelAndView
     } else {
