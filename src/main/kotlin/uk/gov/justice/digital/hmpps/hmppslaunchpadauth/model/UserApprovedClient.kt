@@ -1,9 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model
 
 import jakarta.persistence.Column
-import jakarta.persistence.ElementCollection
 import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
 import jakarta.persistence.Id
 import jakarta.persistence.Index
 import jakarta.persistence.Table
@@ -52,4 +50,3 @@ data class UserApprovedClient(
     return id.hashCode()
   }
 }
-

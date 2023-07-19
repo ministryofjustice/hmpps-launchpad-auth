@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserClients
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
@@ -25,7 +26,7 @@ class UserApprovedClientService (private var userApprovedClientRepository: UserA
   }
 
   fun updateUserApprovedClient(userApprovedClient: UserApprovedClient): UserApprovedClient {
-    logger.info(String.format("Updating user approved client for user id:%s client id:%s",
+    logger.info(String.format("Updating user approved client for user-id:%s client-id:%s",
       userApprovedClient.userId,
       userApprovedClient.clientId))
     return userApprovedClientRepository.save(userApprovedClient)
@@ -41,14 +42,17 @@ class UserApprovedClientService (private var userApprovedClientRepository: UserA
     return userApprovedClientRepository.deleteById(id)
   }
 
-  fun getUserApprovedClientsByUserId(userId: String, page: Long, size: Long): uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserClients {
-    val pageRequest = PageRequest.of(page.toInt(), size.toInt())
-    val totalElements = userApprovedClientRepository.count()
+  fun getUserApprovedClientsByUserId(userId: String, page: Int, size: Int): UserClients {
+    logger.debug(String.format("Getting user approved clients for user id: %s", userId))
+    val pageRequest = PageRequest.of(page, size)
+    pageRequest.withSort(Sort.Direction.ASC, "createdDate")
+    val totalElements = userApprovedClientRepository.countAllByUserId(userId)
     val userApprovedClients = userApprovedClientRepository.findAllByUserId(userId, pageRequest)
     return getUserApprovedClientsDto(userApprovedClients, page, totalElements)
   }
 
   fun getUserApprovedClientByUserIdAndClientId(userId: String, clientId: UUID): Optional<UserApprovedClient> {
+    logger.debug(String.format("Getting user approved clients for user-id: %s and client-id:%s", userId, clientId))
     return userApprovedClientRepository.findUserApprovedClientByUserIdAndClientId(userId, clientId)
   }
 
@@ -59,8 +63,8 @@ class UserApprovedClientService (private var userApprovedClientRepository: UserA
     userApprovedClientRepository.deleteById(userApprovedClient.id)
   }
 
-  private fun getUserApprovedClientsDto(userApprovedClients: List<UserApprovedClient>, page: Long, totalElements: Long)
-  : uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserClients {
+  private fun getUserApprovedClientsDto(userApprovedClients: List<UserApprovedClient>, page: Int, totalElements: Int)
+  : UserClients {
     val clients = ArrayList<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client>()
     userApprovedClients.forEach { x ->
       val client = clientService.getClientById(x.clientId).orElseThrow {
@@ -73,14 +77,14 @@ class UserApprovedClientService (private var userApprovedClientRepository: UserA
         client.description,
         client.autoApprove,
         x.createdDate,
-        convertScopes(x.scopes)
+        convertScopes(x.scopes),
       ))
     }
     return UserClients(
       page,
       true,
       totalElements,
-      clients
+      clients,
     )
   }
 

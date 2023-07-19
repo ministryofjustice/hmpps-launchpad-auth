@@ -4,11 +4,11 @@ import java.time.LocalDateTime
 import java.util.*
 
 data class UserClients(
-  val page: Long,
+  val page: Int,
   val exhausted: Boolean,
-  val totalElements: Long,
+  val totalElements: Int,
   val content: List<Client>,
-  )
+)
 
 data class Client(
   val id: UUID,
@@ -17,7 +17,7 @@ data class Client(
   val description: String,
   val autoApprove: Boolean,
   val createdDate: LocalDateTime,
-  val scopes: Set<Scope>
+  val scopes: Set<Scope>,
 )
 
 data class Scope(

@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserClients
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.BAD_REQUEST_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ClientService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.UserApprovedClientService
 import java.util.*
@@ -19,9 +21,15 @@ class UserApprovedClientController(private var userApprovedClientService: UserAp
   @GetMapping("/users/{user-id}/clients")
   fun getUserApprovedClients(
     @PathVariable("user-id") userId: String,
-    @RequestParam("page") page: Long,
-    @RequestParam("size") size: Long,
+    @RequestParam("page") page: Int,
+    @RequestParam("size") size: Int,
     ): ResponseEntity<UserClients> {
+    if (userId.isEmpty()) {
+      throw ApiException("User id is empty", BAD_REQUEST_CODE)
+    }
+    if (size > 20) {
+      throw ApiException("Max allowed size of page is 20", BAD_REQUEST_CODE)
+    }
     val userApprovedClients = userApprovedClientService.getUserApprovedClientsByUserId(userId, page, size)
     return ResponseEntity.status(HttpStatus.OK).body(userApprovedClients)
   }

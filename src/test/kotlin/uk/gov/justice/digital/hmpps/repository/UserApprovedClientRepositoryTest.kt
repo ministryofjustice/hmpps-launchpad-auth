@@ -1,12 +1,10 @@
 package uk.gov.justice.digital.hmpps.repository
 
-import jakarta.validation.ConstraintViolationException
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
@@ -31,8 +29,12 @@ import java.util.*
 @EntityScan("uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model")
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-class UserApprovedClientRepository(@Autowired private var userApprovedClientRepository: UserApprovedClientRepository) {
+class UserApprovedClientRepositoryTest(@Autowired private var userApprovedClientRepository: UserApprovedClientRepository) {
 
+  @BeforeEach
+  fun `set up`() {
+    userApprovedClientRepository.deleteAll()
+  }
   @Test
   fun `create user aprroved client`() {
     val expected = DataGenerator.buildUserApprovedClient("test@moj.com", UUID.randomUUID(), setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ))

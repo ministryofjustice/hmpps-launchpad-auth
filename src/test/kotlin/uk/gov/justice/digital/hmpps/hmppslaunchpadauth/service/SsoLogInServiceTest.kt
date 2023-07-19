@@ -37,6 +37,9 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
   @MockBean
   private lateinit var tokenProcessor: TokenProcessor
 
+  @MockBean
+  private lateinit var userApprovedClientService: UserApprovedClientService
+
   private lateinit var ssoRequest: SsoRequest
 
   @BeforeEach

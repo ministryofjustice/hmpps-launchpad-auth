@@ -14,8 +14,9 @@ import java.util.*
 @Table(
   name = "sso_request",
   indexes = [
-  Index(name ="ix_authorization_code", columnList = "authorizationCode", unique = true,)
-],)
+    Index(name = "ix_authorization_code", columnList = "authorizationCode", unique = true)
+  ],
+)
 data class SsoRequest(
   @Id
   val id: UUID,

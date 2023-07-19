@@ -73,9 +73,12 @@ class UserApprovedClientServiceTest {
 
     @Test
     fun getUserApprovedClientsByUserId() {
+      val client = DataGenerator.buildClient(true, true)
       val pageRequest = PageRequest.of(0,1)
-      val expected = DataGenerator.buildUserApprovedClient("test@moj.com", UUID.randomUUID(), setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ))
+      val expected = DataGenerator.buildUserApprovedClient("test@moj.com", client.id, setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ))
       Mockito.`when`(userApprovedClientRepository.findAllByUserId("test@moj.com", pageRequest)).thenReturn(listOf(expected))
+      Mockito.`when`(userApprovedClientRepository.countAllByUserId("test@moj.com")).thenReturn(1)
+      Mockito.`when`(clientService.getClientById(client.id)).thenReturn(Optional.of(client))
       val result = userApprovedClientService.getUserApprovedClientsByUserId(expected.userId, 0, 1)
       assertEquals(1, result.totalElements)
       assertTrue(result.exhausted)
