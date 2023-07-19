@@ -114,8 +114,10 @@ class SsoLogInService(
         if (userApprovedClient.scopes != ssoRequest.client.scopes) {
           userApprovedClient.scopes = ssoRequest.client.scopes
           userApprovedClient.lastModifiedDate = LocalDateTime.now(ZoneOffset.UTC)
-          userApprovedClientService.updateUserApprovedClient(userApprovedClient)
-        } else ""
+        } else {
+          userApprovedClient.lastModifiedDate = LocalDateTime.now(ZoneOffset.UTC)
+        }
+        userApprovedClientService.updateUserApprovedClient(userApprovedClient)
       } else {
         val userApprovedClient = UserApprovedClient(
           UUID.randomUUID(),
