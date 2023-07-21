@@ -39,33 +39,6 @@ class AuthController(private var clientService: ClientService,
     return RedirectView(url)
   }
 
-  /*@PostMapping("/callback", consumes = ["application/x-www-form-urlencoded"])
-  fun getAuthCode(
-    @RequestParam("id_token", required = false) token: String?,
-    @RequestParam("state", required = true) state: UUID,
-    ): Any {
-    val ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)}
-    val client  = clientService.getClientById(ssoRequest.client.id)
-      .orElseThrow { ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE) }
-    // Callback and it requires user approval for client
-    if (!client.autoApprove && token != null) {
-      val url = ssoLoginService.updateSsoRequestWithUserId(token, state, client.autoApprove)
-      val modelAndView = ModelAndView("user_approval")
-      if (url.isEmpty) {
-        modelAndView.addObject("state", state)
-        modelAndView.addObject("scopes", Scope.getTemplateTextByScopes(ssoRequest.client.scopes).sortedDescending())
-        modelAndView.addObject("client", client)
-        return modelAndView
-      } else {
-        return RedirectView(url.get())
-      }
-    } else {
-      // Callback and user approval for client is not required
-      val url = ssoLoginService.updateSsoRequestWithUserId(token, state, client.autoApprove)
-      return RedirectView(url.get())
-    }
-  }*/
-
   @PostMapping("/callback", consumes = ["application/x-www-form-urlencoded"])
   fun getAuthCode(
     @RequestParam("id_token", required = false) token: String?,

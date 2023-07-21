@@ -64,39 +64,6 @@ class SsoLogInService(
       .build().toUriString()
   }
 
-  /*fun updateSsoRequestWithUserId(token: String?, state: UUID, autoApprove: Boolean): Optional<String> {
-    val ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {
-      logger.warn(String.format("State send on callback url do not exist %s", state))
-      ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
-    }
-    var approvalRequired = false
-    if (token != null) {
-      // auto approved client
-      val ssoRequest = updateSsoRequestWithUserId(token, ssoRequest)
-      if (ssoRequest.userId != null && autoApprove) {
-        createOrUpdateUserApprovedClient(ssoRequest, true)
-        return Optional.of(buildClientRedirectUrl(ssoRequest))
-      } else if (!autoApprove) {
-        approvalRequired = createOrUpdateUserApprovedClient(ssoRequest, false)
-      }
-      if (approvalRequired) {
-        return Optional.empty<String>()
-      } else {
-        return Optional.of(buildClientRedirectUrl(ssoRequest))
-      }
-    } else {
-      // Auto Approve = false and After user approval
-      if (ssoRequest.userId != null) {
-        approvalRequired = createOrUpdateUserApprovedClient(ssoRequest, true)
-      }
-      if (approvalRequired) {
-        return Optional.empty<String>()
-      } else {
-        return Optional.of(buildClientRedirectUrl(ssoRequest))
-      }
-    }
-  }*/
-
   fun updateSsoRequestWithUserId(token: String?, state: UUID): Any {
     var ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {
       logger.warn(String.format("State send on callback url do not exist %s", state))
