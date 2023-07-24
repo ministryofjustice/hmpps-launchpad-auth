@@ -37,7 +37,7 @@ class UserApprovedClientController(private var userApprovedClientService: UserAp
   @DeleteMapping("/users/{user-id}/clients/{client-id}")
   fun revokeClientAccess(@PathVariable("user-id") userId: String,@PathVariable("client-id") clientId: UUID): ResponseEntity<Void> {
     userApprovedClientService.revokeClientAccess(userId, clientId)
-    return ResponseEntity.status(HttpStatus.OK).build()
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
   }
 
 }
