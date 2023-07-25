@@ -10,6 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedClientRepository
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
 
 @Service
@@ -88,8 +89,8 @@ class UserApprovedClientService (private var userApprovedClientRepository: UserA
     )
   }
 
-  private fun convertScopes(scopes: Set<Scope>): Set<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope> {
-    val scopeDto = HashSet<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope>()
+  private fun convertScopes(scopes: Set<Scope>): List<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope> {
+    val scopeDto = ArrayList<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope>()
     scopes.forEach { scope->
       scopeDto.add(
       uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(scope.toString(), Scope.getTemplateTextByScopes(setOf(scope)).first())
