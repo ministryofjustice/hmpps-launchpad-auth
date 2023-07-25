@@ -45,7 +45,7 @@ class UserApprovedClientService (private var userApprovedClientRepository: UserA
 
   fun getUserApprovedClientsByUserId(userId: String, page: Int, size: Int): UserClients {
     logger.debug(String.format("Getting user approved clients for user id: %s", userId))
-    val pageRequest = PageRequest.of(page, size)
+    val pageRequest = PageRequest.of(page -1, size)
     pageRequest.withSort(Sort.Direction.ASC, "createdDate")
     val totalElements = userApprovedClientRepository.countAllByUserId(userId)
     val userApprovedClients = userApprovedClientRepository.findAllByUserId(userId, pageRequest)

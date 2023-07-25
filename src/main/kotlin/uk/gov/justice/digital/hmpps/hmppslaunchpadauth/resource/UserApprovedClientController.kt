@@ -30,6 +30,9 @@ class UserApprovedClientController(private var userApprovedClientService: UserAp
     if (size > 20) {
       throw ApiException("Max allowed size of page is 20", BAD_REQUEST_CODE)
     }
+    if (page < 1) {
+      throw ApiException("Page number cannot be less than 1", BAD_REQUEST_CODE)
+    }
     val userApprovedClients = userApprovedClientService.getUserApprovedClientsByUserId(userId, page, size)
     return ResponseEntity.status(HttpStatus.OK).body(userApprovedClients)
   }
