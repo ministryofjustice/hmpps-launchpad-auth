@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserClients
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.BAD_REQUEST_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ClientService
@@ -23,7 +23,7 @@ class UserApprovedClientController(private var userApprovedClientService: UserAp
     @PathVariable("user-id") userId: String,
     @RequestParam("page") page: Int,
     @RequestParam("size") size: Int,
-    ): ResponseEntity<UserClients> {
+    ): ResponseEntity<PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client>> {
     if (userId.isEmpty()) {
       throw ApiException("User id is empty", BAD_REQUEST_CODE)
     }

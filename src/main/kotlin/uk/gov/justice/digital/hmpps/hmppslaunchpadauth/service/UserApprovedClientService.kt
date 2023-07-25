@@ -4,14 +4,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserClients
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedClientRepository
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 
 @Service
 class UserApprovedClientService (private var userApprovedClientRepository: UserApprovedClientRepository,
@@ -43,7 +42,7 @@ class UserApprovedClientService (private var userApprovedClientRepository: UserA
     return userApprovedClientRepository.deleteById(id)
   }
 
-  fun getUserApprovedClientsByUserId(userId: String, page: Int, size: Int): UserClients {
+  fun getUserApprovedClientsByUserId(userId: String, page: Int, size: Int): PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client> {
     logger.debug(String.format("Getting user approved clients for user id: %s", userId))
     val pageRequest = PageRequest.of(page -1, size)
     pageRequest.withSort(Sort.Direction.ASC, "createdDate")
@@ -65,7 +64,7 @@ class UserApprovedClientService (private var userApprovedClientRepository: UserA
   }
 
   private fun getUserApprovedClientsDto(userApprovedClients: List<UserApprovedClient>, page: Int, totalElements: Int)
-  : UserClients {
+  : PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client> {
     val clients = ArrayList<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client>()
     userApprovedClients.forEach { x ->
       val client = clientService.getClientById(x.clientId).orElseThrow {
@@ -81,7 +80,7 @@ class UserApprovedClientService (private var userApprovedClientRepository: UserA
         convertScopes(x.scopes),
       ))
     }
-    return UserClients(
+    return PagedResult(
       page,
       true,
       totalElements,

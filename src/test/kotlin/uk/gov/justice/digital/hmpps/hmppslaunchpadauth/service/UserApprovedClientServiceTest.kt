@@ -79,10 +79,10 @@ class UserApprovedClientServiceTest {
       Mockito.`when`(userApprovedClientRepository.findAllByUserId("test@moj.com", pageRequest)).thenReturn(listOf(expected))
       Mockito.`when`(userApprovedClientRepository.countAllByUserId("test@moj.com")).thenReturn(1)
       Mockito.`when`(clientService.getClientById(client.id)).thenReturn(Optional.of(client))
-      val result = userApprovedClientService.getUserApprovedClientsByUserId(expected.userId, 0, 1)
+      val result = userApprovedClientService.getUserApprovedClientsByUserId(expected.userId, 1, 1)
       assertEquals(1, result.totalElements)
       assertTrue(result.exhausted)
-      assertEquals(0, result.page)
+      assertEquals(1, result.page)
     }
 
     @Test

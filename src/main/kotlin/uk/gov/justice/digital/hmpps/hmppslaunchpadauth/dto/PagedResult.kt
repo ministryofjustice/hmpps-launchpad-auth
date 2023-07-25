@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import java.time.LocalDateTime
 import java.util.*
 
-data class UserClients(
+data class PagedResult<T>(
   val page: Int,
   val exhausted: Boolean,
   val totalElements: Int,
-  val content: List<Client>,
+  val content: List<T>,
 )
 
 data class Client(
