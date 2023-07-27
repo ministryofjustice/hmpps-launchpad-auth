@@ -108,7 +108,7 @@ class UserApprovedClientServiceTest {
       dateAndTimeInUTC,
       dateAndTimeInUTC,
     )
-    Mockito.`when`(userApprovedClientRepository.findAllByUserId("test@moj.com", pageRequest))
+    Mockito.`when`(userApprovedClientRepository.findUserApprovedClientsByUserId("test@moj.com", pageRequest))
       .thenReturn(PageImpl(listOf(expected)))
     Mockito.`when`(userApprovedClientRepository.countAllByUserId("test@moj.com")).thenReturn(1)
     Mockito.`when`(clientService.getClientById(client.id)).thenReturn(Optional.of(client))

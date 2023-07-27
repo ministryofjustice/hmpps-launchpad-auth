@@ -9,7 +9,7 @@ import java.util.*
 
 @Repository
 interface UserApprovedClientRepository : JpaRepository<UserApprovedClient, UUID> {
-  fun findAllByUserId(userId: String, pageable: Pageable): Page<UserApprovedClient>
+  fun findUserApprovedClientsByUserId(userId: String, pageable: Pageable): Page<UserApprovedClient>
 
   fun countAllByUserId(userId: String): Int
 

@@ -11,15 +11,20 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedCl
 import java.util.*
 
 @Service
-class UserApprovedClientService (private var userApprovedClientRepository: UserApprovedClientRepository,
-                                 private var clientService: ClientService,
-  )  {
+class UserApprovedClientService(
+  private var userApprovedClientRepository: UserApprovedClientRepository,
+  private var clientService: ClientService,
+) {
   private val logger = LoggerFactory.getLogger(UserApprovedClientService::class.java)
 
   fun upsertUserApprovedClient(userApprovedClient: UserApprovedClient): UserApprovedClient {
-    logger.info(String.format("Upsert user approved client for user id:%s client id:%s",
-      userApprovedClient.userId,
-      userApprovedClient.clientId))
+    logger.info(
+      String.format(
+        "Upsert user approved client for user id:%s client id:%s",
+        userApprovedClient.userId,
+        userApprovedClient.clientId,
+      ),
+    )
     return userApprovedClientRepository.save(userApprovedClient)
   }
 
@@ -33,11 +38,15 @@ class UserApprovedClientService (private var userApprovedClientRepository: UserA
     return userApprovedClientRepository.deleteById(id)
   }
 
-  fun getUserApprovedClientsByUserId(userId: String, page: Int, size: Int): PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client> {
+  fun getUserApprovedClientsByUserId(
+    userId: String,
+    page: Int,
+    size: Int,
+  ): PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client> {
     logger.debug(String.format("Getting user approved clients for user id: %s", userId))
-    val pageRequest = PageRequest.of(page -1, size)
+    val pageRequest = PageRequest.of(page - 1, size)
     val totalElements = userApprovedClientRepository.countAllByUserId(userId)
-    val userApprovedClients = userApprovedClientRepository.findAllByUserId(userId, pageRequest)
+    val userApprovedClients = userApprovedClientRepository.findUserApprovedClientsByUserId(userId, pageRequest)
     return getUserApprovedClientsDto(userApprovedClients.content, page, totalElements)
   }
 
@@ -47,14 +56,25 @@ class UserApprovedClientService (private var userApprovedClientRepository: UserA
   }
 
   fun revokeClientAccess(userId: String, clientId: UUID) {
-    val userApprovedClient = userApprovedClientRepository.findUserApprovedClientByUserIdAndClientId(userId, clientId).orElseThrow {
-      throw ApiException(String.format("No record found for user id:%s and client id:%s", userId, clientId.toString()), BAD_REQUEST_CODE)
-    }
+    val userApprovedClient =
+      userApprovedClientRepository.findUserApprovedClientByUserIdAndClientId(userId, clientId).orElseThrow {
+        throw ApiException(
+          String.format(
+            "No record found for user id:%s and client id:%s",
+            userId,
+            clientId.toString(),
+          ),
+          BAD_REQUEST_CODE,
+        )
+      }
     userApprovedClientRepository.deleteById(userApprovedClient.id)
   }
 
-  private fun getUserApprovedClientsDto(userApprovedClients: List<UserApprovedClient>, page: Int, totalElements: Int)
-  : PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client> {
+  private fun getUserApprovedClientsDto(
+    userApprovedClients: List<UserApprovedClient>,
+    page: Int,
+    totalElements: Int,
+  ): PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client> {
     val clients = ArrayList<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client>()
     userApprovedClients.forEach { x ->
       val client = clientService.getClientById(x.clientId).orElseThrow {
@@ -82,12 +102,14 @@ class UserApprovedClientService (private var userApprovedClientRepository: UserA
 
   private fun convertScopes(scopes: Set<Scope>): List<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope> {
     val scopeDto = ArrayList<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope>()
-    scopes.forEach { scope->
+    scopes.forEach { scope ->
       scopeDto.add(
-      uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(scope.toString(), Scope.getTemplateTextByScopes(setOf(scope)).first())
+        uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(
+          scope.toString(),
+          Scope.getTemplateTextByScopes(setOf(scope)).first(),
+        ),
       )
     }
     return scopeDto
   }
-
 }
