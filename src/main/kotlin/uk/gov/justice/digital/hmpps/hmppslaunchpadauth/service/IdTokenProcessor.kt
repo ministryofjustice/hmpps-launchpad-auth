@@ -20,7 +20,7 @@ class IdTokenProcessor : TokenProcessor {
     validateNonce(nonceInIdToken, nonce)
     val userId = getClaimFromPayload(payload,"email")
     if (userId != null) {
-      logger.info(String.format("Logged user id : %s", userId))
+      logger.info("Logged user id : {}", userId)
       return userId
     } else {
       logger.error("User id not found in payload")
@@ -40,7 +40,7 @@ class IdTokenProcessor : TokenProcessor {
       val jsonObject = JSONObject(payload)
       return jsonObject.getString(claimName)
     } catch(exception: JSONException) {
-      logger.error(String.format("Claim: %s not found in id token payload", claimName))
+      logger.error("Claim: {} not found in id token payload", claimName)
       throw ApiException(String.format("Claim: %s not found", claimName), 500)
     }
   }

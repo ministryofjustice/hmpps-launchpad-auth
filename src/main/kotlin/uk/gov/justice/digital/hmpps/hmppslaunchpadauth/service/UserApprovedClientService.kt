@@ -19,18 +19,12 @@ class UserApprovedClientService(
   private val logger = LoggerFactory.getLogger(UserApprovedClientService::class.java)
 
   fun upsertUserApprovedClient(userApprovedClient: UserApprovedClient): UserApprovedClient {
-    logger.info(
-      String.format(
-        "Upsert user approved client for user id:%s client id:%s",
-        userApprovedClient.userId,
-        userApprovedClient.clientId,
-      ),
-    )
+    logger.info("Upsert user approved client for user id:{} client id:{}", userApprovedClient.userId, userApprovedClient.clientId)
     return userApprovedClientRepository.save(userApprovedClient)
   }
 
   fun getUserApprovedClientById(id: UUID): Optional<UserApprovedClient> {
-    logger.info(String.format("Retrieving user approved client for  id:%s", id))
+    logger.info("Retrieving user approved client for  id:{}", id)
     return userApprovedClientRepository.findById(id)
   }
 
@@ -44,14 +38,14 @@ class UserApprovedClientService(
     page: Int,
     size: Int,
   ): PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto> {
-    logger.debug(String.format("Getting user approved clients for user id: %s", userId))
+    logger.debug("Getting user approved clients for user id: {}", userId)
     val pageRequest = PageRequest.of(page - 1, size)
     val userApprovedClientPage = userApprovedClientRepository.findUserApprovedClientsByUserId(userId, pageRequest)
     return getUserApprovedClientsDto(userApprovedClientPage, page)
   }
 
   fun getUserApprovedClientByUserIdAndClientId(userId: String, clientId: UUID): Optional<UserApprovedClient> {
-    logger.debug(String.format("Getting user approved clients for user-id: %s and client-id:%s", userId, clientId))
+    logger.debug("Getting user approved clients for user-id: {} and client-id:{}", userId, clientId)
     return userApprovedClientRepository.findUserApprovedClientByUserIdAndClientId(userId, clientId)
   }
 

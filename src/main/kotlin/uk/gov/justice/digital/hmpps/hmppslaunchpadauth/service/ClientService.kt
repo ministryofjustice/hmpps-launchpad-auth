@@ -72,7 +72,7 @@ class ClientService(private var clientRepository: ClientRepository) {
     }
     scopeList.forEach { x ->
       if (!Scope.isStringMatchEnumValue(x, clientScopes)) {
-        logger.debug(String.format("Scope %s not matching with client scope set", x))
+        logger.debug("Scope {} not matching with client scope set", x)
         throw ApiException(IN_VALID_SCOPE, BAD_REQUEST_CODE)
       }
     }
