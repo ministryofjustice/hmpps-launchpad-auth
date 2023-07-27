@@ -69,7 +69,7 @@ class UserApprovedClientService(
     page: Int,
   ): PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto> {
     val userApprovedClientDtos = ArrayList<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto>()
-    userApprovedClientPage.forEach { x ->
+    userApprovedClientPage.content.forEach { x ->
       val client = clientService.getClientById(x.clientId).orElseThrow {
         throw ApiException(String.format("Client id not found %s", x.clientId), BAD_REQUEST_CODE)
       }
