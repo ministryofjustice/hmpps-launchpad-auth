@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -141,8 +142,8 @@ class UserApprovedUserApprovedClientRepositoryTestDto(@Autowired private var use
   @Test
   fun `test get user approved clients by user id and page result is sorted by created date`() {
     val dateAndTimeInUTCFirst = LocalDateTime.now(ZoneOffset.UTC)
-    val dateAndTimeInUTCSecond = LocalDateTime.now(ZoneOffset.UTC).plusSeconds(50L)
-    val dateAndTimeInUTCThird = LocalDateTime.now(ZoneOffset.UTC).plusSeconds(100L)
+    val dateAndTimeInUTCSecond = dateAndTimeInUTCFirst.plusMinutes(1L)
+    val dateAndTimeInUTCThird = dateAndTimeInUTCFirst.plusMinutes(2L)
     val expectedFirst = DataGenerator.buildUserApprovedClient(
       userId,
       UUID.randomUUID(),
@@ -167,14 +168,14 @@ class UserApprovedUserApprovedClientRepositoryTestDto(@Autowired private var use
     userApprovedClientRepository.saveAll(listOf(expectedThird, expectedSecond, expectedFirst))
     var result = userApprovedClientRepository.findUserApprovedClientsByUserIdAndClientIdsIsNotNull(
       userId,
-      PageRequest.of(0, 2),
+      PageRequest.of(0, 2).withSort(Sort.Direction.DESC, "createdDate"),
     )
     assertEquals(2, result.content.size)
     assertEquals(dateAndTimeInUTCThird, result.content.get(0).createdDate)
     assertEquals(dateAndTimeInUTCSecond, result.content.get(1).createdDate)
     result = userApprovedClientRepository.findUserApprovedClientsByUserIdAndClientIdsIsNotNull(
       userId,
-      PageRequest.of(1, 2),
+      PageRequest.of(1, 2).withSort(Sort.Direction.DESC, "createdDate"),
     )
     assertEquals(1, result.content.size)
     assertEquals(dateAndTimeInUTCFirst, result.content.get(0).createdDate)

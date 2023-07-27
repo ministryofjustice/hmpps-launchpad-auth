@@ -16,9 +16,9 @@ class IdTokenProcessor : TokenProcessor {
     val decoder = Base64.getUrlDecoder()
     val chunks = token.split(".")
     val payload = String(decoder.decode(chunks[1]))
-    val nonceInIdToken = getClaimFromPayload(payload,"nonce")
+    val nonceInIdToken = getClaimFromPayload(payload, "nonce")
     validateNonce(nonceInIdToken, nonce)
-    val userId = getClaimFromPayload(payload,"email")
+    val userId = getClaimFromPayload(payload, "email")
     if (userId != null) {
       validateUserIdFormat(userId)
       logger.info("Logged user id : {}", userId)
@@ -36,11 +36,11 @@ class IdTokenProcessor : TokenProcessor {
     }
   }
 
-  private fun getClaimFromPayload(payload: String, claimName: String) : String {
+  private fun getClaimFromPayload(payload: String, claimName: String): String {
     try {
       val jsonObject = JSONObject(payload)
       return jsonObject.getString(claimName)
-    } catch(exception: JSONException) {
+    } catch (exception: JSONException) {
       logger.error("Claim: {} not found in id token payload", claimName)
       throw ApiException(String.format("Claim: %s not found", claimName), 500)
     }

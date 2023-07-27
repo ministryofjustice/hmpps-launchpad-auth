@@ -11,7 +11,7 @@ import java.util.*
 
 @Repository
 interface UserApprovedClientRepository : JpaRepository<UserApprovedClient, UUID> {
-  @Query("SELECT u FROM UserApprovedClient u  where u.userId = :userId AND u.clientId is not null ")
+  @Query("SELECT u FROM UserApprovedClient u where u.userId = :userId AND u.clientId is not null")
   fun findUserApprovedClientsByUserIdAndClientIdsIsNotNull(@Param("userId") userId: String, pageable: Pageable): Page<UserApprovedClient>
 
   fun findUserApprovedClientByUserIdAndClientId(userId: String, clientId: UUID): Optional<UserApprovedClient>
