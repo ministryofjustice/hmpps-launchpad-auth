@@ -34,7 +34,7 @@ import java.util.*
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Import(TestConfig::class)
-class UserApprovedUserApprovedClientIntegrationTestDto(
+class UserApprovedUserApprovedClientIntegrationTest(
   @Autowired private var userApprovedClientRepository: UserApprovedClientRepository,
   @Autowired private var clientRepository: ClientRepository,
 ) {

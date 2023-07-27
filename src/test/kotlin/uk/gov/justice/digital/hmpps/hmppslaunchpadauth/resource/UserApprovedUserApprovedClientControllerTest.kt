@@ -22,7 +22,7 @@ import java.util.*
 @EnableAutoConfiguration
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-class UserApprovedUserApprovedClientControllerTestDto(@Autowired private var userApprovedClientController: UserApprovedClientController) {
+class UserApprovedUserApprovedClientControllerTest(@Autowired private var userApprovedClientController: UserApprovedClientController) {
   @MockBean
   private lateinit var userApprovedClientService: UserApprovedClientService
 

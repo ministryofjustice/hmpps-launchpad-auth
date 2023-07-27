@@ -21,7 +21,7 @@ import java.time.ZoneOffset
 import java.util.*
 
 @ExtendWith(MockitoExtension::class)
-class UserApprovedUserApprovedClientServiceTestDto {
+class UserApprovedUserApprovedClientServiceTest {
   @Mock
   private lateinit var userApprovedClientRepository: UserApprovedClientRepository
 

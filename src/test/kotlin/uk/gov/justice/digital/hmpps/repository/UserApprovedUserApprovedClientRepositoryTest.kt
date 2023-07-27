@@ -30,7 +30,7 @@ import java.util.*
 @EntityScan("uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model")
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-class UserApprovedUserApprovedClientRepositoryTestDto(@Autowired private var userApprovedClientRepository: UserApprovedClientRepository) {
+class UserApprovedUserApprovedClientRepositoryTest(@Autowired private var userApprovedClientRepository: UserApprovedClientRepository) {
   private val dateAndTimeInUTC = LocalDateTime.now(ZoneOffset.UTC)
   private val userId = "G2320VD"
 
