@@ -40,7 +40,7 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
     @RequestParam("id_token", required = false) token: String?,
     @RequestParam("state", required = true) state: UUID,
   ): Any {
-    return ssoLoginService.updateSsoRequestWithUserId(token, state)
+    return ssoLoginService.updateSsoRequest(token, state)
   }
 
   @PostMapping("/authorize-client", consumes = ["application/x-www-form-urlencoded"])
@@ -49,7 +49,7 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
     @RequestParam("userApproval", required = true) userApproval: String?,
   ): Any {
     if (userApproval == "approved") {
-      return ssoLoginService.updateSsoRequestWithUserId(null, state)
+      return ssoLoginService.updateSsoRequest(null, state)
     } else {
       // user did not approved the client so delete sso request
       ssoLoginService.cancelAccess(state)

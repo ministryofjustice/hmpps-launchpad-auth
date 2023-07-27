@@ -65,7 +65,7 @@ class SsoLogInService(
       .build().toUriString()
   }
 
-  fun updateSsoRequestWithUserId(token: String?, state: UUID): Any {
+  fun updateSsoRequest(token: String?, state: UUID): Any {
     var ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {
       logger.warn("State send on callback url do not exist {}", state)
       ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
@@ -75,26 +75,22 @@ class SsoLogInService(
       logger.warn("Client of sso request  do not exist {}", clientId)
       ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
     }
+    var approvalRequired = false
     if (token != null) {
       ssoRequest = updateSsoRequestWithUserId(token, ssoRequest)
-    }
-    if (token != null && client.autoApprove) {
-      // auto approved client
-      val ssoRequestRecord = updateSsoRequestWithUserId(token, ssoRequest)
-      if (ssoRequestRecord.userId != null && client.autoApprove) {
-        createOrUpdateUserApprovedClient(ssoRequestRecord, true)
-        return RedirectView(buildClientRedirectUrl(ssoRequestRecord))
+      if (client.autoApprove) {
+        createOrUpdateUserApprovedClient(ssoRequest, true)
+        return RedirectView(buildClientRedirectUrl(ssoRequest))
+      } else {
+        // Auto Approve = false and user approval is required
+        approvalRequired = createOrUpdateUserApprovedClient(ssoRequest, false)
       }
-    }
-    var approvalRequired = false
-    if (token != null && !client.autoApprove) {
-      // Auto Approve = false and check if user approved client exist, if not exist approval by user is required.
-      approvalRequired = createOrUpdateUserApprovedClient(ssoRequest, false)
-    }
-    if (token == null && !client.autoApprove) {
-      // Auto Approve = false and user has already approved.
-      if (ssoRequest.userId != null) {
-        approvalRequired = createOrUpdateUserApprovedClient(ssoRequest, true)
+    } else {
+      if (!client.autoApprove) {
+        // Auto Approve = false and user has already approved.
+        if (ssoRequest.userId != null) {
+          approvalRequired = createOrUpdateUserApprovedClient(ssoRequest, true)
+        }
       }
     }
     if (approvalRequired) {

@@ -6,7 +6,3 @@ data class PagedResult<T>(
   val totalElements: Long,
   val content: List<T>,
 )
-
-
-
-

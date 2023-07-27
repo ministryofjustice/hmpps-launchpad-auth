@@ -31,6 +31,7 @@ class UserApprovedUserApprovedClientServiceTestDto {
 
   private val dateAndTimeInUTC = LocalDateTime.now(ZoneOffset.UTC)
   private val userID = "G2320VD"
+
   @BeforeEach
   fun setUp() {
     userApprovedClientService = UserApprovedClientService(userApprovedClientRepository, clientService)

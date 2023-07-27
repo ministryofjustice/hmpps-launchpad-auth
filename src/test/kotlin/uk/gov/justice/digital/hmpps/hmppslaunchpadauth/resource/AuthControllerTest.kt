@@ -119,7 +119,6 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
     assertEquals("nonce size exceeds 128 char size limit", exception.message)
   }
 
-
   @Test
   fun `authorize clients approved by user`() {
     val client = DataGenerator.buildClient(true, true)
@@ -137,7 +136,7 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
       ),
       UUID.randomUUID().toString(),
     )
-    Mockito.`when`(ssoLoginService.updateSsoRequestWithUserId(null, ssoRequest.id))
+    Mockito.`when`(ssoLoginService.updateSsoRequest(null, ssoRequest.id))
       .thenReturn(RedirectView("${ssoRequest.client.redirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}"))
     val redirectView = authController.authorizeClient(ssoRequest.id, "approved") as RedirectView
     assertNotNull(redirectView)
@@ -158,7 +157,7 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
       SsoClient(client.id, "random_state", "random_nonce", setOf(Scope.USER_BASIC_READ), "http://localhost:8080/test"),
       UUID.randomUUID().toString(),
     )
-    Mockito.`when`(ssoLoginService.updateSsoRequestWithUserId(null, ssoRequest.id))
+    Mockito.`when`(ssoLoginService.updateSsoRequest(null, ssoRequest.id))
       .thenReturn("${ssoRequest.client.redirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}")
     val exception = assertThrows(ApiException::class.java) {
       authController.authorizeClient(ssoRequest.id, "cancelled")

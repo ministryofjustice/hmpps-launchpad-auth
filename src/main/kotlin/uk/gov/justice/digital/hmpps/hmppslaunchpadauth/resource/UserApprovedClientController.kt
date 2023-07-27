@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -18,6 +19,8 @@ import java.util.*
 @RestController
 @RequestMapping("/v1")
 class UserApprovedClientController(private var userApprovedClientService: UserApprovedClientService) {
+  private val logger = LoggerFactory.getLogger(UserApprovedClientController::class.java)
+
   @GetMapping("/users/{user-id}/clients", produces = [MediaType.APPLICATION_JSON_VALUE])
   fun getUserApprovedClients(
     @PathVariable("user-id") userId: String,
@@ -45,7 +48,8 @@ class UserApprovedClientController(private var userApprovedClientService: UserAp
   private fun validateUserIdFormat(userId: String) {
     val regex = "^[A-Z][0-9]{4}[A-Z]{2}\$".toRegex()
     if (!regex.matches(userId)) {
-      throw ApiException("Invalid user id format", BAD_REQUEST_CODE)
+      logger.debug("Invalid user id format for user id", userId)
+      throw ApiException("Invalid user id format for user id", BAD_REQUEST_CODE)
     }
   }
 
@@ -65,5 +69,4 @@ class UserApprovedClientController(private var userApprovedClientService: UserAp
     }
     return size
   }
-
 }

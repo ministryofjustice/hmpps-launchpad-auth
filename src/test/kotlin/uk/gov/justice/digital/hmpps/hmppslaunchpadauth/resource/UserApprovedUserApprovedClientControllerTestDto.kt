@@ -76,8 +76,15 @@ class UserApprovedUserApprovedClientControllerTestDto(@Autowired private var use
 
   @Test
   fun `get user approved clients by user id with when user id format is invalid`() {
-    assertThrows(ApiException::class.java) { userApprovedClientController.getUserApprovedClients("test@moj.com", null, null) }
+    assertThrows(ApiException::class.java) {
+      userApprovedClientController.getUserApprovedClients(
+        "test@moj.com",
+        null,
+        null,
+      )
+    }
   }
+
   @Test
   fun `revoke client access by user id and client id`() {
     Mockito.`when`(userApprovedClientService.getUserApprovedClientsByUserId(userId, 1, size = 10)).thenReturn(

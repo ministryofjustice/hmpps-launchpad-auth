@@ -32,6 +32,7 @@ import java.util.*
 class UserApprovedUserApprovedClientRepositoryTestDto(@Autowired private var userApprovedClientRepository: UserApprovedClientRepository) {
   private val dateAndTimeInUTC = LocalDateTime.now(ZoneOffset.UTC)
   private val userId = "G2320VD"
+
   @BeforeEach
   fun `set up`() {
     userApprovedClientRepository.deleteAll()

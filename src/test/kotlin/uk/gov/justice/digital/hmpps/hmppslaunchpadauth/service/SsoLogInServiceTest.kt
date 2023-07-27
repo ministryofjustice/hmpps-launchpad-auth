@@ -4,7 +4,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -16,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.view.RedirectView
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
@@ -126,7 +124,7 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
     Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn(userID)
     Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
-    val redirectView = ssoLoginService.updateSsoRequestWithUserId(
+    val redirectView = ssoLoginService.updateSsoRequest(
       token,
       ssoRequest.id,
     ) as RedirectView
@@ -142,7 +140,7 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
     Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn(userID)
     Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
-    val redirectView = ssoLoginService.updateSsoRequestWithUserId(
+    val redirectView = ssoLoginService.updateSsoRequest(
       token,
       ssoRequest.id,
     ) as RedirectView
@@ -154,7 +152,7 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
     Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
-    val redirectView = ssoLoginService.updateSsoRequestWithUserId(
+    val redirectView = ssoLoginService.updateSsoRequest(
       null,
       ssoRequest.id,
     ) as RedirectView
@@ -165,7 +163,7 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
   fun `test update sso request with user id when sso request not found`() {
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.empty())
     val exception = assertThrows(ApiException::class.java) {
-      ssoLoginService.updateSsoRequestWithUserId(
+      ssoLoginService.updateSsoRequest(
         null,
         ssoRequest.id,
       )
