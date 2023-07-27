@@ -24,7 +24,7 @@ import java.util.*
 @EntityScan("uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model")
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-class ClientRepositoryTest(@Autowired var clientRepository: ClientRepository) {
+class UserApprovedClientDtoRepositoryTest(@Autowired var clientRepository: ClientRepository) {
   @BeforeEach
   fun setUp() {
   }

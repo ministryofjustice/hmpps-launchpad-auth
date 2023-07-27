@@ -11,7 +11,5 @@ import java.util.*
 interface UserApprovedClientRepository : JpaRepository<UserApprovedClient, UUID> {
   fun findUserApprovedClientsByUserId(userId: String, pageable: Pageable): Page<UserApprovedClient>
 
-  fun countAllByUserId(userId: String): Int
-
   fun findUserApprovedClientByUserIdAndClientId(userId: String, clientId: UUID): Optional<UserApprovedClient>
 }

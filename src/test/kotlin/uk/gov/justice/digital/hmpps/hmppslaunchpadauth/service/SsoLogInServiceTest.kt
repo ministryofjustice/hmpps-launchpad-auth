@@ -50,6 +50,7 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
 
   private lateinit var ssoRequest: SsoRequest
   private lateinit var client: Client
+  private val userID = "G2320VD"
 
   @BeforeEach
   fun setUp() {
@@ -77,7 +78,7 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
         setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ),
         "http://localhost:8080/test",
       ),
-      "test@moj.com",
+      userID,
     )
   }
 
@@ -119,11 +120,11 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
   @Test
   fun `test update sso request with user id when auto approved is true`() {
     val nonce = UUID.randomUUID()
-    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "test@moj.com")
+    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userID)
     ssoRequest.userId = null
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
-    Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn("test@moj.com")
+    Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn(userID)
     Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
     val redirectView = ssoLoginService.updateSsoRequestWithUserId(
       token,
@@ -135,11 +136,11 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
   @Test
   fun `test update sso request with user id when auto approved is false`() {
     val nonce = UUID.randomUUID()
-    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "test@moj.com")
+    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userID)
     ssoRequest.userId = null
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
-    Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn("test@moj.com")
+    Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn(userID)
     Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
     val redirectView = ssoLoginService.updateSsoRequestWithUserId(
       token,

@@ -26,7 +26,7 @@ const val BAD_REQUEST_CODE = 400
 const val ACCESS_DENIED_CODE = 403
 
 @ExtendWith(MockitoExtension::class)
-class ClientServiceTest {
+class UserApprovedClientDtoServiceTest {
   @Mock
   lateinit var clientRepository: ClientRepository
   private lateinit var clientService: ClientService

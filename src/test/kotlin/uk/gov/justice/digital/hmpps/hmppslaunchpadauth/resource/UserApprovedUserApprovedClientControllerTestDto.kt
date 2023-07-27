@@ -22,9 +22,11 @@ import java.util.*
 @EnableAutoConfiguration
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-class UserApprovedClientControllerTest(@Autowired private var userApprovedClientController: UserApprovedClientController) {
+class UserApprovedUserApprovedClientControllerTestDto(@Autowired private var userApprovedClientController: UserApprovedClientController) {
   @MockBean
   private lateinit var userApprovedClientService: UserApprovedClientService
+
+  private val userId = "G2320VD"
 
   @BeforeEach
   fun setUp() {
@@ -36,7 +38,6 @@ class UserApprovedClientControllerTest(@Autowired private var userApprovedClient
 
   @Test
   fun `get user approved clients by user id`() {
-    val userId = "test@moj.com"
     Mockito.`when`(userApprovedClientService.getUserApprovedClientsByUserId(userId, 1, size = 10)).thenReturn(
       PagedResult(1, true, 1, listOf()),
     )
@@ -48,7 +49,6 @@ class UserApprovedClientControllerTest(@Autowired private var userApprovedClient
 
   @Test
   fun `get user approved clients by user id with page number null`() {
-    val userId = "test@moj.com"
     Mockito.`when`(userApprovedClientService.getUserApprovedClientsByUserId(userId, 1, 10)).thenReturn(
       PagedResult(1, true, 1, listOf()),
     )
@@ -60,7 +60,6 @@ class UserApprovedClientControllerTest(@Autowired private var userApprovedClient
 
   @Test
   fun `get user approved clients by user id with page size null`() {
-    val userId = "test@moj.com"
     Mockito.`when`(userApprovedClientService.getUserApprovedClientsByUserId(userId, 1, 20)).thenReturn(
       PagedResult(1, true, 1, listOf()),
     )
@@ -72,14 +71,15 @@ class UserApprovedClientControllerTest(@Autowired private var userApprovedClient
 
   @Test
   fun `get user approved clients by user id with page number less than 1`() {
-    val userId = "test@moj.com"
     assertThrows(ApiException::class.java) { userApprovedClientController.getUserApprovedClients(userId, 0, null) }
   }
 
-
+  @Test
+  fun `get user approved clients by user id with when user id format is invalid`() {
+    assertThrows(ApiException::class.java) { userApprovedClientController.getUserApprovedClients("test@moj.com", null, null) }
+  }
   @Test
   fun `revoke client access by user id and client id`() {
-    val userId = "test@moj.com"
     Mockito.`when`(userApprovedClientService.getUserApprovedClientsByUserId(userId, 1, size = 10)).thenReturn(
       PagedResult(1, true, 1, listOf()),
     )

@@ -12,7 +12,6 @@ import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
@@ -30,9 +29,9 @@ import java.util.*
 @EntityScan("uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model")
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-class UserApprovedClientRepositoryTest(@Autowired private var userApprovedClientRepository: UserApprovedClientRepository) {
+class UserApprovedUserApprovedClientRepositoryTestDto(@Autowired private var userApprovedClientRepository: UserApprovedClientRepository) {
   private val dateAndTimeInUTC = LocalDateTime.now(ZoneOffset.UTC)
-
+  private val userId = "G2320VD"
   @BeforeEach
   fun `set up`() {
     userApprovedClientRepository.deleteAll()
@@ -41,7 +40,7 @@ class UserApprovedClientRepositoryTest(@Autowired private var userApprovedClient
   @Test
   fun `create user aprroved client`() {
     val expected = DataGenerator.buildUserApprovedClient(
-      "test@moj.com",
+      userId,
       UUID.randomUUID(),
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ),
       dateAndTimeInUTC,
@@ -54,7 +53,7 @@ class UserApprovedClientRepositoryTest(@Autowired private var userApprovedClient
   @Test
   fun `update user aprroved client`() {
     val expected = DataGenerator.buildUserApprovedClient(
-      "test@moj.com",
+      userId,
       UUID.randomUUID(),
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ),
       dateAndTimeInUTC,
@@ -72,7 +71,7 @@ class UserApprovedClientRepositoryTest(@Autowired private var userApprovedClient
   @Test
   fun `get user aprroved client by id`() {
     val expected = DataGenerator.buildUserApprovedClient(
-      "test@moj.com",
+      userId,
       UUID.randomUUID(),
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ),
       dateAndTimeInUTC,
@@ -87,7 +86,7 @@ class UserApprovedClientRepositoryTest(@Autowired private var userApprovedClient
   fun `test unique index for  created date, userid and client id`() {
     val clientId = UUID.randomUUID()
     val expectedFirst = DataGenerator.buildUserApprovedClient(
-      "test@moj.com",
+      userId,
       clientId,
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ),
       dateAndTimeInUTC,
@@ -95,7 +94,7 @@ class UserApprovedClientRepositoryTest(@Autowired private var userApprovedClient
     )
     userApprovedClientRepository.save(expectedFirst)
     val expectedSecond = DataGenerator.buildUserApprovedClient(
-      "test@moj.com",
+      userId,
       clientId,
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ),
       dateAndTimeInUTC,
@@ -111,7 +110,7 @@ class UserApprovedClientRepositoryTest(@Autowired private var userApprovedClient
   fun `delete user aprroved client by id`() {
     val createdDate = LocalDateTime.now(ZoneOffset.UTC)
     val expected = DataGenerator.buildUserApprovedClient(
-      "test@moj.com",
+      userId,
       UUID.randomUUID(),
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ),
       createdDate,
@@ -126,7 +125,7 @@ class UserApprovedClientRepositoryTest(@Autowired private var userApprovedClient
   @Test
   fun `get user aprroved client by user id and client id`() {
     val expected = DataGenerator.buildUserApprovedClient(
-      "test@moj.com",
+      userId,
       UUID.randomUUID(),
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ),
       dateAndTimeInUTC,
@@ -140,25 +139,25 @@ class UserApprovedClientRepositoryTest(@Autowired private var userApprovedClient
 
   @Test
   fun `test get user approved clients by user id and page result is sorted by created date`() {
-    val dateAndTimeInUTCOne = LocalDateTime.now(ZoneOffset.UTC)
+    val dateAndTimeInUTCFirst = LocalDateTime.now(ZoneOffset.UTC)
     val dateAndTimeInUTCSecond = LocalDateTime.now(ZoneOffset.UTC).plusSeconds(50L)
     val dateAndTimeInUTCThird = LocalDateTime.now(ZoneOffset.UTC).plusSeconds(100L)
     val expectedFirst = DataGenerator.buildUserApprovedClient(
-      "test@moj.com",
+      userId,
       UUID.randomUUID(),
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ),
-      dateAndTimeInUTCOne,
-      dateAndTimeInUTCOne,
+      dateAndTimeInUTCFirst,
+      dateAndTimeInUTCFirst,
     )
     val expectedSecond = DataGenerator.buildUserApprovedClient(
-      "test@moj.com",
+      userId,
       UUID.randomUUID(),
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ),
       dateAndTimeInUTCSecond,
       dateAndTimeInUTCSecond,
     )
     val expectedThird = DataGenerator.buildUserApprovedClient(
-      "test@moj.com",
+      userId,
       UUID.randomUUID(),
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ),
       dateAndTimeInUTCThird,
@@ -166,21 +165,21 @@ class UserApprovedClientRepositoryTest(@Autowired private var userApprovedClient
     )
     userApprovedClientRepository.saveAll(listOf(expectedThird, expectedSecond, expectedFirst))
     var result = userApprovedClientRepository.findUserApprovedClientsByUserId(
-      "test@moj.com",
-      PageRequest.of(0, 2).withSort(Sort.Direction.ASC, "createdDate"),
+      userId,
+      PageRequest.of(0, 2),
     )
     assertEquals(2, result.content.size)
-    assertEquals(dateAndTimeInUTCOne, result.content.get(0).createdDate)
+    assertEquals(dateAndTimeInUTCThird, result.content.get(0).createdDate)
     assertEquals(dateAndTimeInUTCSecond, result.content.get(1).createdDate)
     result = userApprovedClientRepository.findUserApprovedClientsByUserId(
-      "test@moj.com",
-      PageRequest.of(1, 2).withSort(Sort.Direction.ASC, "createdDate"),
+      userId,
+      PageRequest.of(1, 2),
     )
     assertEquals(1, result.content.size)
-    assertEquals(dateAndTimeInUTCThird, result.content.get(0).createdDate)
+    assertEquals(dateAndTimeInUTCFirst, result.content.get(0).createdDate)
     result = userApprovedClientRepository.findUserApprovedClientsByUserId(
-      "test@moj.com",
-      PageRequest.of(2, 2).withSort(Sort.Direction.ASC, "createdDate"),
+      userId,
+      PageRequest.of(2, 2),
     )
     assertEquals(0, result.content.size)
   }

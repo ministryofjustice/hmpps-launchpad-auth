@@ -23,10 +23,12 @@ class UserApprovedClientController(private var userApprovedClientService: UserAp
     @PathVariable("user-id") userId: String,
     @RequestParam("page", required = false) page: Int?,
     @RequestParam("size", required = false) size: Int?,
-  ): ResponseEntity<PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client>> {
+  ): ResponseEntity<PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto>> {
     validateUserIdFormat(userId)
+    val pageNum = validatePage(page)
+    val pageSize = validatePageSize(size)
     val userApprovedClients = userApprovedClientService
-      .getUserApprovedClientsByUserId(userId, validatePage(page), validatePageSize(size))
+      .getUserApprovedClientsByUserId(userId, pageNum, pageSize)
     return ResponseEntity.status(HttpStatus.OK).body(userApprovedClients)
   }
 
@@ -41,8 +43,8 @@ class UserApprovedClientController(private var userApprovedClientService: UserAp
   }
 
   private fun validateUserIdFormat(userId: String) {
-    // TODO user id regex according to user id format in moj
-    if (userId.isEmpty()) {
+    val regex = "^[A-Z][0-9]{4}[A-Z]{2}\$".toRegex()
+    if (!regex.matches(userId)) {
       throw ApiException("Invalid user id format", BAD_REQUEST_CODE)
     }
   }

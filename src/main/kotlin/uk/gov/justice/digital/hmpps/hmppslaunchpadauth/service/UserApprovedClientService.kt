@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
@@ -42,12 +43,11 @@ class UserApprovedClientService(
     userId: String,
     page: Int,
     size: Int,
-  ): PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client> {
+  ): PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto> {
     logger.debug(String.format("Getting user approved clients for user id: %s", userId))
     val pageRequest = PageRequest.of(page - 1, size)
-    val totalElements = userApprovedClientRepository.countAllByUserId(userId)
-    val userApprovedClients = userApprovedClientRepository.findUserApprovedClientsByUserId(userId, pageRequest)
-    return getUserApprovedClientsDto(userApprovedClients.content, page, totalElements)
+    val userApprovedClientPage = userApprovedClientRepository.findUserApprovedClientsByUserId(userId, pageRequest)
+    return getUserApprovedClientsDto(userApprovedClientPage, page)
   }
 
   fun getUserApprovedClientByUserIdAndClientId(userId: String, clientId: UUID): Optional<UserApprovedClient> {
@@ -71,17 +71,16 @@ class UserApprovedClientService(
   }
 
   private fun getUserApprovedClientsDto(
-    userApprovedClients: List<UserApprovedClient>,
+    userApprovedClientPage: Page<UserApprovedClient>,
     page: Int,
-    totalElements: Int,
-  ): PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client> {
-    val clients = ArrayList<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client>()
-    userApprovedClients.forEach { x ->
+  ): PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto> {
+    val userApprovedClientDtos = ArrayList<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto>()
+    userApprovedClientPage.forEach { x ->
       val client = clientService.getClientById(x.clientId).orElseThrow {
         throw ApiException(String.format("Client id not found %s", x.clientId), BAD_REQUEST_CODE)
       }
-      clients.add(
-        uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client(
+      userApprovedClientDtos.add(
+        uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto(
           client.id,
           client.name,
           client.logoUri,
@@ -93,10 +92,10 @@ class UserApprovedClientService(
       )
     }
     return PagedResult(
-      page,
-      true,
-      totalElements,
-      clients,
+      page + 1,
+      userApprovedClientPage.isLast,
+      userApprovedClientPage.totalElements.toInt(),
+      userApprovedClientDtos,
     )
   }
 

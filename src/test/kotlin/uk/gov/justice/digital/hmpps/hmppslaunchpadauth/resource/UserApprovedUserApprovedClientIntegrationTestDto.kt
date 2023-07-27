@@ -34,7 +34,7 @@ import java.util.*
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Import(TestConfig::class)
-class UserApprovedClientIntegrationTest(
+class UserApprovedUserApprovedClientIntegrationTestDto(
   @Autowired private var userApprovedClientRepository: UserApprovedClientRepository,
   @Autowired private var clientRepository: ClientRepository,
 ) {
@@ -47,7 +47,7 @@ class UserApprovedClientIntegrationTest(
 
   private val id = UUID.randomUUID()
   private val clientId = UUID.randomUUID()
-  private val userID = "test@moj.com"
+  private val userID = "G2320VD"
   private val localDateTime = LocalDateTime.now() // Default time zone set for config is Europe/Paris
   private val dateTimeInUTC = LocalDateTime.now(ZoneOffset.UTC)
   private lateinit var clientDBOne: Client
@@ -55,7 +55,9 @@ class UserApprovedClientIntegrationTest(
   private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
 
   @BeforeEach
-  fun beforeAll() {
+  fun beforeEach() {
+    clientRepository.deleteAll()
+    userApprovedClientRepository.deleteAll()
     clientDBOne = Client(
       clientId,
       UUID.randomUUID().toString(),
@@ -95,11 +97,11 @@ class UserApprovedClientIntegrationTest(
   @Test
   fun `get user approved clients by user id`() {
     val url = URI("$baseUrl:$port/v1/users/$userID/clients?page=1&size=20")
-    val response  = restTemplate.exchange(RequestEntity<Any>(HttpMethod.GET,url), object: ParameterizedTypeReference<PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client>> () {})
-    val pagedResult = response?.body as PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client>
-    val clients = pagedResult?.content as List<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client>
-    val clientOne  = clients[0]
-    assertEquals(pagedResult?.page, 1)
+    val response  = restTemplate.exchange(RequestEntity<Any>(HttpMethod.GET,url), object: ParameterizedTypeReference<PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto>> () {})
+    val pagedResult = response?.body as PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto>
+    val userApprovedClientDtos = pagedResult?.content as List<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto>
+    val clientOne  = userApprovedClientDtos[0]
+    assertEquals(pagedResult?.totalElements, 1)
     assertEquals(1, localDateTime.compareTo(dateTimeInUTC))
     assertEquals(dateTimeInUTC.format(dateTimeFormatter), clientOne?.createdDate?.format(dateTimeFormatter))
     assertEquals(clientDBOne.name, clientOne?.name)
