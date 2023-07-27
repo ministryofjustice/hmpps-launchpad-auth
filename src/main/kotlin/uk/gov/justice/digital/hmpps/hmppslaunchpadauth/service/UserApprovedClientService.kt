@@ -68,12 +68,12 @@ class UserApprovedClientService(
     userApprovedClientPage: Page<UserApprovedClient>,
     page: Int,
   ): PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto> {
-    val userApprovedClientDtos = ArrayList<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto>()
+    val clients = ArrayList<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto>()
     userApprovedClientPage.content.forEach { x ->
       val client = clientService.getClientById(x.clientId).orElseThrow {
         throw ApiException(String.format("Client id not found %s", x.clientId), BAD_REQUEST_CODE)
       }
-      userApprovedClientDtos.add(
+      clients.add(
         uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto(
           client.id,
           client.name,
@@ -89,7 +89,7 @@ class UserApprovedClientService(
       page + 1,
       userApprovedClientPage.isLast,
       userApprovedClientPage.totalElements,
-      userApprovedClientDtos,
+      clients,
     )
   }
 
