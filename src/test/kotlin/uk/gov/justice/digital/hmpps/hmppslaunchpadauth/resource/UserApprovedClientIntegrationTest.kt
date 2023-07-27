@@ -32,7 +32,6 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 @Import(TestConfig::class)
 class UserApprovedClientIntegrationTest(
