@@ -14,7 +14,7 @@ import java.util.*
 @Table(
   name = "user_approved_client",
   indexes = [
-    Index(name ="ix_user_id_client_id", columnList = "user_id,client_id", unique = true,)
+    Index(name = "ix_created_date_user_id_client_id", columnList = " created_date,user_id,client_id", unique = true),
   ],
 )
 data class UserApprovedClient(
@@ -29,7 +29,7 @@ data class UserApprovedClient(
 
   @Column(name = "scopes", nullable = false)
   @JdbcTypeCode(SqlTypes.JSON)
-  var scopes:Set<Scope>,
+  var scopes: Set<Scope>,
 
   @Column(name = "created_date", nullable = false)
   val createdDate: LocalDateTime,

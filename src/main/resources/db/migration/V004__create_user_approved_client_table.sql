@@ -6,6 +6,6 @@ create table public.user_approved_client (
                                              user_id character varying(255) not null,
                                              scopes jsonb not null
 );
-create unique index ix_user_id_client_id on user_approved_client using btree (user_id, client_id);
+create unique index ix_created_date_user_id_client_id on user_approved_client using btree (created_date, user_id, client_id);
 
 

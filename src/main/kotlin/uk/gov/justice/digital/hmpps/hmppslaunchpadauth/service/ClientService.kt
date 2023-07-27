@@ -35,11 +35,10 @@ class ClientService(private var clientRepository: ClientRepository) {
     nonce: String?,
   ) {
     val client = clientRepository.findById(clientId).orElseThrow {
-      val message = String.format("Client with client_id %s does not exist", clientId)
-      logger.error(message)
+      logger.error("Client with client_id {} does not exist", clientId)
       ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
     }
-    logger.info(String.format("Initiate user sign in process for client id: %s", client.id))
+    logger.info("Initiate user sign in process for client id: {}", client.id)
     isEnabled(client.enabled)
     validateScopes(scopes, client.scopes)
     validateAuthorizationGrantType(responseType, client.authorizedGrantTypes)
@@ -58,7 +57,7 @@ class ClientService(private var clientRepository: ClientRepository) {
       URL(uri)
       validateRedirectUri(uri, redirectUris)
     } catch (exception: MalformedURLException) {
-      logger.error("Not a valid redirect url: %s", uri)
+      logger.error("Not a valid redirect url: {}", uri)
       throw ApiException(IN_VALID_REDIRECT_URI, BAD_REQUEST_CODE)
     }
   }
@@ -81,14 +80,14 @@ class ClientService(private var clientRepository: ClientRepository) {
 
   private fun validateAuthorizationGrantType(grant: String, clientGrants: Set<AuthorizationGrantType>) {
     if (!AuthorizationGrantType.isStringMatchEnumValue(grant, clientGrants)) {
-      logger.debug(String.format("Authorization grant type %s not matching with client grants", grant))
+      logger.debug("Authorization grant type {} not matching with client grants", grant)
       throw ApiException(IN_VALID_GRANT, BAD_REQUEST_CODE)
     }
   }
 
   private fun validateRedirectUri(uri: String, redirectUris: Set<String>) {
     if (!redirectUris.contains(uri)) {
-      logger.debug(String.format("Redirect uri not matching with client redirect uri: %s", uri))
+      logger.debug("Redirect uri not matching with client redirect uri: {}", uri)
       throw ApiException(IN_VALID_REDIRECT_URI, BAD_REQUEST_CODE)
     }
   }

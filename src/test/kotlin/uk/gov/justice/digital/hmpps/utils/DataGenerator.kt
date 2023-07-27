@@ -68,14 +68,14 @@ class DataGenerator {
         .compact()
     }
 
-    fun buildUserApprovedClient(userId: String, clientId: UUID, scopes: Set<Scope>): UserApprovedClient {
+    fun buildUserApprovedClient(userId: String, clientId: UUID, scopes: Set<Scope>, createdDate: LocalDateTime, lastModifiedDate: LocalDateTime): UserApprovedClient {
       return UserApprovedClient(
         UUID.randomUUID(),
         userId,
         clientId,
         scopes,
-        LocalDateTime.now(ZoneOffset.UTC),
-        LocalDateTime.now(ZoneOffset.UTC)
+        createdDate,
+        lastModifiedDate
       )
     }
   }

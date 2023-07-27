@@ -1,14 +1,15 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
@@ -20,78 +21,110 @@ import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 class UserApprovedClientServiceTest {
-    @Mock
-    private lateinit var userApprovedClientRepository: UserApprovedClientRepository
+  @Mock
+  private lateinit var userApprovedClientRepository: UserApprovedClientRepository
 
-    @Mock
-    private lateinit var clientService: ClientService
+  @Mock
+  private lateinit var clientService: ClientService
 
-    private lateinit var userApprovedClientService: UserApprovedClientService
+  private lateinit var userApprovedClientService: UserApprovedClientService
 
+  private val dateAndTimeInUTC = LocalDateTime.now(ZoneOffset.UTC)
 
-    @BeforeEach
-    fun setUp() {
-      userApprovedClientService = UserApprovedClientService(userApprovedClientRepository, clientService)
-    }
+  @BeforeEach
+  fun setUp() {
+    userApprovedClientService = UserApprovedClientService(userApprovedClientRepository, clientService)
+  }
 
-    @AfterEach
-    fun tearDown() {
-    }
+  @AfterEach
+  fun tearDown() {
+  }
 
-    @Test
-    fun createUserApprovedClient() {
-      val expected = DataGenerator.buildUserApprovedClient("test@moj.com", UUID.randomUUID(), setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ))
-      Mockito.`when`(userApprovedClientRepository.save(expected)).thenReturn(expected)
-      val result = userApprovedClientService.createUserApprovedClient(expected)
-      assertUserApprovedClient(expected, result)
-    }
+  @Test
+  fun createUserApprovedClient() {
+    val expected = DataGenerator.buildUserApprovedClient(
+      "test@moj.com",
+      UUID.randomUUID(),
+      setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ),
+      dateAndTimeInUTC,
+      dateAndTimeInUTC,
+    )
+    Mockito.`when`(userApprovedClientRepository.save(expected)).thenReturn(expected)
+    val result = userApprovedClientService.upsertUserApprovedClient(expected)
+    assertUserApprovedClient(expected, result)
+  }
 
-    @Test
-    fun updateUserApprovedClient() {
-      val expected = DataGenerator.buildUserApprovedClient("test@moj.com", UUID.randomUUID(), setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ))
-      expected.scopes = setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_DELETE)
-      expected.lastModifiedDate = LocalDateTime.now(ZoneOffset.UTC)
-      Mockito.`when`(userApprovedClientRepository.save(expected)).thenReturn(expected)
-      val result = userApprovedClientService.updateUserApprovedClient(expected)
-      assertEquals(expected, result)
-    }
+  @Test
+  fun updateUserApprovedClient() {
+    val expected = DataGenerator.buildUserApprovedClient(
+      "test@moj.com",
+      UUID.randomUUID(),
+      setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ),
+      dateAndTimeInUTC,
+      dateAndTimeInUTC,
+    )
+    expected.scopes = setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_DELETE)
+    expected.lastModifiedDate = LocalDateTime.now(ZoneOffset.UTC)
+    Mockito.`when`(userApprovedClientRepository.save(expected)).thenReturn(expected)
+    val result = userApprovedClientService.upsertUserApprovedClient(expected)
+    assertEquals(expected, result)
+  }
 
-    @Test
-    fun getUserApprovedClientById() {
-      val expected = DataGenerator.buildUserApprovedClient("test@moj.com", UUID.randomUUID(), setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ))
-      Mockito.`when`(userApprovedClientRepository.findById(expected.id)).thenReturn(Optional.of(expected))
-      val result = userApprovedClientService.getUserApprovedClientById(expected.id)
-      assertEquals(expected, result.get())
-    }
+  @Test
+  fun getUserApprovedClientById() {
+    val expected = DataGenerator.buildUserApprovedClient(
+      "test@moj.com",
+      UUID.randomUUID(),
+      setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ),
+      dateAndTimeInUTC,
+      dateAndTimeInUTC,
+    )
+    Mockito.`when`(userApprovedClientRepository.findById(expected.id)).thenReturn(Optional.of(expected))
+    val result = userApprovedClientService.getUserApprovedClientById(expected.id)
+    assertEquals(expected, result.get())
+  }
 
-    @Test
-    fun deleteUserApprovedClientById() {
-      val expected = DataGenerator.buildUserApprovedClient("test@moj.com", UUID.randomUUID(), setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ))
-      Mockito.doNothing().`when`(userApprovedClientRepository).deleteById(expected.id)
-      val result = userApprovedClientService.deleteUserApprovedClientById(expected.id)
-    }
+  @Test
+  fun deleteUserApprovedClientById() {
+    val expected = DataGenerator.buildUserApprovedClient(
+      "test@moj.com",
+      UUID.randomUUID(),
+      setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ),
+      dateAndTimeInUTC,
+      dateAndTimeInUTC,
+    )
+    Mockito.doNothing().`when`(userApprovedClientRepository).deleteById(expected.id)
+    userApprovedClientService.deleteUserApprovedClientById(expected.id)
+  }
 
-    @Test
-    fun getUserApprovedClientsByUserId() {
-      val client = DataGenerator.buildClient(true, true)
-      val pageRequest = PageRequest.of(0,1)
-      val expected = DataGenerator.buildUserApprovedClient("test@moj.com", client.id, setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ))
-      Mockito.`when`(userApprovedClientRepository.findAllByUserId("test@moj.com", pageRequest)).thenReturn(listOf(expected))
-      Mockito.`when`(userApprovedClientRepository.countAllByUserId("test@moj.com")).thenReturn(1)
-      Mockito.`when`(clientService.getClientById(client.id)).thenReturn(Optional.of(client))
-      val result = userApprovedClientService.getUserApprovedClientsByUserId(expected.userId, 1, 1)
-      assertEquals(1, result.totalElements)
-      assertTrue(result.exhausted)
-      assertEquals(1, result.page)
-    }
+  @Test
+  fun getUserApprovedClientsByUserId() {
+    val client = DataGenerator.buildClient(true, true)
+    val pageRequest = PageRequest.of(0, 1)
+    val expected = DataGenerator.buildUserApprovedClient(
+      "test@moj.com",
+      client.id,
+      setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ),
+      dateAndTimeInUTC,
+      dateAndTimeInUTC,
+    )
+    Mockito.`when`(userApprovedClientRepository.findAllByUserId("test@moj.com", pageRequest))
+      .thenReturn(PageImpl(listOf(expected)))
+    Mockito.`when`(userApprovedClientRepository.countAllByUserId("test@moj.com")).thenReturn(1)
+    Mockito.`when`(clientService.getClientById(client.id)).thenReturn(Optional.of(client))
+    val result = userApprovedClientService.getUserApprovedClientsByUserId(expected.userId, 1, 1)
+    assertEquals(1, result.totalElements)
+    assertTrue(result.exhausted)
+    assertEquals(1, result.page)
+  }
 
-    @Test
-    fun getUserApprovedClientByUserIdAndClientId() {
-    }
+  @Test
+  fun getUserApprovedClientByUserIdAndClientId() {
+  }
 
-    @Test
-    fun revokeClientAccess() {
-    }
+  @Test
+  fun revokeClientAccess() {
+  }
 
   private fun assertUserApprovedClient(expected: UserApprovedClient, result: UserApprovedClient) {
     assertEquals(expected.id, result.id)

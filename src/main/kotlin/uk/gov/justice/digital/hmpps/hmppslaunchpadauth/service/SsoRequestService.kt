@@ -19,24 +19,25 @@ class SsoRequestService(
 ) {
   private val logger = LoggerFactory.getLogger(SsoRequestService::class.java)
   fun createSsoRequest(ssoRequest: SsoRequest): SsoRequest {
+    println(LocalDateTime.now())
     val ssoRequestCreated = ssoRequestRepository.save(ssoRequest)
-    logger.info(String.format("Sso request created for user of  client: %s", ssoRequestCreated.client.id))
+    logger.info("Sso request created for user of  client: {}", ssoRequestCreated.client.id)
     return ssoRequestCreated
   }
 
   fun updateSsoRequest(ssoRequest: SsoRequest): SsoRequest {
     val updatedSsoRequest = ssoRequestRepository.save(ssoRequest)
-    logger.info(String.format("Sso request updated  for user of  client: %s", ssoRequest.client.id))
+    logger.info("Sso request updated  for user of  client: {}", ssoRequest.client.id)
     return updatedSsoRequest
   }
 
   fun getSsoRequestById(id: UUID): Optional<SsoRequest> {
-    logger.debug(String.format("Sso request retrieved for id: %s", id))
+    logger.debug("Sso request retrieved for id: {}", id)
     return ssoRequestRepository.findById(id)
   }
 
   fun deleteSsoRequestById(id: UUID) {
-    logger.debug(String.format("Sso request deleted for id: %s", id))
+    logger.debug("Sso request deleted for id: {}", id)
     ssoRequestRepository.deleteById(id)
   }
 

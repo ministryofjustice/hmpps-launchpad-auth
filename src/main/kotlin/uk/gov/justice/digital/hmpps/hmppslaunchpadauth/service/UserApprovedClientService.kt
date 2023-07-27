@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
@@ -10,7 +9,6 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedClientRepository
 import java.util.*
-import kotlin.collections.ArrayList
 
 @Service
 class UserApprovedClientService (private var userApprovedClientRepository: UserApprovedClientRepository,
@@ -18,15 +16,8 @@ class UserApprovedClientService (private var userApprovedClientRepository: UserA
   )  {
   private val logger = LoggerFactory.getLogger(UserApprovedClientService::class.java)
 
-  fun createUserApprovedClient(userApprovedClient: UserApprovedClient): UserApprovedClient {
-    logger.info(String.format("Creating user approved client for user id:%s client id:%s",
-      userApprovedClient.userId,
-      userApprovedClient.clientId))
-    return userApprovedClientRepository.save(userApprovedClient)
-  }
-
-  fun updateUserApprovedClient(userApprovedClient: UserApprovedClient): UserApprovedClient {
-    logger.info(String.format("Updating user approved client for user-id:%s client-id:%s",
+  fun upsertUserApprovedClient(userApprovedClient: UserApprovedClient): UserApprovedClient {
+    logger.info(String.format("Upsert user approved client for user id:%s client id:%s",
       userApprovedClient.userId,
       userApprovedClient.clientId))
     return userApprovedClientRepository.save(userApprovedClient)
@@ -45,10 +36,9 @@ class UserApprovedClientService (private var userApprovedClientRepository: UserA
   fun getUserApprovedClientsByUserId(userId: String, page: Int, size: Int): PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client> {
     logger.debug(String.format("Getting user approved clients for user id: %s", userId))
     val pageRequest = PageRequest.of(page -1, size)
-    pageRequest.withSort(Sort.Direction.ASC, "createdDate")
     val totalElements = userApprovedClientRepository.countAllByUserId(userId)
     val userApprovedClients = userApprovedClientRepository.findAllByUserId(userId, pageRequest)
-    return getUserApprovedClientsDto(userApprovedClients, page, totalElements)
+    return getUserApprovedClientsDto(userApprovedClients.content, page, totalElements)
   }
 
   fun getUserApprovedClientByUserIdAndClientId(userId: String, clientId: UUID): Optional<UserApprovedClient> {
@@ -68,17 +58,19 @@ class UserApprovedClientService (private var userApprovedClientRepository: UserA
     val clients = ArrayList<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client>()
     userApprovedClients.forEach { x ->
       val client = clientService.getClientById(x.clientId).orElseThrow {
-        throw ApiException(String.format("Client id not found"), BAD_REQUEST_CODE)
+        throw ApiException(String.format("Client id not found %s", x.clientId), BAD_REQUEST_CODE)
       }
-      clients.add(uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client(
-        client.id,
-        client.name,
-        client.logoUri,
-        client.description,
-        client.autoApprove,
-        x.createdDate,
-        convertScopes(x.scopes),
-      ))
+      clients.add(
+        uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Client(
+          client.id,
+          client.name,
+          client.logoUri,
+          client.description,
+          client.autoApprove,
+          x.createdDate,
+          convertScopes(x.scopes),
+        ),
+      )
     }
     return PagedResult(
       page,

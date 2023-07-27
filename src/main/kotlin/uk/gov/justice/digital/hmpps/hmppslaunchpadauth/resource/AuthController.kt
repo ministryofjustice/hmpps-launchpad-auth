@@ -10,9 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ACCESS_DENIED
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ACCESS_DENIED_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.BAD_REQUEST_CODE
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ClientService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoLogInService
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoRequestService
 import java.util.*
 
 const val MAX_STATE_OR_NONCE_SIZE = 128
@@ -20,9 +18,7 @@ const val SSO_SUPPORTED_RESPONSE_TYPE = "code"
 
 @RestController
 @RequestMapping("/v1/oauth2")
-class AuthController(private var clientService: ClientService,
-                     private var ssoRequestService: SsoRequestService,
-                     private var ssoLoginService: SsoLogInService,) {
+class AuthController(private var ssoLoginService: SsoLogInService) {
   @GetMapping("/authorize")
   fun authorize(
     @RequestParam("client_id", required = true) clientId: UUID,
