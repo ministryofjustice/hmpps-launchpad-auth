@@ -94,7 +94,7 @@ class UserApprovedClientService(
     return PagedResult(
       page + 1,
       userApprovedClientPage.isLast,
-      userApprovedClientPage.totalElements.toInt(),
+      userApprovedClientPage.totalElements,
       userApprovedClientDtos,
     )
   }
