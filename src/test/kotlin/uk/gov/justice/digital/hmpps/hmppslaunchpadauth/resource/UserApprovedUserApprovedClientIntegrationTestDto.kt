@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
-
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -19,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.RestTemplate
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.config.TestConfig
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
@@ -66,14 +66,14 @@ class UserApprovedUserApprovedClientIntegrationTestDto(
         Scope.USER_BASIC_READ,
         Scope.USER_BOOKING_READ,
         Scope.USER_ESTABLISHMENT_READ,
-        Scope.USER_CLIENTS_DELETE
+        Scope.USER_CLIENTS_DELETE,
       ),
       setOf(AuthorizationGrantType.AUTHORIZATION_CODE, AuthorizationGrantType.REFRESH_TOKEN),
       setOf("https://testdomain.com"),
       true,
       true,
       "Test App",
-      "http://localhost:${port}/test",
+      "http://localhost:$port/test",
       "This is test App",
     )
     clientRepository.save(clientDBOne)
@@ -89,7 +89,7 @@ class UserApprovedUserApprovedClientIntegrationTestDto(
   }
 
   @AfterEach
-  fun tearOff(){
+  fun tearOff() {
     clientRepository.deleteAll()
     userApprovedClientRepository.deleteAll()
   }
@@ -97,24 +97,30 @@ class UserApprovedUserApprovedClientIntegrationTestDto(
   @Test
   fun `get user approved clients by user id`() {
     val url = URI("$baseUrl:$port/v1/users/$userID/clients?page=1&size=20")
-    val response  = restTemplate.exchange(RequestEntity<Any>(HttpMethod.GET,url), object: ParameterizedTypeReference<PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto>> () {})
-    val pagedResult = response?.body as PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto>
-    val userApprovedClientDtos = pagedResult?.content as List<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto>
-    val clientOne  = userApprovedClientDtos[0]
-    assertEquals(pagedResult?.totalElements, 1)
+    val response = restTemplate.exchange(
+      RequestEntity<Any>(HttpMethod.GET, url),
+      object : ParameterizedTypeReference<PagedResult<UserApprovedClientDto>>() {},
+    )
+    val pagedResult = response.body as PagedResult<UserApprovedClientDto>
+    val userApprovedClientDtos = pagedResult.content
+    val clientOne = userApprovedClientDtos[0]
+    assertEquals(pagedResult.totalElements, 1)
     assertEquals(1, localDateTime.compareTo(dateTimeInUTC))
-    assertEquals(dateTimeInUTC.format(dateTimeFormatter), clientOne?.createdDate?.format(dateTimeFormatter))
-    assertEquals(clientDBOne.name, clientOne?.name)
-    assertEquals(clientDBOne.id, clientOne?.id)
-    assertEquals(clientDBOne.logoUri, clientOne?.logoUri)
-    assertEquals(clientDBOne.description, clientOne?.description)
-    assertEquals(clientDBOne.autoApprove, clientOne?.autoApprove)
+    assertEquals(dateTimeInUTC.format(dateTimeFormatter), clientOne.createdDate.format(dateTimeFormatter))
+    assertEquals(clientDBOne.name, clientOne.name)
+    assertEquals(clientDBOne.id, clientOne.id)
+    assertEquals(clientDBOne.logoUri, clientOne.logoUri)
+    assertEquals(clientDBOne.description, clientOne.description)
+    assertEquals(clientDBOne.autoApprove, clientOne.autoApprove)
   }
 
   @Test
   fun `revoke client access`() {
     val url = URI("$baseUrl:$port/v1/users/$userID/clients/$clientId")
-    val response = restTemplate.exchange(RequestEntity<Any>(HttpMethod.DELETE,url), object: ParameterizedTypeReference<ResponseEntity<Void>> () {})
+    val response = restTemplate.exchange(
+      RequestEntity<Any>(HttpMethod.DELETE, url),
+      object : ParameterizedTypeReference<ResponseEntity<Void>>() {},
+    )
     assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
     assertTrue(userApprovedClientRepository.findUserApprovedClientByUserIdAndClientId(userID, clientId).isEmpty)
   }

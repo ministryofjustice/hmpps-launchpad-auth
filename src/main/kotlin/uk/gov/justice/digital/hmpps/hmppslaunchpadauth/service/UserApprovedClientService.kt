@@ -3,8 +3,10 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
@@ -37,10 +39,10 @@ class UserApprovedClientService(
     userId: String,
     page: Int,
     size: Int,
-  ): PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto> {
+  ): PagedResult<UserApprovedClientDto> {
     logger.debug("Getting user approved clients for user id: {}", userId)
-    val pageRequest = PageRequest.of(page - 1, size)
-    val userApprovedClientPage = userApprovedClientRepository.findUserApprovedClientsByUserId(userId, pageRequest)
+    val pageRequest = PageRequest.of(page - 1, size).withSort(Sort.Direction.DESC, "createdDate")
+    val userApprovedClientPage = userApprovedClientRepository.findUserApprovedClientsByUserIdAndClientIdsIsNotNull(userId, pageRequest)
     return getUserApprovedClientsDto(userApprovedClientPage, page)
   }
 
@@ -67,14 +69,14 @@ class UserApprovedClientService(
   private fun getUserApprovedClientsDto(
     userApprovedClientPage: Page<UserApprovedClient>,
     page: Int,
-  ): PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto> {
-    val clients = ArrayList<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto>()
+  ): PagedResult<UserApprovedClientDto> {
+    val clients = ArrayList<UserApprovedClientDto>()
     userApprovedClientPage.content.forEach { x ->
       val client = clientService.getClientById(x.clientId).orElseThrow {
         throw ApiException(String.format("Client id not found %s", x.clientId), BAD_REQUEST_CODE)
       }
       clients.add(
-        uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto(
+        UserApprovedClientDto(
           client.id,
           client.name,
           client.logoUri,

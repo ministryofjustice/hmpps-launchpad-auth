@@ -12,7 +12,7 @@ class IdTokenProcessor : TokenProcessor {
   private val logger = LoggerFactory.getLogger(IdTokenProcessor::class.java)
 
   override fun getUserId(token: String, nonce: String): String {
-    logger.debug(String.format("Id token received: %s", token))
+    logger.debug("Id token received: {}", token)
     val decoder = Base64.getUrlDecoder()
     val chunks = token.split(".")
     val payload = String(decoder.decode(chunks[1]))
@@ -20,6 +20,7 @@ class IdTokenProcessor : TokenProcessor {
     validateNonce(nonceInIdToken, nonce)
     val userId = getClaimFromPayload(payload,"email")
     if (userId != null) {
+      validateUserIdFormat(userId)
       logger.info("Logged user id : {}", userId)
       return userId
     } else {
@@ -42,6 +43,14 @@ class IdTokenProcessor : TokenProcessor {
     } catch(exception: JSONException) {
       logger.error("Claim: {} not found in id token payload", claimName)
       throw ApiException(String.format("Claim: %s not found", claimName), 500)
+    }
+  }
+
+  private fun validateUserIdFormat(userId: String) {
+    val regex = "^[A-Z][0-9]{4}[A-Z]{2}$".toRegex()
+    if (!regex.matches(userId)) {
+      logger.warn("Invalid user id format for user id {}", userId)
+      throw ApiException("Invalid user id format for user id", BAD_REQUEST_CODE)
     }
   }
 }

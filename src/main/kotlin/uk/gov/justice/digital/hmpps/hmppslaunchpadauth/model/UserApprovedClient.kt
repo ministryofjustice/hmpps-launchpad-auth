@@ -14,7 +14,7 @@ import java.util.*
 @Table(
   name = "user_approved_client",
   indexes = [
-    Index(name = "ix_created_date_user_id_client_id", columnList = " created_date,user_id,client_id", unique = true),
+    Index(name = "ix_user_id_client_id_created_date", columnList = "user_id,client_id,created_date", unique = true),
   ],
 )
 data class UserApprovedClient(

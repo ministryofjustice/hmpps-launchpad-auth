@@ -109,7 +109,7 @@ class UserApprovedUserApprovedClientServiceTestDto {
       dateAndTimeInUTC,
       dateAndTimeInUTC,
     )
-    Mockito.`when`(userApprovedClientRepository.findUserApprovedClientsByUserId(userID, pageRequest))
+    Mockito.`when`(userApprovedClientRepository.findUserApprovedClientsByUserIdAndClientIdsIsNotNull(userID, pageRequest))
       .thenReturn(PageImpl(listOf(expected)))
     Mockito.`when`(clientService.getClientById(client.id)).thenReturn(Optional.of(client))
     val result = userApprovedClientService.getUserApprovedClientsByUserId(expected.userId, 1, 1)

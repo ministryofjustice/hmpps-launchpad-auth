@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.BAD_REQUEST_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.UserApprovedClientService
@@ -26,7 +27,7 @@ class UserApprovedClientController(private var userApprovedClientService: UserAp
     @PathVariable("user-id") userId: String,
     @RequestParam("page", required = false) page: Int?,
     @RequestParam("size", required = false) size: Int?,
-  ): ResponseEntity<PagedResult<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto>> {
+  ): ResponseEntity<PagedResult<UserApprovedClientDto>> {
     validateUserIdFormat(userId)
     val pageNum = validatePage(page)
     val pageSize = validatePageSize(size)
@@ -46,9 +47,9 @@ class UserApprovedClientController(private var userApprovedClientService: UserAp
   }
 
   private fun validateUserIdFormat(userId: String) {
-    val regex = "^[A-Z][0-9]{4}[A-Z]{2}\$".toRegex()
+    val regex = "^[A-Z][0-9]{4}[A-Z]{2}$".toRegex()
     if (!regex.matches(userId)) {
-      logger.warn("Invalid user id format for user id", userId)
+      logger.warn("Invalid user id format for user id {}", userId)
       throw ApiException("Invalid user id format for user id", BAD_REQUEST_CODE)
     }
   }
@@ -66,6 +67,9 @@ class UserApprovedClientController(private var userApprovedClientService: UserAp
   private fun validatePageSize(size: Int?): Int {
     if (size == null) {
       return 20
+    }
+    if (size > 20 || size < 1) {
+      throw ApiException("size cannot be more than 20 and less than 1", BAD_REQUEST_CODE)
     }
     return size
   }

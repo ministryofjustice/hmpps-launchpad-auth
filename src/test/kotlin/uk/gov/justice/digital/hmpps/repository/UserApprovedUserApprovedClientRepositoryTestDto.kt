@@ -165,20 +165,20 @@ class UserApprovedUserApprovedClientRepositoryTestDto(@Autowired private var use
       dateAndTimeInUTCThird,
     )
     userApprovedClientRepository.saveAll(listOf(expectedThird, expectedSecond, expectedFirst))
-    var result = userApprovedClientRepository.findUserApprovedClientsByUserId(
+    var result = userApprovedClientRepository.findUserApprovedClientsByUserIdAndClientIdsIsNotNull(
       userId,
       PageRequest.of(0, 2),
     )
     assertEquals(2, result.content.size)
     assertEquals(dateAndTimeInUTCThird, result.content.get(0).createdDate)
     assertEquals(dateAndTimeInUTCSecond, result.content.get(1).createdDate)
-    result = userApprovedClientRepository.findUserApprovedClientsByUserId(
+    result = userApprovedClientRepository.findUserApprovedClientsByUserIdAndClientIdsIsNotNull(
       userId,
       PageRequest.of(1, 2),
     )
     assertEquals(1, result.content.size)
     assertEquals(dateAndTimeInUTCFirst, result.content.get(0).createdDate)
-    result = userApprovedClientRepository.findUserApprovedClientsByUserId(
+    result = userApprovedClientRepository.findUserApprovedClientsByUserIdAndClientIdsIsNotNull(
       userId,
       PageRequest.of(2, 2),
     )
