@@ -48,7 +48,7 @@ class UserApprovedClientController(private var userApprovedClientService: UserAp
   private fun validateUserIdFormat(userId: String) {
     val regex = "^[A-Z][0-9]{4}[A-Z]{2}\$".toRegex()
     if (!regex.matches(userId)) {
-      logger.debug("Invalid user id format for user id", userId)
+      logger.warn("Invalid user id format for user id", userId)
       throw ApiException("Invalid user id format for user id", BAD_REQUEST_CODE)
     }
   }
