@@ -12,7 +12,7 @@ import org.mockito.kotlin.any
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.SsoRequestRepository
-import uk.gov.justice.digital.hmpps.utils.DataGenerator
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import java.util.*
 
 @ExtendWith(MockitoExtension::class)
@@ -32,47 +32,47 @@ class SsoRequestServiceTest {
   fun tearDown() {
   }
 
-    @Test
-    fun createSsoRequest() {
-      Mockito.`when`(ssoRequestRepository.save(ssoRequest)).thenReturn(ssoRequest)
-      val result = ssoRequestService.createSsoRequest(ssoRequest)
-      assertSsoRequest(ssoRequest, result)
-    }
+  @Test
+  fun createSsoRequest() {
+    Mockito.`when`(ssoRequestRepository.save(ssoRequest)).thenReturn(ssoRequest)
+    val result = ssoRequestService.createSsoRequest(ssoRequest)
+    assertSsoRequest(ssoRequest, result)
+  }
 
-    @Test
-    fun updateSsoRequest() {
-      Mockito.`when`(ssoRequestRepository.save(ssoRequest)).thenReturn(ssoRequest)
-      val result = ssoRequestService.updateSsoRequest(ssoRequest)
-      assertSsoRequest(ssoRequest, result)
-    }
+  @Test
+  fun updateSsoRequest() {
+    Mockito.`when`(ssoRequestRepository.save(ssoRequest)).thenReturn(ssoRequest)
+    val result = ssoRequestService.updateSsoRequest(ssoRequest)
+    assertSsoRequest(ssoRequest, result)
+  }
 
-    @Test
-    fun getSsoRequestById() {
-      val id = UUID.randomUUID()
-      Mockito.`when`(ssoRequestRepository.findById(id)).thenReturn(Optional.of(ssoRequest))
-      val result = ssoRequestService.getSsoRequestById(id)
-      assertSsoRequest(ssoRequest, result.get())
-    }
+  @Test
+  fun getSsoRequestById() {
+    val id = UUID.randomUUID()
+    Mockito.`when`(ssoRequestRepository.findById(id)).thenReturn(Optional.of(ssoRequest))
+    val result = ssoRequestService.getSsoRequestById(id)
+    assertSsoRequest(ssoRequest, result.get())
+  }
 
-   @Test
-   fun deleteSsoRequestById() {
-     val id = UUID.randomUUID()
-     Mockito.doNothing().`when`(ssoRequestRepository).deleteById(id)
-     ssoRequestService.deleteSsoRequestById(id)
-   }
+  @Test
+  fun deleteSsoRequestById() {
+    val id = UUID.randomUUID()
+    Mockito.doNothing().`when`(ssoRequestRepository).deleteById(id)
+    ssoRequestService.deleteSsoRequestById(id)
+  }
 
-    @Test
-    fun generateSsoRequest() {
-      Mockito.`when`(ssoRequestRepository.save(any())).thenReturn(ssoRequest)
-      val result = ssoRequestService.generateSsoRequest(
-        ssoRequest.client.scopes,
-        ssoRequest.client.state,
-        ssoRequest.client.nonce,
-        ssoRequest.client.redirectUri,
-        ssoRequest.client.id
-      )
-      assertSsoRequest(ssoRequest, result)
-    }
+  @Test
+  fun generateSsoRequest() {
+    Mockito.`when`(ssoRequestRepository.save(any())).thenReturn(ssoRequest)
+    val result = ssoRequestService.generateSsoRequest(
+      ssoRequest.client.scopes,
+      ssoRequest.client.state,
+      ssoRequest.client.nonce,
+      ssoRequest.client.redirectUri,
+      ssoRequest.client.id,
+    )
+    assertSsoRequest(ssoRequest, result)
+  }
 
   private fun assertSsoRequest(expected: SsoRequest, result: SsoRequest) {
     assertEquals(expected.id, result.id)

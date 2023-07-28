@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.utils
+package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
@@ -13,6 +13,8 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
+const val REDIRECT_URI = "https://launchpad.com"
+const val LOGO_URI = "$REDIRECT_URI/logo"
 class DataGenerator {
   companion object {
     fun buildClient(enabled: Boolean, autoApprove: Boolean): Client {
@@ -21,11 +23,11 @@ class DataGenerator {
         UUID.randomUUID().toString(),
         setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ, Scope.USER_ESTABLISHMENT_READ),
         setOf(AuthorizationGrantType.AUTHORIZATION_CODE, AuthorizationGrantType.REFRESH_TOKEN),
-        setOf("http://localhost:8080/test"),
+        setOf(REDIRECT_URI),
         enabled,
         autoApprove,
         "Test App",
-        "http://localhost:8080/test",
+        LOGO_URI,
         "Test App for test environment",
       )
     }

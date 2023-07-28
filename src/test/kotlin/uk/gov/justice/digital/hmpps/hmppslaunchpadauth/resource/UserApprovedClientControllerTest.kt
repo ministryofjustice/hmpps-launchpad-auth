@@ -22,7 +22,7 @@ import java.util.*
 @EnableAutoConfiguration
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-class UserApprovedUserApprovedClientControllerTest(@Autowired private var userApprovedClientController: UserApprovedClientController) {
+class UserApprovedClientControllerTest(@Autowired private var userApprovedClientController: UserApprovedClientController) {
   @MockBean
   private lateinit var userApprovedClientService: UserApprovedClientService
 
@@ -78,7 +78,7 @@ class UserApprovedUserApprovedClientControllerTest(@Autowired private var userAp
   fun `get user approved clients by user id with when user id format is invalid`() {
     assertThrows(ApiException::class.java) {
       userApprovedClientController.getUserApprovedClients(
-        "test@moj.com",
+        "test@random.com",
         null,
         null,
       )

@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.repository
+package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository
 
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -13,18 +13,16 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.ClientRepository
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ClientService
-import uk.gov.justice.digital.hmpps.utils.DataGenerator
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import java.util.*
 
-@SpringBootTest(classes = [ClientService::class])
+@SpringBootTest(classes = [ClientRepository::class])
 @EnableAutoConfiguration
 @EnableJpaRepositories(basePackages = ["uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository"])
 @EntityScan("uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model")
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-class UserApprovedClientDtoRepositoryTest(@Autowired var clientRepository: ClientRepository) {
+class ClientRepositoryTest(@Autowired var clientRepository: ClientRepository) {
   @BeforeEach
   fun setUp() {
   }

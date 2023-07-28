@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
-import uk.gov.justice.digital.hmpps.utils.DataGenerator
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import java.time.Instant
 import java.util.*
 

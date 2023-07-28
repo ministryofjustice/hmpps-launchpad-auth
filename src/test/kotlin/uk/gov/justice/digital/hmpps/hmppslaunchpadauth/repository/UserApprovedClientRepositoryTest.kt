@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.repository
+package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -18,8 +18,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedClientRepository
-import uk.gov.justice.digital.hmpps.utils.DataGenerator
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -30,7 +29,7 @@ import java.util.*
 @EntityScan("uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model")
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-class UserApprovedUserApprovedClientRepositoryTest(@Autowired private var userApprovedClientRepository: UserApprovedClientRepository) {
+class UserApprovedClientRepositoryTest(@Autowired private var userApprovedClientRepository: UserApprovedClientRepository) {
   private val dateAndTimeInUTC = LocalDateTime.now(ZoneOffset.UTC)
   private val userId = "G2320VD"
 
@@ -181,7 +180,7 @@ class UserApprovedUserApprovedClientRepositoryTest(@Autowired private var userAp
     assertEquals(dateAndTimeInUTCFirst, result.content.get(0).createdDate)
     result = userApprovedClientRepository.findUserApprovedClientsByUserIdAndClientIdsIsNotNull(
       userId,
-      PageRequest.of(2, 2),
+      PageRequest.of(2, 2).withSort(Sort.Direction.DESC, "createdDate"),
     )
     assertEquals(0, result.content.size)
   }

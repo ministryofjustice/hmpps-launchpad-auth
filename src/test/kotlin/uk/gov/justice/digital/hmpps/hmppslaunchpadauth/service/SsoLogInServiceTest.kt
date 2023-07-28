@@ -22,7 +22,9 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
-import uk.gov.justice.digital.hmpps.utils.DataGenerator
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
 import java.net.URL
 import java.time.Instant
 import java.time.LocalDateTime
@@ -57,11 +59,11 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
       UUID.randomUUID().toString(),
       setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ, Scope.USER_ESTABLISHMENT_READ),
       setOf(AuthorizationGrantType.AUTHORIZATION_CODE, AuthorizationGrantType.REFRESH_TOKEN),
-      setOf("http://localhost:8080/test"),
+      setOf(REDIRECT_URI),
       true,
       true,
       "Test App",
-      "http://localhost:8080/test",
+      LOGO_URI,
       "Test App for test environment",
     )
     ssoRequest = SsoRequest(
@@ -74,7 +76,7 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
         UUID.randomUUID().toString(),
         UUID.randomUUID().toString(),
         setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ),
-        "http://localhost:8080/test",
+        REDIRECT_URI,
       ),
       userID,
     )
@@ -171,5 +173,4 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
     assertEquals(ACCESS_DENIED, exception.message)
     assertEquals(ACCESS_DENIED_CODE, exception.code)
   }
-
 }

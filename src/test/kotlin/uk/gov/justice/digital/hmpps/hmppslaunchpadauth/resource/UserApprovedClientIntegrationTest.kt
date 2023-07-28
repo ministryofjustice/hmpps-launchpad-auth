@@ -25,6 +25,8 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.ClientRepository
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedClientRepository
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
 import java.net.URI
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -34,7 +36,7 @@ import java.util.*
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Import(TestConfig::class)
-class UserApprovedUserApprovedClientIntegrationTest(
+class UserApprovedClientIntegrationTest(
   @Autowired private var userApprovedClientRepository: UserApprovedClientRepository,
   @Autowired private var clientRepository: ClientRepository,
 ) {
@@ -69,11 +71,11 @@ class UserApprovedUserApprovedClientIntegrationTest(
         Scope.USER_CLIENTS_DELETE,
       ),
       setOf(AuthorizationGrantType.AUTHORIZATION_CODE, AuthorizationGrantType.REFRESH_TOKEN),
-      setOf("https://testdomain.com"),
+      setOf(REDIRECT_URI),
       true,
       true,
       "Test App",
-      "http://localhost:$port/test",
+      LOGO_URI,
       "This is test App",
     )
     clientRepository.save(clientDBOne)

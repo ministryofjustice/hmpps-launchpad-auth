@@ -15,13 +15,13 @@ import org.springframework.data.domain.Sort
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedClientRepository
-import uk.gov.justice.digital.hmpps.utils.DataGenerator
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
 @ExtendWith(MockitoExtension::class)
-class UserApprovedUserApprovedClientServiceTest {
+class UserApprovedClientServiceTest {
   @Mock
   private lateinit var userApprovedClientRepository: UserApprovedClientRepository
 

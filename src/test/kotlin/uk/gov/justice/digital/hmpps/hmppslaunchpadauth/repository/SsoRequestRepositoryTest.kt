@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.repository
+package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository
 
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -14,8 +14,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.SsoRequestRepository
-import uk.gov.justice.digital.hmpps.utils.DataGenerator
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import java.util.*
 
 @SpringBootTest(classes = [SsoRequestRepository::class])
@@ -34,7 +33,7 @@ class SsoRequestRepositoryTest(@Autowired private var ssoRequestRepository: SsoR
   }
 
   @Test
-  fun `create ssorequest`() {
+  fun `create sso request`() {
     val expected = DataGenerator.buildSsoRequest()
     val result = ssoRequestRepository.save(expected)
     assertSsoRequest(expected, result)
