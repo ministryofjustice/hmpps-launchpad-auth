@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -15,12 +14,15 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.BAD_REQUEST_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.UserApprovedClientService
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.validator.UserIdValidator
 import java.util.*
 
 @RestController
 @RequestMapping("/v1")
-class UserApprovedClientController(private var userApprovedClientService: UserApprovedClientService) {
-  private val logger = LoggerFactory.getLogger(UserApprovedClientController::class.java)
+class UserApprovedClientController(
+  private var userApprovedClientService: UserApprovedClientService,
+  private var userIdValidator: UserIdValidator
+) {
 
   @GetMapping("/users/{user-id}/clients", produces = [MediaType.APPLICATION_JSON_VALUE])
   fun getUserApprovedClients(
@@ -28,7 +30,7 @@ class UserApprovedClientController(private var userApprovedClientService: UserAp
     @RequestParam("page", required = false) page: Int?,
     @RequestParam("size", required = false) size: Int?,
   ): ResponseEntity<PagedResult<UserApprovedClientDto>> {
-    validateUserIdFormat(userId)
+    validateUserId(userId)
     val pageNum = validatePage(page)
     val pageSize = validatePageSize(size)
     val userApprovedClients = userApprovedClientService
@@ -41,16 +43,14 @@ class UserApprovedClientController(private var userApprovedClientService: UserAp
     @PathVariable("user-id") userId: String,
     @PathVariable("client-id") clientId: UUID,
   ): ResponseEntity<Void> {
-    validateUserIdFormat(userId)
+    validateUserId(userId)
     userApprovedClientService.revokeClientAccess(userId, clientId)
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
   }
 
-  private fun validateUserIdFormat(userId: String) {
-    val regex = "^[A-Z][0-9]{4}[A-Z]{2}$".toRegex()
-    if (!regex.matches(userId)) {
-      logger.warn("Invalid user id format for user id {}", userId)
-      throw ApiException("Invalid user id format for user id", BAD_REQUEST_CODE)
+  private fun validateUserId(userId: String) {
+    if (!userIdValidator.isValid(userId)) {
+      throw ApiException("Invalid user id", BAD_REQUEST_CODE)
     }
   }
 

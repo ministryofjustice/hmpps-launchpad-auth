@@ -1,8 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertThrows
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -167,22 +165,31 @@ class UserApprovedClientRepositoryTest(@Autowired private var userApprovedClient
     userApprovedClientRepository.saveAll(listOf(expectedThird, expectedSecond, expectedFirst))
     var result = userApprovedClientRepository.findUserApprovedClientsByUserIdAndClientIdsIsNotNull(
       userId,
-      PageRequest.of(0, 2).withSort(Sort.Direction.DESC, "createdDate"),
+      PageRequest.of(0, 2).withSort(Sort.Direction.DESC, "created_date"),
     )
     assertEquals(2, result.content.size)
     assertEquals(dateAndTimeInUTCThird, result.content.get(0).createdDate)
     assertEquals(dateAndTimeInUTCSecond, result.content.get(1).createdDate)
+    assertEquals(3, result.totalElements)
+    assertEquals(0, result.number)
+    assertFalse(result.isLast)
     result = userApprovedClientRepository.findUserApprovedClientsByUserIdAndClientIdsIsNotNull(
       userId,
-      PageRequest.of(1, 2).withSort(Sort.Direction.DESC, "createdDate"),
+      PageRequest.of(1, 2).withSort(Sort.Direction.DESC, "created_date"),
     )
     assertEquals(1, result.content.size)
     assertEquals(dateAndTimeInUTCFirst, result.content.get(0).createdDate)
+    assertEquals(3, result.totalElements)
+    assertEquals(1, result.number)
+    assertTrue(result.isLast)
     result = userApprovedClientRepository.findUserApprovedClientsByUserIdAndClientIdsIsNotNull(
       userId,
-      PageRequest.of(2, 2).withSort(Sort.Direction.DESC, "createdDate"),
+      PageRequest.of(2, 2).withSort(Sort.Direction.DESC, "created_date"),
     )
     assertEquals(0, result.content.size)
+    assertEquals(3, result.totalElements)
+    assertEquals(2, result.number)
+    assertTrue(result.isLast)
   }
 
   private fun assertUserApprovedClient(expected: UserApprovedClient, result: UserApprovedClient) {

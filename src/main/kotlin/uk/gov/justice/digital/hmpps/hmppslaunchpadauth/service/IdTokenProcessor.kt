@@ -5,10 +5,11 @@ import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.validator.UserIdValidator
 import java.util.*
 
 @Component
-class IdTokenProcessor : TokenProcessor {
+class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProcessor {
   private val logger = LoggerFactory.getLogger(IdTokenProcessor::class.java)
 
   override fun getUserId(token: String, nonce: String): String {
@@ -20,7 +21,9 @@ class IdTokenProcessor : TokenProcessor {
     validateNonce(nonceInIdToken, nonce)
     val userId = getClaimFromPayload(payload, "email")
     if (userId != null) {
-      validateUserIdFormat(userId)
+      if (!userIdValidator.isValid(userId)) {
+        logger.warn("Potentially invalid user id: {}", userId)
+      }
       logger.info("Logged user id : {}", userId)
       return userId
     } else {
@@ -43,14 +46,6 @@ class IdTokenProcessor : TokenProcessor {
     } catch (exception: JSONException) {
       logger.error("Claim: {} not found in id token payload", claimName)
       throw ApiException(String.format("Claim: %s not found", claimName), 500)
-    }
-  }
-
-  private fun validateUserIdFormat(userId: String) {
-    val regex = "^[A-Z][0-9]{4}[A-Z]{2}$".toRegex()
-    if (!regex.matches(userId)) {
-      logger.warn("Invalid user id format for user id {}", userId)
-      throw ApiException("Invalid user id format for user id", BAD_REQUEST_CODE)
     }
   }
 }

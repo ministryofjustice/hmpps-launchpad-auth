@@ -102,7 +102,7 @@ class UserApprovedClientServiceTest {
   @Test
   fun getUserApprovedClientsByUserId() {
     val client = DataGenerator.buildClient(true, true)
-    val pageRequest = PageRequest.of(0, 1).withSort(Sort.Direction.DESC, "createdDate")
+    val pageRequest = PageRequest.of(0, 1).withSort(Sort.Direction.DESC, "created_date")
     val expected = DataGenerator.buildUserApprovedClient(
       userID,
       client.id,

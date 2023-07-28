@@ -35,15 +35,12 @@ class UserApprovedClientService(
     return userApprovedClientRepository.deleteById(id)
   }
 
-  fun getUserApprovedClientsByUserId(
-    userId: String,
-    page: Int,
-    size: Int,
-  ): PagedResult<UserApprovedClientDto> {
+  fun getUserApprovedClientsByUserId(userId: String, page: Int, size: Int): PagedResult<UserApprovedClientDto> {
     logger.debug("Getting user approved clients for user id: {}", userId)
-    val pageRequest = PageRequest.of(page - 1, size).withSort(Sort.Direction.DESC, "createdDate")
-    val userApprovedClientPage = userApprovedClientRepository.findUserApprovedClientsByUserIdAndClientIdsIsNotNull(userId, pageRequest)
-    return getUserApprovedClientsDto(userApprovedClientPage, page)
+    val pageRequest = PageRequest.of(page - 1, size).withSort(Sort.Direction.DESC, "created_date")
+    val userApprovedClientPage = userApprovedClientRepository
+      .findUserApprovedClientsByUserIdAndClientIdsIsNotNull(userId, pageRequest)
+    return getUserApprovedClientsDto(userApprovedClientPage)
   }
 
   fun getUserApprovedClientByUserIdAndClientId(userId: String, clientId: UUID): Optional<UserApprovedClient> {
@@ -68,12 +65,11 @@ class UserApprovedClientService(
 
   private fun getUserApprovedClientsDto(
     userApprovedClientPage: Page<UserApprovedClient>,
-    page: Int,
   ): PagedResult<UserApprovedClientDto> {
     val clients = ArrayList<UserApprovedClientDto>()
-    userApprovedClientPage.content.forEach { x ->
-      val client = clientService.getClientById(x.clientId).orElseThrow {
-        throw ApiException(String.format("Client id not found %s", x.clientId), BAD_REQUEST_CODE)
+    userApprovedClientPage.content.forEach { userApprovedClient ->
+      val client = clientService.getClientById(userApprovedClient.clientId).orElseThrow {
+        throw ApiException(String.format("Client id not found %s", userApprovedClient.clientId), BAD_REQUEST_CODE)
       }
       clients.add(
         UserApprovedClientDto(
@@ -82,13 +78,13 @@ class UserApprovedClientService(
           client.logoUri,
           client.description,
           client.autoApprove,
-          x.createdDate,
-          convertScopes(x.scopes),
+          userApprovedClient.createdDate,
+          convertScopes(userApprovedClient.scopes),
         ),
       )
     }
     return PagedResult(
-      page + 1,
+      userApprovedClientPage.number + 1,
       userApprovedClientPage.isLast,
       userApprovedClientPage.totalElements,
       clients,

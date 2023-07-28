@@ -11,10 +11,11 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.validator.UserIdValidator
 import java.time.Instant
 import java.util.*
 
-@SpringBootTest(classes = [IdTokenProcessor::class])
+@SpringBootTest(classes = [IdTokenProcessor::class, UserIdValidator::class])
 @EnableAutoConfiguration
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")

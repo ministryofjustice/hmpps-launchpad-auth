@@ -16,9 +16,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.UserApprovedClientService
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.validator.UserIdValidator
 import java.util.*
 
-@SpringBootTest(classes = [UserApprovedClientController::class])
+@SpringBootTest(classes = [UserApprovedClientController::class, UserIdValidator::class])
 @EnableAutoConfiguration
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
