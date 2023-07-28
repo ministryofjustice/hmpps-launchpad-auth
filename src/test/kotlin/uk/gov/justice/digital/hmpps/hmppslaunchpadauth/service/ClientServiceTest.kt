@@ -14,8 +14,8 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantT
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.ClientRepository
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.SsoRequestRepository
-import uk.gov.justice.digital.hmpps.utils.DataGenerator
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
 import java.util.*
 
 const val ACCESS_DENIED = "Access denied"
@@ -26,7 +26,7 @@ const val BAD_REQUEST_CODE = 400
 const val ACCESS_DENIED_CODE = 403
 
 @ExtendWith(MockitoExtension::class)
-class ClientServiceTest {
+class UserApprovedClientDtoServiceTest {
   @Mock
   lateinit var clientRepository: ClientRepository
   private lateinit var clientService: ClientService
@@ -49,7 +49,7 @@ class ClientServiceTest {
       client.id,
       AuthorizationGrantType.AUTHORIZATION_CODE.toString(),
       Scope.USER_BASIC_READ.toString(),
-      "http://localhost:8080/test",
+      "https://launchpad.com",
       UUID.randomUUID().toString(),
       "",
     )
@@ -62,7 +62,7 @@ class ClientServiceTest {
       client.id,
       AuthorizationGrantType.AUTHORIZATION_CODE.toString(),
       Scope.USER_BASIC_READ.toString(),
-      "http://localhost:8080/test",
+      REDIRECT_URI,
       null,
       null,
     )
@@ -111,7 +111,7 @@ class ClientServiceTest {
         client.id,
         AuthorizationGrantType.AUTHORIZATION_CODE.toString(),
         Scope.USER_BASIC_READ.toString(),
-        "http://localhost:8080/test",
+        REDIRECT_URI,
         UUID.randomUUID().toString(),
         "test",
       )
@@ -128,7 +128,7 @@ class ClientServiceTest {
         client.id,
         AuthorizationGrantType.AUTHORIZATION_CODE.toString(),
         "random.read.scope.test random.ead.scope.randomtest",
-        "http://localhost:8080/test",
+        REDIRECT_URI,
         UUID.randomUUID().toString(),
         "test",
       )
@@ -145,7 +145,7 @@ class ClientServiceTest {
         client.id,
         "random_code",
         "user.basic.read user.establishment.read",
-        "http://localhost:8080/test",
+        REDIRECT_URI,
         UUID.randomUUID().toString(),
         "test",
       )
@@ -162,7 +162,7 @@ class ClientServiceTest {
         client.id,
         AuthorizationGrantType.AUTHORIZATION_CODE.toString(),
         "user.basic.read user.establishment.read",
-        "http://localhost:8080/test1",
+        "$REDIRECT_URI/random",
         UUID.randomUUID().toString(),
         "test",
       )

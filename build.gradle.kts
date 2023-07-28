@@ -19,9 +19,9 @@ dependencies {
   implementation("org.json:json:20230618")
   implementation("org.flywaydb:flyway-core:9.19.4")
   implementation("org.postgresql:postgresql:42.6.0")
-  implementation("org.springframework.boot:spring-boot-starter-test")
   implementation("javax.xml.bind:jaxb-api:2.3.0")
 
+  testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("com.h2database:h2:2.0.204")
 }
 

@@ -5,22 +5,26 @@ import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.validator.UserIdValidator
 import java.util.*
 
 @Component
-class IdTokenProcessor : TokenProcessor {
+class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProcessor {
   private val logger = LoggerFactory.getLogger(IdTokenProcessor::class.java)
 
   override fun getUserId(token: String, nonce: String): String {
-    logger.debug(String.format("Id token received: %s", token))
+    logger.debug("Id token received: {}", token)
     val decoder = Base64.getUrlDecoder()
     val chunks = token.split(".")
     val payload = String(decoder.decode(chunks[1]))
-    val nonceInIdToken = getClaimFromPayload(payload,"nonce")
+    val nonceInIdToken = getClaimFromPayload(payload, "nonce")
     validateNonce(nonceInIdToken, nonce)
-    val userId = getClaimFromPayload(payload,"email")
+    val userId = getClaimFromPayload(payload, "email")
     if (userId != null) {
-      logger.info(String.format("Logged user id : %s", userId))
+      if (!userIdValidator.isValid(userId)) {
+        logger.warn("Potentially invalid user id: {}", userId)
+      }
+      logger.info("Logged user id : {}", userId)
       return userId
     } else {
       logger.error("User id not found in payload")
@@ -35,12 +39,12 @@ class IdTokenProcessor : TokenProcessor {
     }
   }
 
-  private fun getClaimFromPayload(payload: String, claimName: String) : String {
+  private fun getClaimFromPayload(payload: String, claimName: String): String {
     try {
       val jsonObject = JSONObject(payload)
       return jsonObject.getString(claimName)
-    } catch(exception: JSONException) {
-      logger.error(String.format("Claim: %s not found in id token payload", claimName))
+    } catch (exception: JSONException) {
+      logger.error("Claim: {} not found in id token payload", claimName)
       throw ApiException(String.format("Claim: %s not found", claimName), 500)
     }
   }

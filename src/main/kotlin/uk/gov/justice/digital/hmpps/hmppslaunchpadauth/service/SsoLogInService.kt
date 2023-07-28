@@ -3,10 +3,16 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import org.springframework.web.servlet.ModelAndView
+import org.springframework.web.servlet.view.RedirectView
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 
 @Component
@@ -14,6 +20,7 @@ class SsoLogInService(
   private var clientService: ClientService,
   private var ssoRequestService: SsoRequestService,
   private var tokenProcessor: TokenProcessor,
+  private var userApprovedClientService: UserApprovedClientService,
 ) {
   @Value("\${azure.oauth2-url}")
   private lateinit var azureOauthUrl: String
@@ -58,17 +65,38 @@ class SsoLogInService(
       .build().toUriString()
   }
 
-  fun updateSsoRequestWithUserId(token: String?, state: UUID, autoApprove: Boolean): String {
-    val ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {
-      logger.warn(String.format("State send on callback url do not exist %s", state))
+  fun updateSsoRequest(token: String?, state: UUID): Any {
+    var ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {
+      logger.warn("State send on callback url do not exist {}", state)
       ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
     }
+    val clientId = ssoRequest.client.id
+    val client = clientService.getClientById(clientId).orElseThrow {
+      logger.warn("Client of sso request  do not exist {}", clientId)
+      ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+    }
+    var approvalRequired = false
     if (token != null) {
-      // auto approved client
-      return buildClientRedirectUrl(updateSsoRequestWithUserId(token, ssoRequest))
+      ssoRequest = updateSsoRequestWithUserId(token, ssoRequest)
+      if (client.autoApprove) {
+        createOrUpdateUserApprovedClient(ssoRequest, true)
+        return RedirectView(buildClientRedirectUrl(ssoRequest))
+      } else {
+        // Auto Approve = false and user approval is required
+        approvalRequired = createOrUpdateUserApprovedClient(ssoRequest, false)
+      }
     } else {
-      // Auto Approve = false and After user approval
-      return buildClientRedirectUrl(ssoRequest)
+      if (!client.autoApprove) {
+        // Auto Approve = false and user has already approved.
+        if (ssoRequest.userId != null) {
+          approvalRequired = createOrUpdateUserApprovedClient(ssoRequest, true)
+        }
+      }
+    }
+    if (approvalRequired) {
+      return buildModelAndView(state, ssoRequest, client)
+    } else {
+      return RedirectView(buildClientRedirectUrl(ssoRequest))
     }
   }
 
@@ -88,5 +116,54 @@ class SsoLogInService(
     val userId = tokenProcessor.getUserId(token, ssoRequest.nonce.toString())
     ssoRequest.userId = userId
     return ssoRequestService.updateSsoRequest(ssoRequest)
+  }
+
+  private fun createOrUpdateUserApprovedClient(ssoRequest: SsoRequest, canSaveIfNotExist: Boolean): Boolean {
+    var approvalRequired = false
+    ssoRequest.userId?.let {
+      val userApprovedClientIfExist = userApprovedClientService
+        .getUserApprovedClientByUserIdAndClientId(
+          it,
+          ssoRequest.client.id,
+        )
+      if (userApprovedClientIfExist.isPresent) {
+        val userApprovedClient = userApprovedClientIfExist.get()
+        if (!((userApprovedClient.scopes.containsAll(ssoRequest.client.scopes) && ssoRequest.client.scopes.containsAll(userApprovedClient.scopes)))
+        ) {
+          // if record exist approval require only when scope varies
+          approvalRequired = true
+          userApprovedClient.scopes = ssoRequest.client.scopes
+        }
+        userApprovedClient.lastModifiedDate = LocalDateTime.now(ZoneOffset.UTC)
+        userApprovedClientService.upsertUserApprovedClient(userApprovedClient)
+      } else {
+        // record do not exist approval required
+        approvalRequired = true
+        if (canSaveIfNotExist) {
+          // user has already approved the client
+          val localDateTimeInUTC = LocalDateTime.now(ZoneOffset.UTC)
+          approvalRequired = false
+          val userApprovedClient = UserApprovedClient(
+            UUID.randomUUID(),
+            ssoRequest.userId!!,
+            ssoRequest.client.id,
+            ssoRequest.client.scopes,
+            localDateTimeInUTC,
+            localDateTimeInUTC,
+          )
+          userApprovedClientService.upsertUserApprovedClient(userApprovedClient)
+        } else {
+        }
+      }
+    }
+    return approvalRequired
+  }
+
+  private fun buildModelAndView(state: UUID, ssoRequest: SsoRequest, client: Client): ModelAndView {
+    val modelAndView = ModelAndView("user_approval")
+    modelAndView.addObject("state", state)
+    modelAndView.addObject("scopes", Scope.getTemplateTextByScopes(ssoRequest.client.scopes).sortedDescending())
+    modelAndView.addObject("client", client)
+    return modelAndView
   }
 }

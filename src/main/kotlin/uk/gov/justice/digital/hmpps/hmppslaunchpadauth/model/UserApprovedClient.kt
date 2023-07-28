@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Index
@@ -12,26 +12,36 @@ import java.util.*
 
 @Entity
 @Table(
-  name = "sso_request",
+  name = "user_approved_client",
   indexes = [
-    Index(name = "ix_authorization_code", columnList = "authorizationCode", unique = true)
+    Index(name = "ix_user_id_client_id_created_date", columnList = "user_id,client_id,created_date", unique = true),
   ],
 )
-data class SsoRequest(
+data class UserApprovedClient(
   @Id
   val id: UUID,
-  val nonce: UUID,
-  val createdDate: LocalDateTime,
-  var authorizationCode: UUID,
+
+  @Column(name = "user_id", nullable = false)
+  val userId: String,
+
+  @Column(name = "client_id", nullable = false)
+  val clientId: UUID,
+
+  @Column(name = "scopes", nullable = false)
   @JdbcTypeCode(SqlTypes.JSON)
-  val client: SsoClient,
-  var userId: String?,
+  var scopes: Set<Scope>,
+
+  @Column(name = "created_date", nullable = false)
+  val createdDate: LocalDateTime,
+
+  @Column(name = "last_modified_date", nullable = false)
+  var lastModifiedDate: LocalDateTime,
 ) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (javaClass != other?.javaClass) return false
 
-    other as SsoRequest
+    other as UserApprovedClient
 
     return id == other.id
   }
@@ -40,16 +50,3 @@ data class SsoRequest(
     return id.hashCode()
   }
 }
-
-class SsoClient(
-  @JsonProperty("id")
-  val id: UUID,
-  @JsonProperty("state")
-  val state: String?,
-  @JsonProperty("nonce")
-  val nonce: String?,
-  @JsonProperty("scopes")
-  val scopes: Set<Scope>,
-  @JsonProperty("redirectUri")
-  val redirectUri: String,
-)

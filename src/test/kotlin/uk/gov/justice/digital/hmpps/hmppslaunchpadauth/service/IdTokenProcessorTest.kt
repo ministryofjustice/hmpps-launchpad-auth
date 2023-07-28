@@ -10,11 +10,12 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
-import uk.gov.justice.digital.hmpps.utils.DataGenerator
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.validator.UserIdValidator
 import java.time.Instant
 import java.util.*
 
-@SpringBootTest(classes = [IdTokenProcessor::class])
+@SpringBootTest(classes = [IdTokenProcessor::class, UserIdValidator::class])
 @EnableAutoConfiguration
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
@@ -23,9 +24,9 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
   @Test
   fun `test get user id when nonce match`() {
     val nonce = UUID.randomUUID()
-    val email = "test@moj.com"
-    val userId = idTokenProcessor.getUserId(DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, email), nonce.toString())
-    assertEquals(userId, email)
+    val userUniqueId = "G2320VD"
+    var userId = idTokenProcessor.getUserId(DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userUniqueId), nonce.toString())
+    assertEquals(userId, userId)
   }
 
   @Test

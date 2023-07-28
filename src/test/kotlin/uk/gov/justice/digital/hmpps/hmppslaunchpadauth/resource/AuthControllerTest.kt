@@ -14,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.view.RedirectView
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
@@ -22,10 +21,8 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ACCESS_DENIED_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.BAD_REQUEST_CODE
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ClientService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoLogInService
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoRequestService
-import uk.gov.justice.digital.hmpps.utils.DataGenerator
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -35,14 +32,9 @@ import java.util.*
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
 class AuthControllerTest(@Autowired private var authController: AuthController) {
-  @MockBean
-  private lateinit var clientService: ClientService
 
   @MockBean
   private lateinit var ssoLoginService: SsoLogInService
-
-  @MockBean
-  private lateinit var ssoRequestService: SsoRequestService
 
   @BeforeEach
   fun setUp() {
@@ -55,7 +47,16 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
   @Test
   fun `authorize happy path`() {
     val clientId = UUID.randomUUID()
-    Mockito.`when`(ssoLoginService.initiateSsoLogin(clientId, "code", "user.basic.read", "http://randomsite/test", null, null)).thenReturn("http://localhost:8080/test")
+    Mockito.`when`(
+      ssoLoginService.initiateSsoLogin(
+        clientId,
+        "code",
+        "user.basic.read",
+        "http://randomsite/test",
+        null,
+        null,
+      ),
+    ).thenReturn("http://localhost:8080/test")
     val redirectView = authController.authorize(
       clientId,
       "code",
@@ -92,7 +93,8 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
         "code",
         "user.basic.read",
         "http://randomsite/test",
-        UUID.randomUUID().toString() + UUID.randomUUID().toString() + UUID.randomUUID().toString() + UUID.randomUUID().toString(),
+        UUID.randomUUID().toString() + UUID.randomUUID().toString() + UUID.randomUUID().toString() + UUID.randomUUID()
+          .toString(),
         "random_nonce",
       )
     }
@@ -109,51 +111,12 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
         "user.basic.read",
         "http://randomsite/test",
         "random_state",
-        UUID.randomUUID().toString() + UUID.randomUUID().toString() + UUID.randomUUID().toString() + UUID.randomUUID().toString(),
+        UUID.randomUUID().toString() + UUID.randomUUID().toString() + UUID.randomUUID().toString() + UUID.randomUUID()
+          .toString(),
       )
     }
     assertEquals(BAD_REQUEST_CODE, exception.code)
     assertEquals("nonce size exceeds 128 char size limit", exception.message)
-  }
-
-  @Test
-  fun `get auth code when auto approve false`() {
-    val client = DataGenerator.buildClient(true, false)
-    val ssoRequest = SsoRequest(
-      UUID.randomUUID(),
-      UUID.randomUUID(),
-      LocalDateTime.now(ZoneOffset.UTC),
-      UUID.randomUUID(),
-      SsoClient(client.id, "random_state", "random_nonce", setOf(Scope.USER_BASIC_READ), "http://localhost:8080/test"),
-      UUID.randomUUID().toString(),
-    )
-    Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
-    Mockito.`when`(clientService.getClientById(client.id)).thenReturn(Optional.of(client))
-    Mockito.`when`(ssoLoginService.updateSsoRequestWithUserId("randomtoken", ssoRequest.id, false))
-      .thenReturn("${ssoRequest.client.redirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}")
-    val modelAndView = authController.getAuthCode("randomtoken", ssoRequest.id) as ModelAndView
-    assertNotNull(modelAndView)
-    assertEquals(client, modelAndView.modelMap.get("client"))
-  }
-
-  @Test
-  fun `get auth code when auto approve true`() {
-    val client = DataGenerator.buildClient(true, true)
-    val ssoRequest = SsoRequest(
-      UUID.randomUUID(),
-      UUID.randomUUID(),
-      LocalDateTime.now(ZoneOffset.UTC),
-      UUID.randomUUID(),
-      SsoClient(client.id, "random_state", "random_nonce", setOf(Scope.USER_BASIC_READ), "http://localhost:8080/test"),
-      UUID.randomUUID().toString(),
-    )
-    Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
-    Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
-    Mockito.`when`(ssoLoginService.updateSsoRequestWithUserId("random token", ssoRequest.id, true))
-      .thenReturn("${ssoRequest.client.redirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}")
-    val redirectView = authController.getAuthCode("random token", ssoRequest.id) as RedirectView
-    assertNotNull(redirectView)
-    assertEquals(redirectView.url, "${ssoRequest.client.redirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}")
   }
 
   @Test
@@ -173,13 +136,14 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
       ),
       UUID.randomUUID().toString(),
     )
-    Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
-    Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
-    Mockito.`when`(ssoLoginService.updateSsoRequestWithUserId(null, ssoRequest.id, false))
-      .thenReturn("${ssoRequest.client.redirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}")
+    Mockito.`when`(ssoLoginService.updateSsoRequest(null, ssoRequest.id))
+      .thenReturn(RedirectView("${ssoRequest.client.redirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}"))
     val redirectView = authController.authorizeClient(ssoRequest.id, "approved") as RedirectView
     assertNotNull(redirectView)
-    assertEquals(redirectView.url, "${ssoRequest.client.redirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}")
+    assertEquals(
+      redirectView.url,
+      "${ssoRequest.client.redirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}",
+    )
   }
 
   @Test
@@ -193,9 +157,7 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
       SsoClient(client.id, "random_state", "random_nonce", setOf(Scope.USER_BASIC_READ), "http://localhost:8080/test"),
       UUID.randomUUID().toString(),
     )
-    Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
-    Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
-    Mockito.`when`(ssoLoginService.updateSsoRequestWithUserId(null, ssoRequest.id, false))
+    Mockito.`when`(ssoLoginService.updateSsoRequest(null, ssoRequest.id))
       .thenReturn("${ssoRequest.client.redirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}")
     val exception = assertThrows(ApiException::class.java) {
       authController.authorizeClient(ssoRequest.id, "cancelled")
