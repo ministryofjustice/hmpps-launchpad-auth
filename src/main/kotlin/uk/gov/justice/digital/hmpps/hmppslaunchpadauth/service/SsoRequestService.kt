@@ -76,4 +76,8 @@ class SsoRequestService(
     )
     return createSsoRequest(ssoRequest)
   }
+
+  fun getSsoRequestByAuthorizationCode(code: UUID): Optional<SsoRequest> {
+    return ssoRequestRepository.findSsoRequestByAuthorizationCode(code)
+  }
 }

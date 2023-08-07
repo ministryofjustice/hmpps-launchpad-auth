@@ -2,33 +2,32 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.context.annotation.Import
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
 import org.springframework.http.RequestEntity
-import org.springframework.http.ResponseEntity
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.RestTemplate
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.config.TestConfig
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Token
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.ClientRepository
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.SsoRequestRepository
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedClientRepository
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.USER_ID
 import java.net.URI
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -37,10 +36,11 @@ import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Import(TestConfig::class)
-class UserApprovedClientIntegrationTest(
+class TokenControllerIntegrationTest(
   @Autowired private var userApprovedClientRepository: UserApprovedClientRepository,
   @Autowired private var clientRepository: ClientRepository,
+  @Autowired private var ssoRequestRepository: SsoRequestRepository,
+  @Autowired private var encoder: BCryptPasswordEncoder,
 ) {
   @LocalServerPort
   private val port = 0
@@ -58,6 +58,11 @@ class UserApprovedClientIntegrationTest(
   private lateinit var userApprovedClientOne: UserApprovedClient
   private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
   private lateinit var authorizationHeader: String
+  private lateinit var ssoRequest: SsoRequest
+  private val clientState: String = "12345"
+  private val clientSecret = UUID.randomUUID()
+  private val clientNonce: String = "client_nonce"
+  private val code = UUID.randomUUID()
 
   @BeforeEach
   fun beforeEach() {
@@ -65,7 +70,7 @@ class UserApprovedClientIntegrationTest(
     userApprovedClientRepository.deleteAll()
     clientDBOne = Client(
       clientId,
-      UUID.randomUUID().toString(),
+      encoder.encode(clientSecret.toString()),
       setOf(
         Scope.USER_CLIENTS_READ,
         Scope.USER_BASIC_READ,
@@ -82,6 +87,21 @@ class UserApprovedClientIntegrationTest(
       "This is test App",
     )
     clientRepository.save(clientDBOne)
+    ssoRequest = SsoRequest(
+      UUID.randomUUID(),
+      UUID.randomUUID(),
+      dateTimeInUTC,
+      code,
+      SsoClient(
+        clientId,
+        clientState,
+        clientNonce,
+        setOf(Scope.USER_CLIENTS_READ, Scope.USER_CLIENTS_DELETE),
+        REDIRECT_URI,
+      ),
+      USER_ID,
+    )
+    ssoRequestRepository.save(ssoRequest)
     userApprovedClientOne = UserApprovedClient(
       id,
       userID,
@@ -91,47 +111,42 @@ class UserApprovedClientIntegrationTest(
       dateTimeInUTC,
     )
     userApprovedClientRepository.save(userApprovedClientOne)
-    authorizationHeader = DataGenerator.generateAccessToken(clientDBOne, userApprovedClientOne, "test nonce", "random_secret")
+    authorizationHeader =
+      "Basic " + Base64.getEncoder().encodeToString("$clientId:$clientSecret".toByteArray(Charsets.UTF_8))
   }
 
   @AfterEach
   fun tearOff() {
     clientRepository.deleteAll()
     userApprovedClientRepository.deleteAll()
+    ssoRequestRepository.deleteAll()
   }
 
   @Test
-  fun `get user approved clients by user id`() {
+  fun `get token`() {
     val headers = LinkedMultiValueMap<String, String>();
     headers.add("Authorization", authorizationHeader)
-    val url = URI("$baseUrl:$port/v1/users/$userID/clients?page=1&size=20")
-    val response = restTemplate.exchange(
+    var url = URI("$baseUrl:$port/v1/token?code=$code&grant_type=code&redirect_uri=$REDIRECT_URI")
+    var response = restTemplate.exchange(
       RequestEntity<Any>(headers, HttpMethod.GET, url),
-      object : ParameterizedTypeReference<PagedResult<UserApprovedClientDto>>() {},
+      object : ParameterizedTypeReference<Token>() {},
     )
-    val pagedResult = response.body as PagedResult<UserApprovedClientDto>
-    val userApprovedClientDtos = pagedResult.content
-    val clientOne = userApprovedClientDtos[0]
-    assertEquals(pagedResult.totalElements, 1)
-    assertEquals(1, localDateTime.compareTo(dateTimeInUTC))
-    assertEquals(dateTimeInUTC.format(dateTimeFormatter), clientOne.createdDate.format(dateTimeFormatter))
-    assertEquals(clientDBOne.name, clientOne.name)
-    assertEquals(clientDBOne.id, clientOne.id)
-    assertEquals(clientDBOne.logoUri, clientOne.logoUri)
-    assertEquals(clientDBOne.description, clientOne.description)
-    assertEquals(clientDBOne.autoApprove, clientOne.autoApprove)
-  }
-
-  @Test
-  fun `revoke client access`() {
-    val headers = LinkedMultiValueMap<String, String>();
-    headers.add("Authorization", authorizationHeader)
-    val url = URI("$baseUrl:$port/v1/users/$userID/clients/$clientId")
-    val response = restTemplate.exchange(
-      RequestEntity<Any>(headers, HttpMethod.DELETE, url),
-      object : ParameterizedTypeReference<ResponseEntity<Void>>() {},
+    var token = response.body
+    assertNotNull(token?.idToken)
+    assertNotNull(token?.accessToken)
+    assertNotNull(token?.refreshToken)
+    assertEquals("Bearer", token?.tokenType)
+    assertEquals(3600L, token?.expiresIn)
+    url = URI("$baseUrl:$port/v1/token?nonce=anything&refresh_token=${response.body.refreshToken}")
+    response = restTemplate.exchange(
+      RequestEntity<Any>(headers, HttpMethod.GET, url),
+      object : ParameterizedTypeReference<Token>() {},
     )
-    assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
-    assertTrue(userApprovedClientRepository.findUserApprovedClientByUserIdAndClientId(userID, clientId).isEmpty)
+    token = response.body
+    assertNotNull(token?.idToken)
+    assertNotNull(token?.accessToken)
+    assertNotNull(token?.refreshToken)
+    assertEquals("Bearer", token?.tokenType)
+    assertEquals(3600L, token?.expiresIn)
   }
 }

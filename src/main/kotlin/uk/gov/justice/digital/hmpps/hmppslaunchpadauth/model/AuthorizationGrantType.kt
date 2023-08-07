@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model
 
+import java.lang.IllegalArgumentException
+
 enum class AuthorizationGrantType(private val grantType: String) {
   AUTHORIZATION_CODE("code"),
   REFRESH_TOKEN("refresh_token"), ;
@@ -16,6 +18,15 @@ enum class AuthorizationGrantType(private val grantType: String) {
         }
       }
       return false
+    }
+
+    fun getAuthorizationGrantTypeByStringValue(value: String): AuthorizationGrantType {
+      AuthorizationGrantType.values().forEach { grantType ->
+        if (value == grantType.toString()) {
+          return grantType
+        }
+      }
+      throw IllegalArgumentException("Invalid scope value")
     }
   }
 }

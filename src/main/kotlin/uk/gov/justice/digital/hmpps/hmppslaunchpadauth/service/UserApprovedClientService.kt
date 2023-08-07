@@ -49,6 +49,14 @@ class UserApprovedClientService(
   }
 
   fun revokeClientAccess(userId: String, clientId: UUID) {
+    val client = clientService.getClientById(clientId)
+    .orElseThrow{
+      logger.error("Client id {} not found", clientId)
+      throw ApiException("Client id not found", BAD_REQUEST_CODE)
+    }
+    if (client.autoApprove) {
+      throw ApiException("Requested action not permitted", BAD_REQUEST_CODE)
+    }
     val userApprovedClient =
       userApprovedClientRepository.findUserApprovedClientByUserIdAndClientId(userId, clientId).orElseThrow {
         throw ApiException(
