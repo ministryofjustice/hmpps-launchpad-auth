@@ -10,13 +10,12 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantT
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ACCESS_DENIED
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ACCESS_DENIED_CODE
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.BAD_REQUEST_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ClientService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoRequestService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.UserApprovedClientService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication.AuthenticationInfo
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication.UNAUTHORIZED
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication.UNAUTHORIZED_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.PrisonerApiService
 import java.net.URI
 import java.util.*
@@ -47,11 +46,15 @@ class TokenService(
     nonce: String?,
   ): Token {
     val client = clientService.getClientById(clientId)
-      .orElseThrow { ApiException(String.format("Client with %s not found", clientId), BAD_REQUEST_CODE) }
+      .orElseThrow {
+        logger.warn("Client with id {} not found", clientId)
+        throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE)
+      }
     if (code != null && grantType == "code" && redirectUri != null) {
       validateGrant(grantType, clientId, client)
       val ssoRequest = ssoRequestService.getSsoRequestByAuthorizationCode(code).orElseThrow {
-        throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+        logger.warn("Sso Request with code {} not found", code)
+        throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE)
       }
       validateRedirectUri(redirectUri, ssoRequest)
       val token = generateToken(ssoRequest.userId!!, clientId, ssoRequest.client.scopes, ssoRequest.client.nonce)
@@ -64,11 +67,12 @@ class TokenService(
       val userId = claims.body["sub"] as String
       val userApprovedClient =
         userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userId, clientId).orElseThrow {
-          throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+          logger.warn("User approved client  with user id {} and client id {} not found", userId, clientId)
+          throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE)
         }
       return generateToken(userId, clientId, userApprovedClient.scopes, nonce)
     } else {
-      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+      throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE)
     }
   }
 
@@ -128,16 +132,19 @@ class TokenService(
   private fun validateGrant(grantType: String, clientId: UUID, client: Client) {
     val grant = AuthorizationGrantType.getAuthorizationGrantTypeByStringValue(grantType)
     if (!client.authorizedGrantTypes.contains(grant)) {
-      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+      logger.warn("Invalid grant type {} sent in get token request", grantType)
+      throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE)
     }
     if (client.id != clientId) {
-      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+      logger.warn("Client id {} in token and query not matching", clientId)
+      throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE)
     }
   }
 
   private fun validateRedirectUri(redirectUri: URI, ssoRequest: SsoRequest) {
     if (ssoRequest.client.redirectUri != redirectUri.toString()) {
-      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+      logger.warn("Redirect uri sent in token request not in list {}", redirectUri)
+      throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE)
     }
   }
 }

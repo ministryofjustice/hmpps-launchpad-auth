@@ -5,7 +5,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -23,7 +23,7 @@ class TokenController(
   @Qualifier("basicAuthentication") private var authentication: Authentication,
 ) {
 
-  @GetMapping("/token", produces = [MediaType.APPLICATION_JSON_VALUE])
+  @PostMapping("/token", produces = [MediaType.APPLICATION_JSON_VALUE])
   fun createToken(
     @RequestParam("code", required = false) code: UUID?,
     @RequestParam("grant_type", required = false) grant: String,

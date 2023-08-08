@@ -129,7 +129,7 @@ class TokenControllerIntegrationTest(
     headers.add("Authorization", authorizationHeader)
     var url = URI("$baseUrl:$port/v1/token?code=$code&grant_type=code&redirect_uri=$REDIRECT_URI")
     var response = restTemplate.exchange(
-      RequestEntity<Any>(headers, HttpMethod.GET, url),
+      RequestEntity<Any>(headers, HttpMethod.POST, url),
       object : ParameterizedTypeReference<Token>() {},
     )
     var token = response.body
@@ -143,7 +143,7 @@ class TokenControllerIntegrationTest(
     url =
       URI("$baseUrl:$port/v1/token?grant_type=refresh_token&nonce=anything&refresh_token=${response.body!!.refreshToken}")
     response = restTemplate.exchange(
-      RequestEntity<Any>(headers, HttpMethod.GET, url),
+      RequestEntity<Any>(headers, HttpMethod.POST, url),
       object : ParameterizedTypeReference<Token>() {},
     )
     token = response.body
