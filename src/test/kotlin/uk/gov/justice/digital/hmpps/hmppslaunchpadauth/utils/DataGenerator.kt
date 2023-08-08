@@ -11,7 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Profile
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.AccessTokenPayload
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGeneration
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -64,8 +64,8 @@ class DataGenerator {
         .setIssuer("RandomIssuer")
         .setSubject("login")
         .setAudience("test audience")
-        //.claim("preferred_username", "testuser@test.com")
-        .claim("name", "Varun Kumar")
+        // .claim("preferred_username", "testuser@test.com")
+        .claim("name", "Test User")
         .claim("scope", "openid")
         .claim("nonce", nonce)
         .claim("email", userId)
@@ -134,7 +134,7 @@ class DataGenerator {
         userApprovedScopes,
         nonce,
       )
-      val authHeader = "Bearer " + TokenGeneration.createToken(
+      val authHeader = "Bearer " + TokenGenerationAndValidation.createToken(
         payload,
         accessTokenPayload.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
         SignatureAlgorithm.HS256,
@@ -158,7 +158,7 @@ class DataGenerator {
         userApprovedClient.scopes,
         nonce,
       )
-      return "Bearer " + TokenGeneration.createToken(
+      return "Bearer " + TokenGenerationAndValidation.createToken(
         payload,
         accessTokenPayload.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
         SignatureAlgorithm.HS256,

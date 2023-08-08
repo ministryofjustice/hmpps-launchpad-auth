@@ -2,7 +2,8 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication
 
 import io.jsonwebtoken.SignatureAlgorithm
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -24,7 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ClientService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.UserApprovedClientService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Profile
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.AccessTokenPayload
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGeneration
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.USER_ID
@@ -78,16 +79,18 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
       userApprovedScopes,
       nonce,
     )
-    val authHeader = "Bearer " + TokenGeneration.createToken(
+    val authHeader = "Bearer " + TokenGenerationAndValidation.createToken(
       payload,
       accessTokenPayload.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
       SignatureAlgorithm.HS256,
       secret,
     )
     Mockito.`when`(clientService.getClientById(clientId)).thenReturn(Optional.of(client))
-    Mockito.`when`(userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userId, clientId)).thenReturn(
-      Optional.of(userApprovedClient),
+    Mockito.`when`(
+      userApprovedClientService
+        .getUserApprovedClientByUserIdAndClientId(userId, clientId),
     )
+      .thenReturn(Optional.of(userApprovedClient))
     val authenticationUserInfo = tokenAuthentication.authenticate(authHeader) as AuthenticationUserInfo
     assertEquals(authenticationUserInfo.clientId, clientId)
     assertEquals(authenticationUserInfo.clientScope, scopes)
@@ -108,16 +111,15 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
       userApprovedScopes,
       nonce,
     )
-    val authHeader = "Bearer " + TokenGeneration.createToken(
+    val authHeader = "Bearer " + TokenGenerationAndValidation.createToken(
       payload,
       accessTokenPayload.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
       SignatureAlgorithm.HS256,
       secret,
     )
     Mockito.`when`(clientService.getClientById(clientId)).thenReturn(Optional.of(client))
-    Mockito.`when`(userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userId, clientId)).thenReturn(
-      Optional.empty(),
-    )
+    Mockito.`when`(userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userId, clientId))
+      .thenReturn(Optional.empty())
     val exception = assertThrows(ApiException::class.java) {
       tokenAuthentication.authenticate(authHeader)
     }
@@ -138,7 +140,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
       userApprovedScopes,
       nonce,
     )
-    val authHeader = "Bearer " + TokenGeneration.createToken(
+    val authHeader = "Bearer " + TokenGenerationAndValidation.createToken(
       payload,
       accessTokenPayload.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
       SignatureAlgorithm.HS256,
@@ -164,7 +166,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
       userApprovedScopes,
       nonce,
     )
-    val authHeader = "Bearer " + TokenGeneration.createToken(
+    val authHeader = "Bearer " + TokenGenerationAndValidation.createToken(
       payload,
       accessTokenPayload.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
       SignatureAlgorithm.HS256,

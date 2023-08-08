@@ -119,12 +119,13 @@ class TokenControllerIntegrationTest(
   fun tearOff() {
     clientRepository.deleteAll()
     userApprovedClientRepository.deleteAll()
-    ssoRequestRepository.deleteAll()
   }
 
   @Test
   fun `get token`() {
-    val headers = LinkedMultiValueMap<String, String>();
+    // confirm sso request record exist before token request
+    assertEquals(true, ssoRequestRepository.findById(ssoRequest.id).isPresent)
+    val headers = LinkedMultiValueMap<String, String>()
     headers.add("Authorization", authorizationHeader)
     var url = URI("$baseUrl:$port/v1/token?code=$code&grant_type=code&redirect_uri=$REDIRECT_URI")
     var response = restTemplate.exchange(
@@ -137,7 +138,10 @@ class TokenControllerIntegrationTest(
     assertNotNull(token?.refreshToken)
     assertEquals("Bearer", token?.tokenType)
     assertEquals(3600L, token?.expiresIn)
-    url = URI("$baseUrl:$port/v1/token?nonce=anything&refresh_token=${response.body.refreshToken}")
+    // confirm ssorequest deleted
+    assertEquals(true, ssoRequestRepository.findById(ssoRequest.id).isEmpty)
+    url =
+      URI("$baseUrl:$port/v1/token?grant_type=refresh_token&nonce=anything&refresh_token=${response.body!!.refreshToken}")
     response = restTemplate.exchange(
       RequestEntity<Any>(headers, HttpMethod.GET, url),
       object : ParameterizedTypeReference<Token>() {},
