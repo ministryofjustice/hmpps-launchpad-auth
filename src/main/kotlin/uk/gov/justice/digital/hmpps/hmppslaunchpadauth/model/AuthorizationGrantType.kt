@@ -26,7 +26,7 @@ enum class AuthorizationGrantType(private val grantType: String) {
           return grantType
         }
       }
-      throw IllegalArgumentException("Invalid scope value")
+      throw IllegalArgumentException(String.format("Invalid grant value %s", value))
     }
   }
 }
