@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token
 
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.SignatureAlgorithm
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -18,7 +20,10 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication.UN
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication.UNAUTHORIZED_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.PrisonerApiService
 import java.net.URI
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
+import kotlin.collections.LinkedHashMap
 
 const val TOKEN_TYPE = "Bearer"
 
@@ -57,26 +62,37 @@ class TokenService(
         throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE)
       }
       validateRedirectUri(redirectUri, ssoRequest)
-      val token = generateToken(ssoRequest.userId!!, clientId, ssoRequest.client.scopes, ssoRequest.client.nonce)
+      val token = generateToken(ssoRequest.userId!!, clientId, ssoRequest.client.scopes, ssoRequest.client.nonce, null)
       ssoRequestService.deleteSsoRequestById(ssoRequest.id)
       return token
     } else if (refreshToken != null && grantType == "refresh_token") {
-      validateGrant(grantType, clientId, client)
-      TokenGenerationAndValidation.validateJwtTokenSignature(refreshToken, secret)
-      val claims = TokenGenerationAndValidation.parseClaims(refreshToken, secret)
-      val userId = claims.body["sub"] as String
-      val userApprovedClient =
-        userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userId, clientId).orElseThrow {
-          logger.warn("User approved client  with user id {} and client id {} not found", userId, clientId)
-          throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE)
+      if (TokenGenerationAndValidation.validateJwtTokenSignature(refreshToken, secret)) {
+        val claims = TokenGenerationAndValidation.parseClaims(refreshToken, secret)
+        val exp = claims.body["exp"] as Int
+        val userId = claims.body["sub"] as String
+        val clientIdInString = claims.body["aud"] as String
+        val clientId = UUID.fromString(clientIdInString)
+        validateGrant(grantType, clientId, client)
+        val userApprovedClient =
+          userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userId, clientId).orElseThrow {
+            logger.warn("User approved client  with user id {} and client id {} not found", userId, clientId)
+            throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE)
+          }
+        // add here logic for token not expired
+        if (exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)) {
+          return generateToken(userId, clientId, userApprovedClient.scopes, nonce, claims)
+        } else {
+          return generateToken(userId, clientId, userApprovedClient.scopes, nonce, null)
         }
-      return generateToken(userId, clientId, userApprovedClient.scopes, nonce)
+      } else {
+        throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE)
+      }
     } else {
       throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE)
     }
   }
 
-  private fun generateToken(prisonerId: String, clientId: UUID, scopes: Set<Scope>, nonce: String?): Token {
+  private fun generateToken(prisonerId: String, clientId: UUID, scopes: Set<Scope>, nonce: String?, refreshTokenPayloadOld: Jws<Claims>?): Token {
     val prisonerData = prisonerApiService.getPrisonerData(prisonerId)
     val idTokenPayload = idTokenService.generatePayload(
       prisonerData.booking,
@@ -86,7 +102,6 @@ class TokenService(
       scopes,
       nonce,
     )
-
     val accessTokenPayload = accessTokenService.generatePayload(
       null,
       null,
@@ -95,15 +110,24 @@ class TokenService(
       scopes,
       nonce,
     )
-
-    val refreshTokenPayload = refreshToken.generatePayload(
-      null,
-      null,
-      prisonerData.profile,
-      clientId,
-      scopes,
-      nonce,
-    )
+    var refreshTokenPayload = LinkedHashMap<String, Any>()
+    if (refreshTokenPayloadOld != null) {
+      val claims = refreshTokenPayloadOld.body
+      claims.keys.forEach{
+        value ->
+        val v = value as String
+        refreshTokenPayload[v] = claims[value] as Any
+      }
+    } else {
+      refreshTokenPayload = refreshToken.generatePayload(
+        null,
+        null,
+        prisonerData.profile,
+        clientId,
+        scopes,
+        nonce,
+      )
+    }
     val idToken = TokenGenerationAndValidation
       .createToken(
         idTokenPayload,

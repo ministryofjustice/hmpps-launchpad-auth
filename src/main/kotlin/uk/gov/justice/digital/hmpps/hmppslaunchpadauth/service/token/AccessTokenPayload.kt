@@ -6,7 +6,6 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.priso
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Establishment
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Profile
 import java.util.*
-import kotlin.collections.HashMap
 
 @Component
 class AccessTokenPayload: TokenPayload() {
@@ -32,7 +31,7 @@ class AccessTokenPayload: TokenPayload() {
     clientId: UUID,
     scopes: Set<Scope>,
     nonce: String?,
-  ): HashMap<String, Any> {
+  ): LinkedHashMap<String, Any> {
     return buildClaims(null, null, profile, clientId, scopes, nonce)
   }
 }

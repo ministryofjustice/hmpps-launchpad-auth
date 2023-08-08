@@ -23,7 +23,7 @@ class TokenController(
   @Qualifier("basicAuthentication") private var authentication: Authentication,
 ) {
 
-  @PostMapping("/token", produces = [MediaType.APPLICATION_JSON_VALUE])
+  @PostMapping("/token", consumes = ["application/x-www-form-urlencoded"], produces = [MediaType.APPLICATION_JSON_VALUE])
   fun createToken(
     @RequestParam("code", required = false) code: UUID?,
     @RequestParam("grant_type", required = false) grant: String,

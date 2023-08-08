@@ -6,7 +6,6 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.priso
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Establishment
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Profile
 import java.util.*
-import kotlin.collections.HashMap
 
 @Component
 class IdTokenPayload: TokenPayload() {
@@ -15,7 +14,7 @@ class IdTokenPayload: TokenPayload() {
     booking: Booking,
     establishment: Establishment,
     profile: Profile,
-    clientId: UUID, scope: Set<Scope>,  nonce: String?): HashMap<String, Any> {
+    clientId: UUID, scope: Set<Scope>,  nonce: String?): LinkedHashMap<String, Any> {
     var claims = LinkedHashMap<String, Any>()
     claims["name"] = profile.name
     claims["given_name"] = profile.givenName
@@ -40,8 +39,7 @@ class IdTokenPayload: TokenPayload() {
     clientId: UUID,
     scopes: Set<Scope>,
     nonce: String?,
-  ): HashMap<String, Any> {
-//    TODO("Not yet implemented")
+  ): LinkedHashMap<String, Any> {
     return buildClaims(booking!!, establishment!!, profile!!, clientId, scopes, nonce)
   }
 
