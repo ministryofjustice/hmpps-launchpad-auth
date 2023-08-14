@@ -12,7 +12,7 @@ import java.time.ZoneOffset
 import java.util.*
 
 const val INTERNAL_SERVER_ERROR_CODE = 500
-
+const val CODE = "code"
 @Service
 class SsoRequestService(
   private var ssoRequestRepository: SsoRequestRepository,

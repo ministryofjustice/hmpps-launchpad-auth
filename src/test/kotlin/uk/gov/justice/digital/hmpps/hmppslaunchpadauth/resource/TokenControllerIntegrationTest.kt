@@ -9,13 +9,18 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.RequestEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.util.LinkedMultiValueMap
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Token
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
@@ -33,6 +38,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
+
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -122,12 +128,12 @@ class TokenControllerIntegrationTest(
   }
 
   @Test
-  fun `get token`() {
+  fun `get token and use token for api call`() {
     // confirm sso request record exist before token request
     assertEquals(true, ssoRequestRepository.findById(ssoRequest.id).isPresent)
-    val headers = LinkedMultiValueMap<String, String>()
+    var headers = LinkedMultiValueMap<String, String>()
     headers.add("Authorization", authorizationHeader)
-    var url = URI("$baseUrl:$port/v1/token?code=$code&grant_type=code&redirect_uri=$REDIRECT_URI")
+    var url = URI("$baseUrl:$port/v1/token?code=$code&grant_type=authorization_code&redirect_uri=$REDIRECT_URI")
     var response = restTemplate.exchange(
       RequestEntity<Any>(headers, HttpMethod.POST, url),
       object : ParameterizedTypeReference<Token>() {},
@@ -152,5 +158,47 @@ class TokenControllerIntegrationTest(
     assertNotNull(token?.refreshToken)
     assertEquals("Bearer", token?.tokenType)
     assertEquals(3600L, token?.expiresIn)
+
+    // using access token in auth header
+    headers.remove("Authorization")
+    headers.add("Authorization", "Bearer " + token.accessToken)
+    url = URI("$baseUrl:$port/v1/users/$userID/clients?page=1&size=20")
+    var apiResponse = restTemplate.exchange(
+      RequestEntity<Any>(headers, HttpMethod.GET, url),
+      object : ParameterizedTypeReference<PagedResult<UserApprovedClientDto>>() {},
+    )
+    var pagedResult = apiResponse.body as PagedResult<UserApprovedClientDto>
+    assertEquals(200, apiResponse.statusCode.value())
+    assertNotNull(pagedResult.content)
+
+    // Using id token in auth header expected response should be Http 401
+    headers.remove("Authorization")
+    headers.add("Authorization", "Bearer " + token.idToken)
+    url = URI("$baseUrl:$port/v1/users/$userID/clients?page=1&size=20")
+    try {
+      restTemplate.exchange(
+        url,
+        HttpMethod.GET,
+        HttpEntity<Any>(headers),
+        ErrorResponse::class.java,
+      )
+    } catch (exception: HttpClientErrorException) {
+      assertEquals(401, exception.statusCode.value())
+    }
+
+    // Using id token in auth header expected response should be Http 401
+    headers.remove("Authorization")
+    headers.add("Authorization", "Bearer " + token.refreshToken)
+    url = URI("$baseUrl:$port/v1/users/$userID/clients?page=1&size=20")
+    try {
+      restTemplate.exchange(
+        url,
+        HttpMethod.GET,
+        HttpEntity<Any>(headers),
+        ErrorResponse::class.java,
+      )
+    } catch (exception: HttpClientErrorException) {
+      assertEquals(401, exception.statusCode.value())
+    }
   }
 }

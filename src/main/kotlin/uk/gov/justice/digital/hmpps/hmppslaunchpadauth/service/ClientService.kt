@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.ClientRepository
@@ -41,7 +40,7 @@ class ClientService(private var clientRepository: ClientRepository) {
     logger.info("Initiate user sign in process for client id: {}", client.id)
     isEnabled(client.enabled)
     validateScopes(scopes, client.scopes)
-    validateAuthorizationGrantType(responseType, client.authorizedGrantTypes)
+    validateAuthorizationGrantType(responseType)
     validateUri(redirectUri, client.registeredRedirectUris)
   }
 
@@ -78,8 +77,8 @@ class ClientService(private var clientRepository: ClientRepository) {
     }
   }
 
-  private fun validateAuthorizationGrantType(grant: String, clientGrants: Set<AuthorizationGrantType>) {
-    if (!AuthorizationGrantType.isStringMatchEnumValue(grant, clientGrants)) {
+  private fun validateAuthorizationGrantType(grant: String) {
+    if (grant != CODE) {
       logger.debug("Authorization grant type {} not matching with client grants", grant)
       throw ApiException(IN_VALID_GRANT, BAD_REQUEST_CODE)
     }

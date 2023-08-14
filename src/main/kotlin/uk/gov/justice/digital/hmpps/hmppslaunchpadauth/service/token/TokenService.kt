@@ -55,7 +55,7 @@ class TokenService(
         logger.warn("Client with id {} not found", clientId)
         throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE)
       }
-    if (code != null && grantType == "code" && redirectUri != null) {
+    if (code != null && grantType == AuthorizationGrantType.AUTHORIZATION_CODE.toString() && redirectUri != null) {
       validateGrant(grantType, clientId, client)
       val ssoRequest = ssoRequestService.getSsoRequestByAuthorizationCode(code).orElseThrow {
         logger.warn("Sso Request with code {} not found", code)

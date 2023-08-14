@@ -47,7 +47,7 @@ class UserApprovedClientDtoServiceTest {
     Mockito.`when`(clientRepository.findById(client.id)).thenReturn(Optional.of(client))
     clientService.validateParams(
       client.id,
-      AuthorizationGrantType.AUTHORIZATION_CODE.toString(),
+      "code",
       Scope.USER_BASIC_READ.toString(),
       "https://launchpad.com",
       UUID.randomUUID().toString(),
@@ -60,7 +60,7 @@ class UserApprovedClientDtoServiceTest {
     Mockito.`when`(clientRepository.findById(client.id)).thenReturn(Optional.of(client))
     clientService.validateParams(
       client.id,
-      AuthorizationGrantType.AUTHORIZATION_CODE.toString(),
+      "code",
       Scope.USER_BASIC_READ.toString(),
       REDIRECT_URI,
       null,
@@ -92,7 +92,7 @@ class UserApprovedClientDtoServiceTest {
     val exception = assertThrows(ApiException::class.java) {
       clientService.validateParams(
         client.id,
-        AuthorizationGrantType.AUTHORIZATION_CODE.toString(),
+        "code",
         Scope.USER_BASIC_READ.toString(),
         "jhuyt",
         UUID.randomUUID().toString(),
@@ -160,7 +160,7 @@ class UserApprovedClientDtoServiceTest {
     val exception = assertThrows(ApiException::class.java) {
       clientService.validateParams(
         client.id,
-        AuthorizationGrantType.AUTHORIZATION_CODE.toString(),
+        "code",
         "user.basic.read user.establishment.read",
         "$REDIRECT_URI/random",
         UUID.randomUUID().toString(),
