@@ -63,7 +63,7 @@ enum class Scope(val scope: String) {
       }
     }
 
-    private fun getScopeByStringValue(value: String): Scope {
+    fun getScopeByStringValue(value: String): Scope {
       Scope.values().forEach { scope ->
         if (value == scope.toString()) {
           return scope

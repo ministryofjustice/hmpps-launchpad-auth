@@ -4,17 +4,22 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.ACCESS_DENIED
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.ACCESS_DENIED_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.validator.UserIdValidator
 import java.util.*
 
 @Component
 class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProcessor {
-  private val logger = LoggerFactory.getLogger(IdTokenProcessor::class.java)
+  companion object {
+    private val logger = LoggerFactory.getLogger(IdTokenProcessor::class.java)
+  }
 
   override fun getUserId(token: String, nonce: String): String {
     logger.debug("Id token received: {}", token)
-    val decoder = Base64.getUrlDecoder()
+    val decoder = Base64.getDecoder()
     val chunks = token.split(".")
     val payload = String(decoder.decode(chunks[1]))
     val nonceInIdToken = getClaimFromPayload(payload, "nonce")
@@ -28,14 +33,14 @@ class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProc
       return userId
     } else {
       logger.error("User id not found in payload")
-      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE, ApiErrorTypes.ACCESS_DENIED.toString(), ACCESS_DENIED)
     }
   }
 
   private fun validateNonce(nonceToken: String, nonceSsoRequest: String) {
     if (nonceToken != nonceSsoRequest) {
       logger.error("Nonce in sso request not matching with nonce in id token payload")
-      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE, ApiErrorTypes.ACCESS_DENIED.toString(), ACCESS_DENIED)
     }
   }
 
@@ -45,7 +50,8 @@ class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProc
       return jsonObject.getString(claimName)
     } catch (exception: JSONException) {
       logger.error("Claim: {} not found in id token payload", claimName)
-      throw ApiException(String.format("Claim: %s not found", claimName), 500)
+      val message = String.format("Claim: %s not found", claimName)
+      throw ApiException(message, 500, ApiErrorTypes.SERVER_ERROR.toString(), "Internal server error")
     }
   }
 }

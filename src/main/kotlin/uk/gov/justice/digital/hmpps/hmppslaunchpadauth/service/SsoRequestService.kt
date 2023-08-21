@@ -2,7 +2,9 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.INTERNAL_SERVER_ERROR_CODE
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
@@ -11,13 +13,14 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
-const val INTERNAL_SERVER_ERROR_CODE = 500
-const val CODE = "code"
+
 @Service
 class SsoRequestService(
   private var ssoRequestRepository: SsoRequestRepository,
 ) {
-  private val logger = LoggerFactory.getLogger(SsoRequestService::class.java)
+  companion object {
+    private val logger = LoggerFactory.getLogger(SsoRequestService::class.java)
+  }
   fun createSsoRequest(ssoRequest: SsoRequest): SsoRequest {
     println(LocalDateTime.now())
     val ssoRequestCreated = ssoRequestRepository.save(ssoRequest)
@@ -54,7 +57,8 @@ class SsoRequestService(
     while (ssoRequestRecord.isPresent) {
       count += 1
       if (count > 3) {
-        throw ApiException("Duplicate uuid created multiple time for auth code", INTERNAL_SERVER_ERROR_CODE)
+        val message = "Duplicate uuid created multiple time for auth code"
+        throw SsoException(message, INTERNAL_SERVER_ERROR_CODE, ApiErrorTypes.SERVER_ERROR.toString(), "Internal server error", redirectUri)
       }
       logger.debug("Authorization code exist in sso request db record so creating new")
       authorizationCode = UUID.randomUUID()

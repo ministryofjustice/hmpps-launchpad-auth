@@ -7,33 +7,32 @@ import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.UNAUTHORIZED
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.UNAUTHORIZED_CODE
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication.UNAUTHORIZED
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication.UNAUTHORIZED_CODE
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.*
 import javax.crypto.spec.SecretKeySpec
 
 class TokenGenerationAndValidation {
 
   companion object {
     private val logger = LoggerFactory.getLogger(TokenGenerationAndValidation::class.java)
-    fun createToken(
+    fun generateToken(
       payloadMap: HashMap<String, Any>,
       headerMap: HashMap<String, Any>,
-      alg: SignatureAlgorithm,
       secret: String,
     ): String {
       try {
         return Jwts.builder()
           .addClaims(payloadMap)
           .setHeader(headerMap)
-          .signWith(alg, secret.toByteArray(Charsets.UTF_8))
+          .signWith(SignatureAlgorithm.HS256, secret.toByteArray(Charsets.UTF_8))
           .compact()
       } catch (e: Exception) {
         logger.debug("Exception during token creation {}", e.message)
-        throw ApiException("Exception during token creation ", HttpStatus.INTERNAL_SERVER_ERROR.value())
+        throw ApiException("Exception during token creation", HttpStatus.INTERNAL_SERVER_ERROR.value(), ApiErrorTypes.SERVER_ERROR.toString(), "Exception during token creation")
       }
     }
 
@@ -65,7 +64,7 @@ class TokenGenerationAndValidation {
 
     private fun invalidTokenFormat(token: String) {
       logger.error("Invalid bearer token format {}", token)
-      throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE)
+      throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), "Invalid token")
     }
   }
 }

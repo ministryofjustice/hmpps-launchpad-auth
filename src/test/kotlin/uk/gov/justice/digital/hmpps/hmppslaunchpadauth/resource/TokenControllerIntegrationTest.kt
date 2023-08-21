@@ -1,11 +1,16 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SignatureAlgorithm
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
@@ -30,6 +35,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.ClientRepository
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.SsoRequestRepository
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedClientRepository
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.USER_ID
@@ -50,6 +56,9 @@ class TokenControllerIntegrationTest(
 ) {
   @LocalServerPort
   private val port = 0
+
+  @Value("\${auth.service.secret}")
+  private lateinit var secret: String
 
   private val baseUrl = "http://localhost"
 
@@ -133,12 +142,12 @@ class TokenControllerIntegrationTest(
     assertEquals(true, ssoRequestRepository.findById(ssoRequest.id).isPresent)
     var headers = LinkedMultiValueMap<String, String>()
     headers.add("Authorization", authorizationHeader)
-    var url = URI("$baseUrl:$port/v1/token?code=$code&grant_type=authorization_code&redirect_uri=$REDIRECT_URI")
+    var url = URI("$baseUrl:$port/v1/oauth2/token?code=$code&grant_type=authorization_code&redirect_uri=$REDIRECT_URI")
     var response = restTemplate.exchange(
       RequestEntity<Any>(headers, HttpMethod.POST, url),
       object : ParameterizedTypeReference<Token>() {},
     )
-    var token = response.body
+    var token: Token = response.body
     assertNotNull(token?.idToken)
     assertNotNull(token?.accessToken)
     assertNotNull(token?.refreshToken)
@@ -147,17 +156,34 @@ class TokenControllerIntegrationTest(
     // confirm ssorequest deleted
     assertEquals(true, ssoRequestRepository.findById(ssoRequest.id).isEmpty)
     url =
-      URI("$baseUrl:$port/v1/token?grant_type=refresh_token&nonce=anything&refresh_token=${response.body!!.refreshToken}")
+      URI("$baseUrl:$port/v1/oauth2/token?grant_type=refresh_token&nonce=anything&refresh_token=${token.refreshToken}")
     response = restTemplate.exchange(
       RequestEntity<Any>(headers, HttpMethod.POST, url),
       object : ParameterizedTypeReference<Token>() {},
     )
     token = response.body
-    assertNotNull(token?.idToken)
-    assertNotNull(token?.accessToken)
-    assertNotNull(token?.refreshToken)
+    assertNotNull(token.idToken)
+    assertNotNull(token.accessToken)
+    assertNotNull(token.refreshToken)
+    assertIdTokenClaims(token.idToken)
+    assertAccessTokenClaims(token.accessToken)
+    assertRefreshTokenClaims(token.refreshToken)
     assertEquals("Bearer", token?.tokenType)
     assertEquals(3600L, token?.expiresIn)
+
+    // use expire refreshToken
+    var exception = Assertions.assertThrows(HttpClientErrorException::class.java) {
+      val refreshToken = updateTokenExpireTime(token.refreshToken, LocalDateTime.now().minusHours(1).toEpochSecond(ZoneOffset.UTC))
+      url =
+        URI("$baseUrl:$port/v1/oauth2/token?grant_type=refresh_token&nonce=anything&refresh_token=${refreshToken}")
+      response = restTemplate.exchange(
+        RequestEntity<Any>(headers, HttpMethod.POST, url),
+        object : ParameterizedTypeReference<Token>() {},
+      )
+    }
+    assertEquals(400, exception.statusCode.value())
+
+
 
     // using access token in auth header
     headers.remove("Authorization")
@@ -175,30 +201,81 @@ class TokenControllerIntegrationTest(
     headers.remove("Authorization")
     headers.add("Authorization", "Bearer " + token.idToken)
     url = URI("$baseUrl:$port/v1/users/$userID/clients?page=1&size=20")
-    try {
+    exception = Assertions.assertThrows(HttpClientErrorException::class.java) {
       restTemplate.exchange(
         url,
         HttpMethod.GET,
         HttpEntity<Any>(headers),
         ErrorResponse::class.java,
       )
-    } catch (exception: HttpClientErrorException) {
-      assertEquals(401, exception.statusCode.value())
     }
+    assertEquals(401, exception.statusCode.value())
 
     // Using id token in auth header expected response should be Http 401
     headers.remove("Authorization")
     headers.add("Authorization", "Bearer " + token.refreshToken)
     url = URI("$baseUrl:$port/v1/users/$userID/clients?page=1&size=20")
-    try {
+    exception = Assertions.assertThrows(HttpClientErrorException::class.java) {
       restTemplate.exchange(
         url,
         HttpMethod.GET,
         HttpEntity<Any>(headers),
         ErrorResponse::class.java,
       )
-    } catch (exception: HttpClientErrorException) {
-      assertEquals(401, exception.statusCode.value())
     }
+    assertEquals(401, exception.statusCode.value())
   }
+
+  private fun assertIdTokenClaims(idToken: String) {
+    assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(idToken, secret))
+    val claims = TokenGenerationAndValidation.parseClaims(idToken, secret).body
+    val exp = claims["exp"] as Int
+    assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
+    assertEquals(clientId.toString(), claims["aud"])
+    assertEquals(userID.toString(), claims["sub"])
+    assertEquals("Test User", claims["name"])
+    assertEquals("Test", claims["given_name"])
+    assertEquals("user", claims["family_name"])
+  }
+
+  private fun assertAccessTokenClaims(accessToken: String) {
+    assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(accessToken, secret))
+    val claims = TokenGenerationAndValidation.parseClaims(accessToken, secret).body
+    val exp = claims["exp"] as Int
+    assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
+    assertEquals(clientId.toString(), claims["aud"])
+    assertEquals(userID, claims["sub"])
+    val scopes = claims["scopes"] as ArrayList<String>
+    assertScopes(scopes, userApprovedClientOne.scopes)
+
+  }
+
+  private fun assertRefreshTokenClaims(refreshToken: String) {
+    assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(refreshToken, secret))
+    val claims = TokenGenerationAndValidation.parseClaims(refreshToken, secret).body
+    val exp = claims["exp"] as Int
+    assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
+    assertEquals(clientId.toString(), claims["aud"])
+    assertEquals(userID, claims["sub"])
+    val scopes = claims["scopes"] as ArrayList<String>
+    assertScopes(scopes, userApprovedClientOne.scopes)
+  }
+
+  private fun assertScopes(scopes: ArrayList<String>, scopesEnum: Set<Scope>) {
+    scopesEnum.forEach { s ->
+      assertTrue(scopes.contains(s.toString()))
+    }
+    assertEquals(scopes.size, scopesEnum.size)
+  }
+
+  private fun updateTokenExpireTime(token: String, exp: Long): String {
+    val claims = TokenGenerationAndValidation.parseClaims(token, secret)
+    claims.body["exp"] = exp
+    return Jwts.builder()
+      .addClaims(claims.body)
+      .setHeader(claims.header)
+      .signWith(SignatureAlgorithm.HS256, secret.toByteArray(Charsets.UTF_8))
+      .compact()
+  }
+
 }

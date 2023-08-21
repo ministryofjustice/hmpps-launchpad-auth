@@ -51,10 +51,8 @@ class UserApprovedClientControllerTest(@Autowired private var userApprovedClient
     Mockito.`when`(tokenAuthentication.authenticate("Bearer x.y.z")).thenReturn(
       AuthenticationUserInfo(
         UUID.randomUUID(),
-        setOf(
-          Scope.USER_CLIENTS_READ,
-        ),
-        USER_ID, setOf(Scope.USER_CLIENTS_READ),
+        USER_ID,
+        setOf(Scope.USER_CLIENTS_READ),
       ),
     )
     Mockito.`when`(userApprovedClientService.getUserApprovedClientsByUserId(userId, 1, size = 10)).thenReturn(
@@ -71,10 +69,8 @@ class UserApprovedClientControllerTest(@Autowired private var userApprovedClient
     Mockito.`when`(tokenAuthentication.authenticate("Bearer x.y.z")).thenReturn(
       AuthenticationUserInfo(
         UUID.randomUUID(),
-        setOf(
-          Scope.USER_CLIENTS_READ,
-        ),
-        USER_ID, setOf(Scope.USER_CLIENTS_READ),
+        USER_ID,
+        setOf(Scope.USER_CLIENTS_READ),
       ),
     )
     Mockito.`when`(userApprovedClientService.getUserApprovedClientsByUserId(userId, 1, 10)).thenReturn(
@@ -91,9 +87,6 @@ class UserApprovedClientControllerTest(@Autowired private var userApprovedClient
     Mockito.`when`(tokenAuthentication.authenticate("Bearer x.y.z")).thenReturn(
       AuthenticationUserInfo(
         UUID.randomUUID(),
-        setOf(
-          Scope.USER_CLIENTS_READ,
-        ),
         USER_ID, setOf(Scope.USER_CLIENTS_READ),
       ),
     )
@@ -111,9 +104,6 @@ class UserApprovedClientControllerTest(@Autowired private var userApprovedClient
     Mockito.`when`(tokenAuthentication.authenticate("Bearer x.y.z")).thenReturn(
       AuthenticationUserInfo(
         UUID.randomUUID(),
-        setOf(
-          Scope.USER_CLIENTS_READ,
-        ),
         USER_ID, setOf(Scope.USER_CLIENTS_READ),
       ),
     )
@@ -133,9 +123,6 @@ class UserApprovedClientControllerTest(@Autowired private var userApprovedClient
     Mockito.`when`(tokenAuthentication.authenticate("Bearer x.y.z")).thenReturn(
       AuthenticationUserInfo(
         UUID.randomUUID(),
-        setOf(
-          Scope.USER_CLIENTS_READ,
-        ),
         "${USER_ID}@gmail.com", setOf(Scope.USER_CLIENTS_READ),
       ),
     )

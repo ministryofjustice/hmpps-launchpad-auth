@@ -16,19 +16,21 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.UNAUTHORIZED
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.UNAUTHORIZED_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ClientService
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.UserApprovedClientService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Profile
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.AccessTokenPayload
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenCommonClaims
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.USER_ID
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.validator.UserIdValidator
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -38,11 +40,9 @@ import java.util.*
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
 class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenAuthentication) {
-  @MockBean
-  private lateinit var clientService: ClientService
 
   @MockBean
-  private lateinit var userApprovedClientService: UserApprovedClientService
+  private lateinit var userIdValidator: UserIdValidator
 
   @Value("\${auth.service.secret}")
   private lateinit var secret: String
@@ -67,8 +67,6 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
 
   @Test
   fun authenticate() {
-    val client = buildClient(true)
-    val userApprovedClient = buildUserApprovedClient()
     val accessTokenPayload = AccessTokenPayload()
     val nonce = "random_nonce"
     val payload = accessTokenPayload.generatePayload(
@@ -79,52 +77,16 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
       userApprovedScopes,
       nonce,
     )
-    val authHeader = "Bearer " + TokenGenerationAndValidation.createToken(
+    val authHeader = "Bearer " + TokenGenerationAndValidation.generateToken(
       payload,
-      accessTokenPayload.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
-      SignatureAlgorithm.HS256,
+      TokenCommonClaims.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
       secret,
     )
-    Mockito.`when`(clientService.getClientById(clientId)).thenReturn(Optional.of(client))
-    Mockito.`when`(
-      userApprovedClientService
-        .getUserApprovedClientByUserIdAndClientId(userId, clientId),
-    )
-      .thenReturn(Optional.of(userApprovedClient))
+    Mockito.`when`(userIdValidator.isValid(userId)).thenReturn(true)
     val authenticationUserInfo = tokenAuthentication.authenticate(authHeader) as AuthenticationUserInfo
     assertEquals(authenticationUserInfo.clientId, clientId)
-    assertEquals(authenticationUserInfo.clientScope, scopes)
     assertEquals(authenticationUserInfo.userId, userId)
     assertEquals(authenticationUserInfo.userApprovedScope, userApprovedScopes)
-  }
-
-  @Test
-  fun `authenticate when user approved client is not found`() {
-    val client = buildClient(true)
-    val accessTokenPayload = AccessTokenPayload()
-    val nonce = "random_nonce"
-    val payload = accessTokenPayload.generatePayload(
-      null,
-      null,
-      Profile(USER_ID, "John Smith", "John", "Smith"),
-      clientId,
-      userApprovedScopes,
-      nonce,
-    )
-    val authHeader = "Bearer " + TokenGenerationAndValidation.createToken(
-      payload,
-      accessTokenPayload.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
-      SignatureAlgorithm.HS256,
-      secret,
-    )
-    Mockito.`when`(clientService.getClientById(clientId)).thenReturn(Optional.of(client))
-    Mockito.`when`(userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userId, clientId))
-      .thenReturn(Optional.empty())
-    val exception = assertThrows(ApiException::class.java) {
-      tokenAuthentication.authenticate(authHeader)
-    }
-    assertEquals(exception.message, UNAUTHORIZED)
-    assertEquals(exception.code, UNAUTHORIZED_CODE)
   }
 
   @Test
@@ -140,10 +102,9 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
       userApprovedScopes,
       nonce,
     )
-    val authHeader = "Bearer " + TokenGenerationAndValidation.createToken(
+    val authHeader = "Bearer " + TokenGenerationAndValidation.generateToken(
       payload,
-      accessTokenPayload.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
-      SignatureAlgorithm.HS256,
+      TokenCommonClaims.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
       randomSecret,
     )
     val exception = assertThrows(ApiException::class.java) {
@@ -166,13 +127,12 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
       userApprovedScopes,
       nonce,
     )
-    val authHeader = "Bearer " + TokenGenerationAndValidation.createToken(
+    val authHeader = "Bearer " + TokenGenerationAndValidation.generateToken(
       payload,
-      accessTokenPayload.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
-      SignatureAlgorithm.HS256,
+      TokenCommonClaims.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
       secret,
     )
-    Mockito.`when`(clientService.getClientById(clientId)).thenReturn(Optional.of(client))
+   /* Mockito.`when`(clientService.getClientById(clientId)).thenReturn(Optional.of(client))*/
     val exception = assertThrows(ApiException::class.java) {
       tokenAuthentication.authenticate(authHeader)
     }

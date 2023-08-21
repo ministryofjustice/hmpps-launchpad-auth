@@ -5,8 +5,10 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.BAD_REQUEST_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
@@ -18,7 +20,9 @@ class UserApprovedClientService(
   private var userApprovedClientRepository: UserApprovedClientRepository,
   private var clientService: ClientService,
 ) {
-  private val logger = LoggerFactory.getLogger(UserApprovedClientService::class.java)
+  companion object {
+    private val logger = LoggerFactory.getLogger(UserApprovedClientService::class.java)
+  }
 
   fun upsertUserApprovedClient(userApprovedClient: UserApprovedClient): UserApprovedClient {
     logger.info("Upsert user approved client for user id:{} client id:{}", userApprovedClient.userId, userApprovedClient.clientId)
@@ -52,20 +56,25 @@ class UserApprovedClientService(
     val client = clientService.getClientById(clientId)
     .orElseThrow{
       logger.error("Client id {} not found", clientId)
-      throw ApiException("Client id not found", BAD_REQUEST_CODE)
+      val message = "Client id not found"
+      throw ApiException("Client id not found", BAD_REQUEST_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid request")
     }
     if (client.autoApprove) {
-      throw ApiException("Requested action not permitted", BAD_REQUEST_CODE)
+      val message = "Requested action not permitted"
+      throw ApiException("Requested action not permitted", BAD_REQUEST_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid request")
     }
     val userApprovedClient =
       userApprovedClientRepository.findUserApprovedClientByUserIdAndClientId(userId, clientId).orElseThrow {
+        val message = String.format(
+          "No record found for user id:%s and client id:%s",
+          userId,
+          clientId.toString(),
+        )
         throw ApiException(
-          String.format(
-            "No record found for user id:%s and client id:%s",
-            userId,
-            clientId.toString(),
-          ),
+          message,
           BAD_REQUEST_CODE,
+          ApiErrorTypes.INVALID_REQUEST.toString(),
+          "Invalid request"
         )
       }
     userApprovedClientRepository.deleteById(userApprovedClient.id)
@@ -77,7 +86,8 @@ class UserApprovedClientService(
     val clients = ArrayList<UserApprovedClientDto>()
     userApprovedClientPage.content.forEach { userApprovedClient ->
       val client = clientService.getClientById(userApprovedClient.clientId).orElseThrow {
-        throw ApiException(String.format("Client id not found %s", userApprovedClient.clientId), BAD_REQUEST_CODE)
+        val message = String.format("Client id not found %s", userApprovedClient.clientId)
+        throw ApiException(message, BAD_REQUEST_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid request")
       }
       clients.add(
         UserApprovedClientDto(

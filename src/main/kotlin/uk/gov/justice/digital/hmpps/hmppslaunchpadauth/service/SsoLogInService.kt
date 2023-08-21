@@ -6,7 +6,11 @@ import org.springframework.stereotype.Component
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.view.RedirectView
 import org.springframework.web.util.UriComponentsBuilder
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.ACCESS_DENIED
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.ACCESS_DENIED_CODE
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
@@ -34,7 +38,9 @@ class SsoLogInService(
   @Value("\${azure.issuer-url}")
   private lateinit var issuerUrl: String
 
-  private val logger = LoggerFactory.getLogger(SsoLogInService::class.java)
+  companion object {
+    private val logger = LoggerFactory.getLogger(SsoLogInService::class.java)
+  }
 
   fun initiateSsoLogin(
     clientId: UUID,
@@ -68,12 +74,12 @@ class SsoLogInService(
   fun updateSsoRequest(token: String?, state: UUID): Any {
     var ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {
       logger.warn("State send on callback url do not exist {}", state)
-      ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+      ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE, ApiErrorTypes.ACCESS_DENIED.toString(), "Permission not granted")
     }
     val clientId = ssoRequest.client.id
     val client = clientService.getClientById(clientId).orElseThrow {
       logger.warn("Client of sso request  do not exist {}", clientId)
-      ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+      SsoException(ACCESS_DENIED, ACCESS_DENIED_CODE, ApiErrorTypes.ACCESS_DENIED.toString(), "Invalid client", ssoRequest.client.redirectUri)
     }
     var approvalRequired = false
     if (token != null) {
@@ -113,9 +119,13 @@ class SsoLogInService(
   }
 
   private fun updateSsoRequestWithUserId(token: String, ssoRequest: SsoRequest): SsoRequest {
-    val userId = tokenProcessor.getUserId(token, ssoRequest.nonce.toString())
-    ssoRequest.userId = userId
-    return ssoRequestService.updateSsoRequest(ssoRequest)
+    try {
+      val userId = tokenProcessor.getUserId(token, ssoRequest.nonce.toString())
+      ssoRequest.userId = userId
+      return ssoRequestService.updateSsoRequest(ssoRequest)
+    } catch (e: ApiException) {
+      throw SsoException(e.message, e.code, e.error, e.errorDescription, ssoRequest.client.redirectUri)
+    }
   }
 
   private fun createOrUpdateUserApprovedClient(ssoRequest: SsoRequest, canSaveIfNotExist: Boolean): Boolean {
@@ -164,6 +174,7 @@ class SsoLogInService(
     modelAndView.addObject("state", state)
     modelAndView.addObject("scopes", Scope.getTemplateTextByScopes(ssoRequest.client.scopes).sortedDescending())
     modelAndView.addObject("client", client)
+    modelAndView.addObject("redirectUri", ssoRequest.client.redirectUri)
     return modelAndView
   }
 }

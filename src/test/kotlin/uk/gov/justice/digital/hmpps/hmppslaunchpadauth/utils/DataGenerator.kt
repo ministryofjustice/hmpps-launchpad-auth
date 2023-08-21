@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Profile
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.AccessTokenPayload
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenCommonClaims
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -134,10 +135,9 @@ class DataGenerator {
         userApprovedScopes,
         nonce,
       )
-      val authHeader = "Bearer " + TokenGenerationAndValidation.createToken(
+      val authHeader = "Bearer " + TokenGenerationAndValidation.generateToken(
         payload,
-        accessTokenPayload.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
-        SignatureAlgorithm.HS256,
+        TokenCommonClaims.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
         randomSecret,
       )
     }
@@ -158,10 +158,9 @@ class DataGenerator {
         userApprovedClient.scopes,
         nonce,
       )
-      return "Bearer " + TokenGenerationAndValidation.createToken(
+      return "Bearer " + TokenGenerationAndValidation.generateToken(
         payload,
-        accessTokenPayload.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
-        SignatureAlgorithm.HS256,
+        TokenCommonClaims.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
         secret,
       )
     }

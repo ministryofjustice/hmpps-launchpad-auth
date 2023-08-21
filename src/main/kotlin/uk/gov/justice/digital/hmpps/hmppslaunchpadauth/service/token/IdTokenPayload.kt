@@ -1,14 +1,12 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token
 
-import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Booking
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Establishment
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Profile
 import java.util.*
 
-@Component
-class IdTokenPayload: TokenPayload() {
+class IdTokenPayload : TokenPayload {
 
   private fun buildClaims(
     booking: Booking,
@@ -24,7 +22,7 @@ class IdTokenPayload: TokenPayload() {
     if (nonce != null) {
       claims["nonce"] = nonce
     }
-    claims = buildCommonClaims(clientId.toString(), profile.id, claims)
+    claims = TokenCommonClaims.buildCommonClaims(clientId.toString(), profile.id, claims)
     if (scope.contains(Scope.USER_BASIC_READ)) {
       claims["booking"] = booking
     }
@@ -40,7 +38,6 @@ class IdTokenPayload: TokenPayload() {
     scopes: Set<Scope>,
     nonce: String?,
   ): LinkedHashMap<String, Any> {
-    return buildClaims(booking!!, establishment!!, profile!!, clientId, scopes, nonce)
+    return buildClaims(booking!!, establishment!!, profile, clientId, scopes, nonce)
   }
-
 }

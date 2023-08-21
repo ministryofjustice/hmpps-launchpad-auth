@@ -1,3 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception
 
-class ApiException(override var message: String, var code: Int) : RuntimeException(message)
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
+
+open class ApiException(
+  override val message: String,
+  open val code: Int,
+  open val error: String,
+  open val errorDescription: String
+) : RuntimeException(message)

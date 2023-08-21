@@ -5,5 +5,5 @@ import java.util.*
 
 open class AuthenticationInfo(
   open val clientId: UUID,
-  open val clientScope: Set<Scope>
+  // open val clientScope: Set<Scope>
 )

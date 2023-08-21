@@ -2,7 +2,14 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.ACCESS_DENIED
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.ACCESS_DENIED_CODE
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.BAD_REQUEST_CODE
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.CODE
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.IN_VALID_GRANT_DESCRIPTION
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.IN_VALID_REDIRECT_URI_DESCRIPTION
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.IN_VALID_SCOPE_DESCRIPTION
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.ClientRepository
@@ -10,16 +17,12 @@ import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
 
-const val ACCESS_DENIED = "Access denied"
-const val IN_VALID_SCOPE = "The requested scope is invalid or not found."
-const val IN_VALID_GRANT = "The requested response type is invalid or not found."
-const val IN_VALID_REDIRECT_URI = "The requested redirect uri is invalid or not found"
-const val BAD_REQUEST_CODE = 400
-const val ACCESS_DENIED_CODE = 403
 
 @Service
 class ClientService(private var clientRepository: ClientRepository) {
-  private val logger = LoggerFactory.getLogger(ClientService::class.java)
+  companion object {
+    private val logger = LoggerFactory.getLogger(ClientService::class.java)
+  }
 
   fun getClientById(id: UUID): Optional<Client> {
     return clientRepository.findById(id)
@@ -35,19 +38,26 @@ class ClientService(private var clientRepository: ClientRepository) {
   ) {
     val client = clientRepository.findById(clientId).orElseThrow {
       logger.error("Client with client_id {} does not exist", clientId)
-      ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+      SsoException(ACCESS_DENIED, ACCESS_DENIED_CODE, "invalid_clientId", "Invalid client id", redirectUri)
     }
     logger.info("Initiate user sign in process for client id: {}", client.id)
-    isEnabled(client.enabled)
-    validateScopes(scopes, client.scopes)
-    validateAuthorizationGrantType(responseType)
+    isEnabled(client.enabled, redirectUri)
+    validateScopes(scopes, client.scopes, redirectUri)
+    validateAuthorizationGrantType(responseType, redirectUri)
     validateUri(redirectUri, client.registeredRedirectUris)
+    logger.info(
+      "Single sign on request received for client: {}, with response_type: {}, scopes: {}, redirect_uri: {}",
+      clientId,
+      responseType,
+      scopes,
+      redirectUri
+      )
   }
 
-  private fun isEnabled(enabled: Boolean) {
+  private fun isEnabled(enabled: Boolean, redirectUri: String) {
     if (!enabled) {
       logger.debug("Client not enabled")
-      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+      throw SsoException(ACCESS_DENIED, ACCESS_DENIED_CODE, "invalid_client", "Client not found or invalid id format", redirectUri)
     }
   }
 
@@ -57,12 +67,12 @@ class ClientService(private var clientRepository: ClientRepository) {
       validateRedirectUri(uri, redirectUris)
     } catch (exception: MalformedURLException) {
       logger.error("Not a valid redirect url: {}", uri)
-      throw ApiException(IN_VALID_REDIRECT_URI, BAD_REQUEST_CODE)
+      throw SsoException(IN_VALID_REDIRECT_URI_DESCRIPTION, BAD_REQUEST_CODE, "invalid_redirectUri", "redirect url invalid or not listed", uri)
     }
   }
 
-  private fun validateScopes(scopes: String, clientScopes: Set<Scope>) {
-    var scopeList: List<String>
+  private fun validateScopes(scopes: String, clientScopes: Set<Scope>, redirectUri: String) {
+    val scopeList: List<String>
     if (scopes.contains(" ")) {
       val scopeValues = scopes.replace("\\s+".toRegex(), " ")
       scopeList = scopeValues.split("\\s".toRegex())
@@ -72,22 +82,22 @@ class ClientService(private var clientRepository: ClientRepository) {
     scopeList.forEach { x ->
       if (!Scope.isStringMatchEnumValue(x, clientScopes)) {
         logger.debug("Scope {} not matching with client scope set", x)
-        throw ApiException(IN_VALID_SCOPE, BAD_REQUEST_CODE)
+        throw SsoException(IN_VALID_SCOPE_DESCRIPTION, BAD_REQUEST_CODE, "invalid_scope", "Invalid scope or not listed", redirectUri)
       }
     }
   }
 
-  private fun validateAuthorizationGrantType(grant: String) {
+  private fun validateAuthorizationGrantType(grant: String, redirectUri: String) {
     if (grant != CODE) {
       logger.debug("Authorization grant type {} not matching with client grants", grant)
-      throw ApiException(IN_VALID_GRANT, BAD_REQUEST_CODE)
+      throw SsoException(IN_VALID_GRANT_DESCRIPTION, BAD_REQUEST_CODE, "invalid_grant", "Grant type invalid or not allowed", redirectUri)
     }
   }
 
   private fun validateRedirectUri(uri: String, redirectUris: Set<String>) {
     if (!redirectUris.contains(uri)) {
       logger.debug("Redirect uri not matching with client redirect uri: {}", uri)
-      throw ApiException(IN_VALID_REDIRECT_URI, BAD_REQUEST_CODE)
+      throw SsoException(IN_VALID_REDIRECT_URI_DESCRIPTION, BAD_REQUEST_CODE, "invalid_redirectUri", "Invalid redirect uri or not listed", uri)
     }
   }
 }

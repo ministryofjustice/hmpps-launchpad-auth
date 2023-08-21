@@ -17,14 +17,14 @@ import java.net.URI
 import java.util.*
 
 @RestController
-@RequestMapping("/v1")
+@RequestMapping("/v1/oauth2")
 class TokenController(
   private var tokenService: TokenService,
   @Qualifier("basicAuthentication") private var authentication: Authentication,
 ) {
 
-  @PostMapping("/token", consumes = ["application/x-www-form-urlencoded"], produces = [MediaType.APPLICATION_JSON_VALUE])
-  fun createToken(
+  @PostMapping("/token", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+  fun generateToken(
     @RequestParam("code", required = false) code: UUID?,
     @RequestParam("grant_type", required = false) grant: String,
     @RequestParam("redirect_uri", required = false) redirectUri: URI?,

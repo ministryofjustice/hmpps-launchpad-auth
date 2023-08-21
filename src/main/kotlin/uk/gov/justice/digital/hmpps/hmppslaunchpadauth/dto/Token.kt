@@ -7,10 +7,10 @@ data class Token(
   val idToken: String,
 
   @JsonProperty("access_token")
-  val accessToken: String?,
+  val accessToken: String,
 
   @JsonProperty("refresh_token")
-  val refreshToken: String?,
+  val refreshToken: String,
 
   @JsonProperty("token_type")
   val tokenType: String,
