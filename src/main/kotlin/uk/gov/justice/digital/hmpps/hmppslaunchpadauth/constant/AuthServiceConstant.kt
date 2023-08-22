@@ -18,6 +18,7 @@ class AuthServiceConstant {
     const val EXPIRE_TOKEN_MSG = "Token has expired"
     const val INVALID_TOKEN_MSG = "Invalid token"
     const val REDIRECTION_CODE = 302
+
     fun getResponseHeaders() : HttpHeaders {
       val httpHeaders: HttpHeaders = HttpHeaders()
       httpHeaders.add(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, max-age=0, must-revalidate")
