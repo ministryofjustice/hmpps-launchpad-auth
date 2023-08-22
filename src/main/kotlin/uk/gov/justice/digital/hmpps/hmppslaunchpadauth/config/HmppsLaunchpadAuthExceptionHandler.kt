@@ -2,11 +2,11 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.config
 
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.servlet.view.RedirectView
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.getResponseHeaders
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.ApiError
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
@@ -17,13 +17,14 @@ class HmppsLaunchpadAuthExceptionHandler {
 
   @ExceptionHandler(ApiException::class)
   fun handleApiException(e: ApiException): ResponseEntity<ApiError> {
-    log.info("Validation exception: {}", e.message)
+    log.error("Exception: {}", e.message)
     return ResponseEntity
       .status(e.code)
+      .headers(getResponseHeaders())
       .body(
         ApiError(
-          error = e.error,
-          errorDescription = e.errorDescription,
+          e.error,
+          e.errorDescription,
         ),
       )
   }
@@ -38,7 +39,7 @@ class HmppsLaunchpadAuthExceptionHandler {
   fun handleException(e: java.lang.Exception): ResponseEntity<ApiError?>? {
     log.error("Unexpected exception", e)
     return ResponseEntity
-      .status(INTERNAL_SERVER_ERROR)
+      .status(500)
       .body(
         ApiError(
           error = ApiErrorTypes.SERVER_ERROR.toString(),

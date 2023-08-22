@@ -4,8 +4,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.BAD_REQUEST_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
@@ -57,11 +57,11 @@ class UserApprovedClientService(
     .orElseThrow{
       logger.error("Client id {} not found", clientId)
       val message = "Client id not found"
-      throw ApiException("Client id not found", BAD_REQUEST_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid request")
+      throw ApiException("Client id not found", HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid request")
     }
     if (client.autoApprove) {
       val message = "Requested action not permitted"
-      throw ApiException("Requested action not permitted", BAD_REQUEST_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid request")
+      throw ApiException("Requested action not permitted", HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid request")
     }
     val userApprovedClient =
       userApprovedClientRepository.findUserApprovedClientByUserIdAndClientId(userId, clientId).orElseThrow {
@@ -72,7 +72,7 @@ class UserApprovedClientService(
         )
         throw ApiException(
           message,
-          BAD_REQUEST_CODE,
+          HttpStatus.BAD_REQUEST.value(),
           ApiErrorTypes.INVALID_REQUEST.toString(),
           "Invalid request"
         )
@@ -87,7 +87,7 @@ class UserApprovedClientService(
     userApprovedClientPage.content.forEach { userApprovedClient ->
       val client = clientService.getClientById(userApprovedClient.clientId).orElseThrow {
         val message = String.format("Client id not found %s", userApprovedClient.clientId)
-        throw ApiException(message, BAD_REQUEST_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid request")
+        throw ApiException(message, HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid request")
       }
       clients.add(
         UserApprovedClientDto(

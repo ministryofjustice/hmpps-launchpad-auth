@@ -1,26 +1,23 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication
 
 import io.jsonwebtoken.Claims
-import io.jsonwebtoken.ExpiredJwtException
-import io.jsonwebtoken.MalformedJwtException
-import io.jsonwebtoken.SignatureException
-import io.jsonwebtoken.UnsupportedJwtException
+import io.jsonwebtoken.JwtException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Component
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.UNAUTHORIZED
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.UNAUTHORIZED_CODE
+import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.EXPIRE_TOKEN_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_TOKEN_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.UNAUTHORIZED_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.validator.UserIdValidator
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 
 
-@Component("tokenAuthentication")
+@Service("tokenAuthentication")
 class TokenAuthentication(
   private var userIdValidator: UserIdValidator,
 ) : Authentication {
@@ -32,57 +29,57 @@ class TokenAuthentication(
     private const val BEARER = "Bearer "
     private val logger = LoggerFactory.getLogger(TokenAuthentication::class.java)
   }
+
   override fun authenticate(credential: String): AuthenticationInfo {
     if (credential.startsWith(BEARER)) {
       val token = credential.replace(BEARER, "")
       if (TokenGenerationAndValidation.validateJwtTokenSignature(token, secret)) {
-        try {
-          val jwsClaims = TokenGenerationAndValidation.parseClaims(token, secret)
-          val claims = jwsClaims.body
-          val expireAt = getClaim("exp", claims) as Int
-          validateExpireTime(expireAt)
-          TokenGenerationAndValidation.validateExpireTime(expireAt)
-          val jti = getClaim("jti", claims) as String
-          validateAndGetUUIDInClaim(jti, "jti")
-          val aud = getClaim("aud", claims) as String
-          val clientId = validateAndGetUUIDInClaim(aud, "aud")
-          val userId = getClaim("sub", claims) as String
-          validateUserIdFormat(userId)
-          val scopes = getClaim("scopes", claims) as Any
-          val scopesEnum = validateScopeInClaims(scopes)
-          return AuthenticationUserInfo(clientId, userId, scopesEnum)
-        } catch (e: Exception) {
-          when (e) {
-            is ExpiredJwtException, is UnsupportedJwtException, is MalformedJwtException, is SignatureException, is IllegalArgumentException -> {
-              logger.debug("Exception during bearer token authentication: {}", e.message)
-              throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED,)
-            }
-            is Exception -> {
-              throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED,)
-            }
-          }
-        }
+        val claims = getJwsClaims(token)
+        checkIfRefreshToken(claims)
+        val expireAt = getClaim("exp", claims) as Int
+        validateExpireTime(expireAt)
+        TokenGenerationAndValidation.validateExpireTime(expireAt)
+        val jti = getClaim("jti", claims) as String
+        validateAndGetUUIDInClaim(jti, "jti")
+        getClaim("iat", claims) as Int
+        val aud = getClaim("aud", claims) as String
+        val clientId = validateAndGetUUIDInClaim(aud, "aud")
+        val userId = getClaim("sub", claims) as String
+        validateUserIdFormat(userId)
+        val scopes = getClaim("scopes", claims) as Any
+        val scopesEnum = validateScopeInClaims(scopes)
+        return AuthenticationUserInfo(clientId, userId, scopesEnum)
       } else {
-        throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED,)
+        throw ApiException(UNAUTHORIZED_MSG, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
       }
     } else {
-      throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED,)
+      throw ApiException(UNAUTHORIZED_MSG, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
     }
-    throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED,)
   }
 
 
   private fun getClaim(claimName: String, claims: Claims): Any? {
-    try {
-      return claims[claimName]
-    } catch (e: NullPointerException) {
-      logger.warn("Required claim {} not found in refresh token query parameter", claimName)
+    val claim = claims[claimName]
+    if (claim == null) {
+      val message = String.format("Required claim %s not found in access token", claimName)
+      logger.error(message)
       throw ApiException(
-        "Invalid token",
-        401,
+        message,
+        HttpStatus.UNAUTHORIZED.value(),
         ApiErrorTypes.UNAUTHORIZED.toString(),
-        "Invalid token",
+        INVALID_TOKEN_MSG,
       )
+    }
+    return claim
+  }
+
+  private fun getJwsClaims(token: String): Claims {
+    try {
+      val jwsClaims = TokenGenerationAndValidation.parseClaims(token, secret)
+      return jwsClaims.body
+    } catch (e: JwtException) {
+      logger.error("Exception during token authentication {}", e.message)
+      throw ApiException(e.message!!, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.INVALID_TOKEN.toString(), INVALID_TOKEN_MSG)
     }
   }
 
@@ -90,32 +87,52 @@ class TokenAuthentication(
     try {
       TokenGenerationAndValidation.validateExpireTime(exp)
     } catch (e: IllegalArgumentException) {
-      throw ApiException("Refresh token is expired", 400, ApiErrorTypes.INVALID_REQUEST.toString(), "Refresh token is expired",)
+      val message = String.format("Exception during token expire time validation {}", e.message)
+      logger.error(message)
+      throw ApiException(
+        message,
+        HttpStatus.UNAUTHORIZED.value(),
+        ApiErrorTypes.EXPIRED_ACCESS_TOKEN.toString(),
+        EXPIRE_TOKEN_MSG,
+      )
     }
   }
 
-  private fun validateAndGetUUIDInClaim(aud: String, claimName: String): UUID {
+  private fun validateAndGetUUIDInClaim(value: String, claimName: String): UUID {
     try {
-      return UUID.fromString(aud)
+      return UUID.fromString(value)
     } catch (e: IllegalArgumentException) {
       logger.warn("Invalid claim name {} format in token", claimName)
       throw ApiException(
         "Invalid token",
-        401,
+        HttpStatus.UNAUTHORIZED.value(),
         ApiErrorTypes.UNAUTHORIZED.toString(),
-        "Invalid token"
+        INVALID_TOKEN_MSG,
       )
     }
   }
 
   private fun validateUserIdFormat(sub: String) {
     if (!userIdValidator.isValid(sub)) {
-      logger.warn("Invalid user id format in token")
+      val message = String.format("Invalid user id %s format in token", sub)
+      logger.debug(message)
       throw ApiException(
-        "Invalid token",
-        401,
+        message,
+        HttpStatus.UNAUTHORIZED.value(),
         ApiErrorTypes.UNAUTHORIZED.toString(),
-        "Invalid token",
+        INVALID_TOKEN_MSG,
+      )
+    }
+  }
+
+  private fun checkIfRefreshToken(claims: Claims) {
+    val ati = claims["ati"]
+    if (ati != null) {
+      throw ApiException(
+        "Refresh token sent as bearer auth token",
+        HttpStatus.UNAUTHORIZED.value(),
+        ApiErrorTypes.UNAUTHORIZED.toString(),
+        INVALID_TOKEN_MSG,
       )
     }
   }
@@ -124,18 +141,29 @@ class TokenAuthentication(
     val scopes = scopeInClaims as? ArrayList<String>
     val scopeEnums = HashSet<Scope>()
     if (scopes != null) {
-        scopes.forEach{
-          scope ->
-          try {
-            val scopeEnum = Scope.getScopeByStringValue(scope)
-            scopeEnums.add(scopeEnum)
-          } catch (e: IllegalArgumentException) {
-            throw ApiException("Token do not contain scopes", UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), "Invalid token",)
+      scopes.forEach { scope ->
+        try {
+          val scopeEnum = Scope.getScopeByStringValue(scope)
+          scopeEnums.add(scopeEnum)
+        } catch (e: IllegalArgumentException) {
+          val message = String.format("Scope %s in token not in auth service scope list", scope)
+          logger.debug(message)
+          throw ApiException(
+            message,
+            HttpStatus.UNAUTHORIZED.value(),
+            ApiErrorTypes.UNAUTHORIZED.toString(),
+            INVALID_TOKEN_MSG,
+          )
         }
       }
       return scopeEnums
     } else {
-      throw ApiException("Token do not contain scopes", UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), "Invalid token",)
+      throw ApiException(
+        "Access token do not contain scopes",
+        HttpStatus.UNAUTHORIZED.value(),
+        ApiErrorTypes.UNAUTHORIZED.toString(),
+        INVALID_TOKEN_MSG,
+      )
     }
   }
 }

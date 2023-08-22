@@ -1,18 +1,17 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication
 
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.stereotype.Component
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.UNAUTHORIZED
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.UNAUTHORIZED_CODE
+import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.UNAUTHORIZED_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ClientService
 import java.util.*
 
 
-
-@Component("basicAuthentication")
+@Service("basicAuthentication")
 class BasicAuthentication(
   private var clientService: ClientService,
   private var encoder: BCryptPasswordEncoder,
@@ -20,7 +19,7 @@ class BasicAuthentication(
   companion object {
     private const val BASIC = "Basic "
     private const val CHUNKS_SIZE = 2
-    private val LOGGER = LoggerFactory.getLogger(BasicAuthentication::class.java)
+    private val logger = LoggerFactory.getLogger(BasicAuthentication::class.java)
   }
 
 
@@ -35,35 +34,40 @@ class BasicAuthentication(
       val clientId = chunks[0]
       val clientSecret = chunks[1]
       val client = clientService.getClientById(UUID.fromString(clientId)).orElseThrow {
-        LOGGER.debug("Client record with id {} do not exist", clientId)
-        throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED)
+        val message = String.format("Client record with id %s do not exist", clientId)
+        logger.debug(message)
+        throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
       }
       if (!client.enabled) {
-        LOGGER.debug("Client record with id {} is not enabled", clientId)
-        throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED)
+        val message = String.format("Client record with id %s is not enabled", clientId)
+        logger.debug(message)
+        throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
       }
       if (encoder.matches(clientSecret, client.secret)) {
         return AuthenticationInfo(client.id)
       } else {
-        throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED)
+        throw ApiException(UNAUTHORIZED_MSG, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
       }
     } else {
-      LOGGER.debug("Invalid basic authorisation header format")
-      throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED)
+      val message = "Invalid basic authorisation header format"
+      logger.debug(message)
+      throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
     }
   }
 
   private fun validateCredentialFormat(credentialInfo: String) {
     if (!credentialInfo.contains(":")) {
-      LOGGER.debug("Invalid basic format {}", credentialInfo)
-      throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED)
+      val message = "Invalid auth header basic format"
+      logger.debug(message)
+      throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
     }
   }
 
   private fun validateChunksSize(size: Int, credentialInfo: String) {
     if (size != CHUNKS_SIZE) {
-      LOGGER.debug("Invalid basic format {}", credentialInfo)
-      throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED)
+      val message = "Invalid auth header basic format"
+      logger.debug(message)
+      throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
     }
   }
 }

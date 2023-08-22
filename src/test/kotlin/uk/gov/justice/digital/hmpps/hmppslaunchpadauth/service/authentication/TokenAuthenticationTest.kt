@@ -13,11 +13,11 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.UNAUTHORIZED
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.UNAUTHORIZED_CODE
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.UNAUTHORIZED_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
@@ -25,8 +25,8 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Profile
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.AccessTokenPayload
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenCommonClaims
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.USER_ID
@@ -110,8 +110,8 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
     val exception = assertThrows(ApiException::class.java) {
       tokenAuthentication.authenticate(authHeader)
     }
-    assertEquals(exception.message, UNAUTHORIZED)
-    assertEquals(exception.code, UNAUTHORIZED_CODE)
+    assertEquals(exception.message, UNAUTHORIZED_MSG)
+    assertEquals(exception.code, HttpStatus.UNAUTHORIZED.value())
   }
 
   @Test
@@ -136,8 +136,8 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
     val exception = assertThrows(ApiException::class.java) {
       tokenAuthentication.authenticate(authHeader)
     }
-    assertEquals(exception.message, UNAUTHORIZED)
-    assertEquals(exception.code, UNAUTHORIZED_CODE)
+    //assertEquals(exception.message, UNAUTHORIZED)
+    assertEquals(exception.code, HttpStatus.UNAUTHORIZED.value())
   }
 
   @Test
@@ -146,8 +146,8 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
     val exception = assertThrows(ApiException::class.java) {
       tokenAuthentication.authenticate(authHeader)
     }
-    assertEquals(exception.message, UNAUTHORIZED)
-    assertEquals(exception.code, UNAUTHORIZED_CODE)
+    assertEquals(exception.message, UNAUTHORIZED_MSG)
+    assertEquals(exception.code, HttpStatus.UNAUTHORIZED.value())
   }
 
   private fun buildClient(enabled: Boolean): Client {

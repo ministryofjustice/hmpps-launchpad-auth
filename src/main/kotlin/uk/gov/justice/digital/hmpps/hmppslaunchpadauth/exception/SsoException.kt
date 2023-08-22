@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception
 
-import java.net.URI
-
 class SsoException(
   override val message: String,
   override val code: Int,

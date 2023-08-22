@@ -4,8 +4,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.ACCESS_DENIED
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.ACCESS_DENIED_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.validator.UserIdValidator
@@ -32,15 +30,19 @@ class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProc
       logger.info("Logged user id : {}", userId)
       return userId
     } else {
-      logger.error("User id not found in payload")
-      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE, ApiErrorTypes.ACCESS_DENIED.toString(), ACCESS_DENIED)
+      val message = "User id not found in payload"
+      logger.error(message)
+      throw IllegalArgumentException(message)
+      //throw ApiException(ACCESS_DENIED, HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.ACCESS_DENIED.toString(), ACCESS_DENIED)
     }
   }
 
   private fun validateNonce(nonceToken: String, nonceSsoRequest: String) {
     if (nonceToken != nonceSsoRequest) {
-      logger.error("Nonce in sso request not matching with nonce in id token payload")
-      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE, ApiErrorTypes.ACCESS_DENIED.toString(), ACCESS_DENIED)
+      val message = "Nonce in sso request not matching with nonce in id token payload"
+      logger.error(message)
+      throw IllegalArgumentException(message)
+      //throw ApiException(ACCESS_DENIED, HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.ACCESS_DENIED.toString(), ACCESS_DENIED)
     }
   }
 

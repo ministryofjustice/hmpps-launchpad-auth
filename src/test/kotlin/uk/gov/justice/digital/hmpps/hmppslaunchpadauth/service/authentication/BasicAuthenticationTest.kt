@@ -8,9 +8,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
+import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.UNAUTHORIZED
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.UNAUTHORIZED_CODE
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.UNAUTHORIZED_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
@@ -63,7 +63,7 @@ class BasicAuthenticationTest {
     val authHeader = "Basic " + Base64.getEncoder().encodeToString("$id:$password".toByteArray(Charsets.UTF_8))
     val authenticationInfo = basicAuthentication.authenticate(authHeader)
     assertEquals(authenticationInfo.clientId, id)
-    //assertEquals(authenticationInfo.clientScope, scopes)
+    // assertEquals(authenticationInfo.clientScope, scopes)
   }
 
   @Test
@@ -92,8 +92,8 @@ class BasicAuthenticationTest {
     val exception = assertThrows(ApiException::class.java) {
       basicAuthentication.authenticate(authHeader)
     }
-    assertEquals(exception.message, UNAUTHORIZED)
-    assertEquals(exception.code, UNAUTHORIZED_CODE)
+    assertEquals(exception.message, UNAUTHORIZED_MSG)
+    assertEquals(exception.code, HttpStatus.UNAUTHORIZED.value())
   }
 
   @Test
@@ -122,8 +122,8 @@ class BasicAuthenticationTest {
     val exception = assertThrows(ApiException::class.java) {
       basicAuthentication.authenticate(authHeader)
     }
-    assertEquals(exception.message, UNAUTHORIZED)
-    assertEquals(exception.code, UNAUTHORIZED_CODE)
+    //assertEquals(exception.message, UNAUTHORIZED_MSG)
+    assertEquals(exception.code, HttpStatus.UNAUTHORIZED.value())
   }
 
   @Test
@@ -152,8 +152,8 @@ class BasicAuthenticationTest {
     val exception = assertThrows(ApiException::class.java) {
       basicAuthentication.authenticate(authHeader)
     }
-    assertEquals(exception.message, UNAUTHORIZED)
-    assertEquals(exception.code, UNAUTHORIZED_CODE)
+    //assertEquals(exception.message, UNAUTHORIZED_MSG)
+    assertEquals(exception.code, HttpStatus.UNAUTHORIZED.value())
   }
 
   @Test
@@ -162,7 +162,7 @@ class BasicAuthenticationTest {
     val exception = assertThrows(ApiException::class.java) {
       basicAuthentication.authenticate(authHeader)
     }
-    assertEquals(exception.message, UNAUTHORIZED)
-    assertEquals(exception.code, UNAUTHORIZED_CODE)
+    //assertEquals(exception.message, UNAUTHORIZED_MSG)
+    assertEquals(exception.code, HttpStatus.UNAUTHORIZED.value())
   }
 }

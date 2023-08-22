@@ -7,32 +7,31 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.servlet.view.RedirectView
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.ACCESS_DENIED
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.ACCESS_DENIED_CODE
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.BAD_REQUEST_CODE
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.ACCESS_DENIED_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_REQUEST_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.REDIRECTION_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoLogInService
 import java.util.*
 
-const val MAX_STATE_OR_NONCE_SIZE = 128
-const val SSO_SUPPORTED_RESPONSE_TYPE = "code"
-
 @RestController
 @RequestMapping("/v1/oauth2")
 class AuthController(private var ssoLoginService: SsoLogInService) {
   companion object {
+    const val MAX_STATE_OR_NONCE_SIZE = 128
+    const val SSO_SUPPORTED_RESPONSE_TYPE = "code"
     private val logger = LoggerFactory.getLogger(AuthController::class.java)
   }
 
   @GetMapping("/authorize")
   fun authorize(
-    @RequestParam("client_id", required = true) clientId: UUID,
-    @RequestParam("response_type", required = true) responseType: String,
-    @RequestParam("scope", required = true) scope: String,
-    @RequestParam("redirect_uri", required = true) redirectUri: String,
-    @RequestParam("state", required = false) state: String?,
-    @RequestParam("nonce", required = false) nonce: String?,
+    @RequestParam("client_id") clientId: UUID,
+    @RequestParam("response_type") responseType: String,
+    @RequestParam scope: String,
+    @RequestParam("redirect_uri") redirectUri: String,
+    @RequestParam(required = false) state: String?,
+    @RequestParam(required = false) nonce: String?,
   ): RedirectView {
     validateResponseType(responseType, redirectUri)
     validateSize(state, "state", redirectUri)
@@ -44,23 +43,23 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
   @PostMapping("/callback", consumes = ["application/x-www-form-urlencoded"])
   fun getAuthCode(
     @RequestParam("id_token", required = false) token: String?,
-    @RequestParam("state", required = true) state: UUID,
+    @RequestParam(required = true) state: UUID,
   ): Any {
     return ssoLoginService.updateSsoRequest(token, state)
   }
 
   @PostMapping("/authorize-client", consumes = ["application/x-www-form-urlencoded"])
   fun authorizeClient(
-    @RequestParam("state", required = true) state: UUID,
-    @RequestParam("userApproval", required = true) userApproval: String?,
-    @RequestParam("redirectUri", required = true) redirectUri: String,
+    @RequestParam state: UUID,
+    @RequestParam userApproval: String,
+    @RequestParam redirectUri: String,
   ): Any {
     if (userApproval == "approved") {
       return ssoLoginService.updateSsoRequest(null, state)
     } else {
       // user did not approved the client so delete sso request
       ssoLoginService.cancelAccess(state)
-      throw SsoException(ACCESS_DENIED, ACCESS_DENIED_CODE, ApiErrorTypes.ACCESS_DENIED.toString(), "Access denied", redirectUri)
+      throw SsoException(ACCESS_DENIED_MSG, REDIRECTION_CODE, ApiErrorTypes.ACCESS_DENIED.toString(), ACCESS_DENIED_MSG, redirectUri)
     }
   }
 
@@ -70,7 +69,7 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
       if (value.length > MAX_STATE_OR_NONCE_SIZE) {
         val message = String.format("%s size exceeds 128 char size limit", paramName)
         logger.error(message)
-        throw SsoException(message, BAD_REQUEST_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid request", redirectUri)
+        throw SsoException(message, REDIRECTION_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), INVALID_REQUEST_MSG, redirectUri)
       }
     }
   }
@@ -79,7 +78,7 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
     if (responseType != SSO_SUPPORTED_RESPONSE_TYPE) {
       val message = String.format("Response type: %s is not supported", responseType)
       logger.error(message)
-      throw SsoException(message, BAD_REQUEST_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid request", redirectUri)
+      throw SsoException(message, REDIRECTION_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), INVALID_REQUEST_MSG, redirectUri)
     }
   }
 }

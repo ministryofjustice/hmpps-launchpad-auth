@@ -2,12 +2,12 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.view.RedirectView
 import org.springframework.web.util.UriComponentsBuilder
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.ACCESS_DENIED
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.ACCESS_DENIED_CODE
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.REDIRECTION_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
@@ -74,12 +74,12 @@ class SsoLogInService(
   fun updateSsoRequest(token: String?, state: UUID): Any {
     var ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {
       logger.warn("State send on callback url do not exist {}", state)
-      ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE, ApiErrorTypes.ACCESS_DENIED.toString(), "Permission not granted")
+      ApiException("Permission denied as sso request with state send from azure redirect not found", HttpStatus.FORBIDDEN.value(), ApiErrorTypes.ACCESS_DENIED.toString(), "Permission not granted")
     }
     val clientId = ssoRequest.client.id
     val client = clientService.getClientById(clientId).orElseThrow {
       logger.warn("Client of sso request  do not exist {}", clientId)
-      SsoException(ACCESS_DENIED, ACCESS_DENIED_CODE, ApiErrorTypes.ACCESS_DENIED.toString(), "Invalid client", ssoRequest.client.redirectUri)
+      SsoException("Permission denied as client not found", REDIRECTION_CODE, ApiErrorTypes.INVALID_CLIENT.toString(), "Client not found", ssoRequest.client.redirectUri)
     }
     var approvalRequired = false
     if (token != null) {
@@ -123,8 +123,9 @@ class SsoLogInService(
       val userId = tokenProcessor.getUserId(token, ssoRequest.nonce.toString())
       ssoRequest.userId = userId
       return ssoRequestService.updateSsoRequest(ssoRequest)
-    } catch (e: ApiException) {
-      throw SsoException(e.message, e.code, e.error, e.errorDescription, ssoRequest.client.redirectUri)
+    } catch (e: IllegalArgumentException) {
+      logger.error(e.message)
+      throw SsoException(e.message!!, REDIRECTION_CODE, ApiErrorTypes.SERVER_ERROR.toString(), "Exception in token processing", ssoRequest.client.redirectUri)
     }
   }
 

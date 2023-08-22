@@ -18,8 +18,8 @@ class TokenCommonClaims {
       sub: String,
       payloadClaims: LinkedHashMap<String, Any>,
     ): LinkedHashMap<String, Any> {
-      payloadClaims["iat"] = LocalDateTime.now(ZoneOffset.UTC).toEpochSecond(ZoneOffset.UTC)
-      payloadClaims["exp"] = LocalDateTime.now(ZoneOffset.UTC).plusHours(12).toEpochSecond(ZoneOffset.UTC)
+      payloadClaims["iat"] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+      //payloadClaims["exp"] = LocalDateTime.now().plusHours(12).toEpochSecond(ZoneOffset.UTC)
       payloadClaims["aud"] = aud
       payloadClaims["sub"] = sub
       return payloadClaims

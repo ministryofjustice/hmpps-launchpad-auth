@@ -81,7 +81,7 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
         "random_nonce",
       )
     }
-    assertEquals(400, exception.code)
+    assertEquals(302, exception.code)
     assertEquals("Response type: anything is not supported", exception.message)
   }
 
@@ -98,7 +98,7 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
         "random_nonce",
       )
     }
-    assertEquals(400, exception.code)
+    assertEquals(302, exception.code)
     assertEquals("state size exceeds 128 char size limit", exception.message)
   }
 
@@ -115,7 +115,7 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
           .toString(),
       )
     }
-    assertEquals(BAD_REQUEST_CODE, exception.code)
+    assertEquals(302, exception.code)
     assertEquals("nonce size exceeds 128 char size limit", exception.message)
   }
 
@@ -162,6 +162,6 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
     val exception = assertThrows(ApiException::class.java) {
       authController.authorizeClient(ssoRequest.id, "cancelled", ssoRequest.client.redirectUri)
     }
-    assertEquals(ACCESS_DENIED_CODE, exception.code)
+    assertEquals(302, exception.code)
   }
 }

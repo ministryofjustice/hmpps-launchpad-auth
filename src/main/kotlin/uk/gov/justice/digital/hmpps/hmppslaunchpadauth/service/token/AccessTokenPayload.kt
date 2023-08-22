@@ -4,6 +4,8 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Booking
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Establishment
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Profile
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 
 class AccessTokenPayload : TokenPayload{
@@ -13,6 +15,7 @@ class AccessTokenPayload : TokenPayload{
     var claims = LinkedHashMap<String, Any>()
     claims["jti"] = UUID.randomUUID().toString()
     claims = TokenCommonClaims.buildCommonClaims(clientId.toString(), profile.id, claims)
+    claims["exp"] = LocalDateTime.now().plusHours(1).toEpochSecond(ZoneOffset.UTC)
     claims["scopes"] = TokenCommonClaims.buildScopeTextsSet(scope)
     return claims
   }

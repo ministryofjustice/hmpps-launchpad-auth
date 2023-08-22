@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.INTERNAL_SERVER_ERROR_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
@@ -22,7 +22,6 @@ class SsoRequestService(
     private val logger = LoggerFactory.getLogger(SsoRequestService::class.java)
   }
   fun createSsoRequest(ssoRequest: SsoRequest): SsoRequest {
-    println(LocalDateTime.now())
     val ssoRequestCreated = ssoRequestRepository.save(ssoRequest)
     logger.info("Sso request created for user of  client: {}", ssoRequestCreated.client.id)
     return ssoRequestCreated
@@ -53,12 +52,12 @@ class SsoRequestService(
   ): SsoRequest {
     var authorizationCode: UUID = UUID.randomUUID()
     var ssoRequestRecord = ssoRequestRepository.findSsoRequestByAuthorizationCode(authorizationCode)
-    var count: Int = 0
+    var count = 0
     while (ssoRequestRecord.isPresent) {
       count += 1
       if (count > 3) {
         val message = "Duplicate uuid created multiple time for auth code"
-        throw SsoException(message, INTERNAL_SERVER_ERROR_CODE, ApiErrorTypes.SERVER_ERROR.toString(), "Internal server error", redirectUri)
+        throw SsoException(message, HttpStatus.INTERNAL_SERVER_ERROR.value(), ApiErrorTypes.SERVER_ERROR.toString(), "Internal server error", redirectUri)
       }
       logger.debug("Authorization code exist in sso request db record so creating new")
       authorizationCode = UUID.randomUUID()

@@ -45,13 +45,11 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
   @Test
   fun `test get user id when nonce do not match`() {
     val nonce = UUID.randomUUID()
-    val exception = assertThrows(ApiException::class.java) {
+    assertThrows(IllegalArgumentException::class.java) {
       idTokenProcessor.getUserId(
         DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "test@moj.com"),
         UUID.randomUUID().toString(),
       )
     }
-    assertEquals(ACCESS_DENIED, exception.message)
-    assertEquals(ACCESS_DENIED_CODE, exception.code)
   }
 }

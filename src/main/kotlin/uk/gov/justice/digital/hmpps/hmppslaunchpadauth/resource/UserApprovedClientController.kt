@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.ACCESS_DENIED
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.ACCESS_DENIED_CODE
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.BAD_REQUEST_CODE
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.ACCESS_DENIED_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_SCOPE
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.getResponseHeaders
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
@@ -41,8 +41,8 @@ class UserApprovedClientController(
   @GetMapping("/users/{user-id}/clients", produces = [MediaType.APPLICATION_JSON_VALUE])
   fun getUserApprovedClients(
     @PathVariable("user-id") userId: String,
-    @RequestParam("page", required = false) page: Int?,
-    @RequestParam("size", required = false) size: Int?,
+    @RequestParam("page", required = false) page: Long?,
+    @RequestParam("size", required = false) size: Long?,
     @RequestHeader(HttpHeaders.AUTHORIZATION, required = true) authorization: String,
   ): ResponseEntity<PagedResult<UserApprovedClientDto>> {
     val authenticationInfo = authentication.authenticate(authorization) as AuthenticationUserInfo
@@ -51,8 +51,8 @@ class UserApprovedClientController(
     val pageNum = validatePage(page)
     val pageSize = validatePageSize(size)
     val userApprovedClients = userApprovedClientService
-      .getUserApprovedClientsByUserId(userId, pageNum, pageSize)
-    return ResponseEntity.status(HttpStatus.OK).body(userApprovedClients)
+      .getUserApprovedClientsByUserId(userId, pageNum.toInt(), pageSize.toInt())
+    return ResponseEntity.status(HttpStatus.OK).headers(getResponseHeaders()).body(userApprovedClients)
   }
 
   @DeleteMapping("/users/{user-id}/clients/{client-id}")
@@ -65,7 +65,7 @@ class UserApprovedClientController(
     validateScope(Scope.USER_CLIENTS_DELETE, authenticationInfo.userApprovedScope)
     validateUserId(userId, authenticationInfo.userId)
     userApprovedClientService.revokeClientAccess(userId, clientId)
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).headers(getResponseHeaders()).build()
   }
 
 
@@ -78,35 +78,35 @@ class UserApprovedClientController(
     if (!userIdValidator.isValid(userId)) {
       val message = String.format("invalid user id format %s", userId)
       logger.error(message)
-      throw ApiException(message, BAD_REQUEST_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid user id format")
+      throw ApiException(message, HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid user id format")
     }
   }
 
-  private fun validatePage(page: Int?): Int {
+  private fun validatePage(page: Long?): Long {
     if (page == null) {
       return 1
     }
     if (page < 1) {
       val message = "page cannot be less than 1"
-      throw ApiException(message, BAD_REQUEST_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), message)
+      throw ApiException(message, HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.INVALID_REQUEST.toString(), message)
     }
     return page
   }
 
-  private fun validatePageSize(size: Int?): Int {
+  private fun validatePageSize(size: Long?): Long {
     if (size == null) {
       return 20
     }
     if (size > 20 || size < 1) {
       val message = "size cannot be more than 20 and less than 1"
-      throw ApiException(message, BAD_REQUEST_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), message)
+      throw ApiException(message, HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.INVALID_REQUEST.toString(), message)
     }
     return size
   }
 
   private fun validateScope(scope: Scope, scopes:Set<Scope>) {
     if (!scopes.contains(scope)) {
-      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE, ApiErrorTypes.INVALID_SCOPE.toString(), "Invalid scope")
+      throw ApiException(ACCESS_DENIED_MSG, HttpStatus.FORBIDDEN.value(), ApiErrorTypes.INVALID_SCOPE.toString(), INVALID_SCOPE)
     }
   }
 }

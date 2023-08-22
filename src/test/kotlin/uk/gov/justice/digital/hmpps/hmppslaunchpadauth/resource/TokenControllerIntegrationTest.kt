@@ -211,7 +211,7 @@ class TokenControllerIntegrationTest(
     }
     assertEquals(401, exception.statusCode.value())
 
-    // Using id token in auth header expected response should be Http 401
+    // Using refresh token in auth header expected response should be Http 401
     headers.remove("Authorization")
     headers.add("Authorization", "Bearer " + token.refreshToken)
     url = URI("$baseUrl:$port/v1/users/$userID/clients?page=1&size=20")

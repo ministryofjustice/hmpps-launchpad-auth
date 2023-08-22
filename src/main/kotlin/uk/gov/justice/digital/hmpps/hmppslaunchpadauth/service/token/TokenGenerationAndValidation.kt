@@ -7,8 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.UNAUTHORIZED
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.UNAUTHORIZED_CODE
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.UNAUTHORIZED_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import java.time.LocalDateTime
@@ -64,7 +63,7 @@ class TokenGenerationAndValidation {
 
     private fun invalidTokenFormat(token: String) {
       logger.error("Invalid bearer token format {}", token)
-      throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), "Invalid token")
+      throw ApiException(UNAUTHORIZED_MSG, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), "Invalid token")
     }
   }
 }

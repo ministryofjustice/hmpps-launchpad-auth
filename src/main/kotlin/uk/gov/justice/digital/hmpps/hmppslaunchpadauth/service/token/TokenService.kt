@@ -5,13 +5,20 @@ import io.jsonwebtoken.Jws
 import io.jsonwebtoken.SignatureAlgorithm
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.UNAUTHORIZED
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.UNAUTHORIZED_CODE
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.ACCESS_DENIED_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.EXPIRE_TOKEN_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_CODE_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_GRANT_TYPE_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_REDIRECT_URI_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_REQUEST_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.UNAUTHORIZED_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Token
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ClientService
@@ -49,33 +56,63 @@ class TokenService(
     val client = clientService.getClientById(clientId)
       .orElseThrow {
         logger.warn("Client with id {} not found", clientId)
-        throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED)
+        throw ApiException(
+          UNAUTHORIZED_MSG,
+          HttpStatus.UNAUTHORIZED.value(),
+          ApiErrorTypes.UNAUTHORIZED.toString(),
+          UNAUTHORIZED_MSG,
+        )
       }
     if (code != null && grantType == AuthorizationGrantType.AUTHORIZATION_CODE.toString() && redirectUri != null) {
-      validateGrant(grantType, client.authorizedGrantTypes)
-      val ssoRequest = ssoRequestService.getSsoRequestByAuthorizationCode(code).orElseThrow {
-        logger.warn("Sso Request with code {} not found", code)
-        throw ApiException("The code is invalid", 400, ApiErrorTypes.INVALID_CODE.toString(), "Invalid code")
-      }
-      validateRedirectUri(redirectUri, ssoRequest)
-      val token = generateToken(ssoRequest.userId!!, clientId, ssoRequest.client.scopes, ssoRequest.client.nonce, null)
-      ssoRequestService.deleteSsoRequestById(ssoRequest.id)
-      return token
-    } else if (refreshToken != null && grantType == "refresh_token") {
-      validateGrant(grantType, client.authorizedGrantTypes)
-      val refreshTokenPayloadOld = validateAndGetRefreshTokenPayloadClaims(refreshToken, clientId)
-      val userId = refreshTokenPayloadOld.body["sub"] as String
-      val scopes = refreshTokenPayloadOld.body["scopes"] as Any
-      val userApprovedClient =
-        userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userId, clientId).orElseThrow {
-          logger.warn("User approved client  with user id {} and client id {} not found", userId, clientId)
-          throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED)
-        }
-      validateScopeInClaims(scopes, userApprovedClient.scopes)
-      return generateToken(userId, clientId, userApprovedClient.scopes, nonce, refreshTokenPayloadOld)
+      return generateTokenByCode(code, grantType, redirectUri, client)
+    } else if (refreshToken != null && grantType == AuthorizationGrantType.REFRESH_TOKEN.toString()) {
+      return generateTokenByRefreshToken(refreshToken, grantType, client, nonce)
     } else {
-      throw ApiException(UNAUTHORIZED, UNAUTHORIZED_CODE, ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED)
+      throw ApiException(
+        INVALID_REQUEST_MSG,
+        HttpStatus.BAD_REQUEST.value(),
+        ApiErrorTypes.INVALID_REQUEST.toString(),
+        INVALID_REQUEST_MSG,
+      )
     }
+  }
+
+  private fun generateTokenByCode(code: UUID, grantType: String, redirectUri: URI, client: Client): Token {
+    validateGrant(grantType, client.authorizedGrantTypes)
+    val ssoRequest = ssoRequestService.getSsoRequestByAuthorizationCode(code)
+      .orElseThrow {
+        logger.warn("Sso Request with code {} not found", code)
+        throw ApiException("The code is invalid", 400, ApiErrorTypes.INVALID_CODE.toString(), INVALID_CODE_MSG)
+      }
+    validateRedirectUri(redirectUri, ssoRequest)
+    val token = generateToken(ssoRequest.userId!!, client.id, ssoRequest.client.scopes, ssoRequest.client.nonce, null)
+    ssoRequestService.deleteSsoRequestById(ssoRequest.id)
+    return token
+  }
+
+  private fun generateTokenByRefreshToken(
+    refreshToken: String,
+    grantType: String,
+    client: Client,
+    nonce: String?,
+  ): Token {
+    validateGrant(grantType, client.authorizedGrantTypes)
+    val refreshTokenPayloadOld = validateAndGetRefreshTokenPayloadClaims(refreshToken, client.id)
+    val userId = refreshTokenPayloadOld.body["sub"] as String
+    val scopes = refreshTokenPayloadOld.body["scopes"] as Any
+    val userApprovedClient =
+      userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userId, client.id)
+        .orElseThrow {
+        logger.warn("User approved client  with user id {} and client id {} not found", userId, client.id)
+        throw ApiException(
+          UNAUTHORIZED_MSG,
+          HttpStatus.UNAUTHORIZED.value(),
+          ApiErrorTypes.UNAUTHORIZED.toString(),
+          UNAUTHORIZED_MSG,
+        )
+      }
+    validateScopeInClaims(scopes, userApprovedClient.scopes)
+    return generateToken(userId, client.id, userApprovedClient.scopes, nonce, refreshTokenPayloadOld)
   }
 
   private fun generateToken(
@@ -147,15 +184,17 @@ class TokenService(
   private fun validateGrant(grantType: String, authorizationGrantType: Set<AuthorizationGrantType>) {
     val grant = AuthorizationGrantType.getAuthorizationGrantTypeByStringValue(grantType)
     if (!authorizationGrantType.contains(grant)) {
-      logger.warn("Invalid grant type {} sent in get token request", grantType)
-      throw ApiException("Invalid grant", 400, ApiErrorTypes.INVALID_GRANT.toString(), "Invalid grant")
+      val message = String.format("Invalid grant type %s sent in get token request", grantType)
+      logger.warn(message)
+      throw ApiException(message, 400, ApiErrorTypes.INVALID_GRANT.toString(), INVALID_GRANT_TYPE_MSG)
     }
   }
 
   private fun validateRedirectUri(redirectUri: URI, ssoRequest: SsoRequest) {
     if (ssoRequest.client.redirectUri != redirectUri.toString()) {
-      logger.warn("Redirect uri sent in token request not in list {}", redirectUri)
-      throw ApiException("Invalid redirect uri", 400, ApiErrorTypes.INVALID_REDIRECT_URI.toString(), "Invalid redirect uri")
+      val message = String.format("Redirect uri sent in token request not in list %s", redirectUri)
+      logger.warn(message)
+      throw ApiException(message, 400, ApiErrorTypes.INVALID_REDIRECT_URI.toString(), INVALID_REDIRECT_URI_MSG)
     }
   }
 
@@ -163,22 +202,28 @@ class TokenService(
     try {
       TokenGenerationAndValidation.validateExpireTime(exp)
     } catch (e: IllegalArgumentException) {
-      throw ApiException("Refresh token is expired", 400, ApiErrorTypes.INVALID_REQUEST.toString(), "Expired token")
+      throw ApiException(
+        "Expired refresh token",
+        400,
+        ApiErrorTypes.EXPIRED_REFRESH_TOKEN.toString(),
+        EXPIRE_TOKEN_MSG,
+      )
     }
   }
 
-  private fun getClaim(claimName: String, claims: Claims): Any? {
-    try {
-      return claims[claimName]
-    } catch (e: NullPointerException) {
-      logger.warn("Required claim {} not found in refresh token query parameter", claimName)
+  private fun getClaim(claimName: String, claims: Claims): Any {
+    val claim = claims[claimName]
+    if (claim == null) {
+      val message = String.format("Required claim %s not found in refresh token query parameter", claimName)
+      logger.warn(message)
       throw ApiException(
-        String.format("Missing claim %s in refresh token", claimName),
+        message,
         400,
         ApiErrorTypes.INVALID_REQUEST.toString(),
-        "Invalid token"
+        "Invalid refresh token",
       )
     }
+    return claim
   }
 
   private fun validateAndGetRefreshTokenPayloadClaims(refreshToken: String, clientId: UUID): Jws<Claims> {
@@ -189,21 +234,24 @@ class TokenService(
       val userIdInRefreshToken = getClaim("sub", claims.body) as String
       val clientIdInRefreshToken = getClaim("aud", claims.body) as String
       if (!userIdValidator.isValid(userIdInRefreshToken)) {
-        logger.warn("Sub in refresh token do not match valid regex")
-        throw ApiException("Invalid format of sub claim in refresh token", 400, ApiErrorTypes.INVALID_REQUEST.toString(), "invalid token")
+        val message = "Sub in refresh token do not match valid regex"
+        logger.warn(message)
+        throw ApiException(message, 400, ApiErrorTypes.INVALID_REQUEST.toString(), "invalid token")
       }
       if (clientId.toString() != clientIdInRefreshToken) {
-        logger.debug(
-          "client id {} from auth header do not match with aud {} in refresh token",
+        val message = String.format(
+          "client id %s from auth header do not match with aud %s in refresh token",
           clientId,
           clientIdInRefreshToken,
         )
-        throw ApiException("Invalid aud claim in refresh token", 400, ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid request")
+        logger.debug(message)
+        throw ApiException(message, 400, ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid request")
       }
       return claims
     } else {
-      logger.warn("Refresh token signature is invalid")
-      throw ApiException("Invalid refresh token", 400, ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid refresh token")
+      val message = "Refresh token signature is invalid"
+      logger.warn(message)
+      throw ApiException(message, 400, ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid refresh token")
     }
   }
 
@@ -211,7 +259,7 @@ class TokenService(
     val scopes = scopeInClaims as List<String>
     scopes.forEach { scope ->
       if (!Scope.isStringMatchEnumValue(scope, scopeApprovedByUser)) {
-        throw ApiException("Permission denied", 403, ApiErrorTypes.ACCESS_DENIED.toString(), "Permission denied")
+        throw ApiException("Permission denied", 403, ApiErrorTypes.ACCESS_DENIED.toString(), ACCESS_DENIED_MSG)
       }
     }
   }
