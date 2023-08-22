@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
