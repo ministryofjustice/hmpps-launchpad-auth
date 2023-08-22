@@ -6,10 +6,10 @@ import java.time.ZoneOffset
 
 class TokenCommonClaims {
   companion object {
-    fun buildHeaderClaims(alg: String, type: String): LinkedHashMap<String, Any> {
+    fun buildHeaderClaims(): LinkedHashMap<String, Any> {
       val headerClaims = LinkedHashMap<String, Any>()
-      headerClaims["alg"] = alg
-      headerClaims["type"] = type
+      headerClaims["alg"] = "HS256"
+      headerClaims["type"] = "JWT"
       return headerClaims
     }
 
@@ -19,7 +19,6 @@ class TokenCommonClaims {
       payloadClaims: LinkedHashMap<String, Any>,
     ): LinkedHashMap<String, Any> {
       payloadClaims["iat"] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
-      //payloadClaims["exp"] = LocalDateTime.now().plusHours(12).toEpochSecond(ZoneOffset.UTC)
       payloadClaims["aud"] = aud
       payloadClaims["sub"] = sub
       return payloadClaims

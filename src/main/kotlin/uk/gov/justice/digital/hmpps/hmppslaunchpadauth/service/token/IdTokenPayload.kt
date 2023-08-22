@@ -14,22 +14,22 @@ class IdTokenPayload : TokenPayload {
     booking: Booking,
     establishment: Establishment,
     profile: Profile,
-    clientId: UUID, scope: Set<Scope>,  nonce: String?): LinkedHashMap<String, Any> {
+    clientId: UUID, scopes: Set<Scope>, nonce: String?): LinkedHashMap<String, Any> {
     var claims = LinkedHashMap<String, Any>()
-    claims["name"] = profile.name
+    claims["name"] = "${profile.givenName} ${profile.familyName}"
     claims["given_name"] = profile.givenName
     claims["family_name"] = profile.familyName
-    //claims["profile"] = ""
-    //claims["picture"] = ""
     if (nonce != null) {
       claims["nonce"] = nonce
     }
     claims = TokenCommonClaims.buildCommonClaims(clientId.toString(), profile.id, claims)
     claims["exp"] = LocalDateTime.now().plusHours(12).toEpochSecond(ZoneOffset.UTC)
-    if (scope.contains(Scope.USER_BASIC_READ)) {
+    if (scopes.contains(Scope.USER_BOOKING_READ)) {
       claims["booking"] = booking
     }
-    claims["establishment"] = establishment
+    if (scopes.contains(Scope.USER_ESTABLISHMENT_READ)) {
+      claims["establishment"] = establishment
+    }
     return claims
   }
 

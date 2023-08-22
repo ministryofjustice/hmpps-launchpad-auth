@@ -79,7 +79,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
     )
     val authHeader = "Bearer " + TokenGenerationAndValidation.generateToken(
       payload,
-      TokenCommonClaims.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
+      TokenCommonClaims.buildHeaderClaims(),
       secret,
     )
     Mockito.`when`(userIdValidator.isValid(userId)).thenReturn(true)
@@ -104,7 +104,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
     )
     val authHeader = "Bearer " + TokenGenerationAndValidation.generateToken(
       payload,
-      TokenCommonClaims.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
+      TokenCommonClaims.buildHeaderClaims(),
       randomSecret,
     )
     val exception = assertThrows(ApiException::class.java) {
@@ -129,7 +129,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
     )
     val authHeader = "Bearer " + TokenGenerationAndValidation.generateToken(
       payload,
-      TokenCommonClaims.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
+      TokenCommonClaims.buildHeaderClaims(),
       secret,
     )
    /* Mockito.`when`(clientService.getClientById(clientId)).thenReturn(Optional.of(client))*/

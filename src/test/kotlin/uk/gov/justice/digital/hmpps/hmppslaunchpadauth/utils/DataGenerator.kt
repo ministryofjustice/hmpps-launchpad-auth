@@ -137,7 +137,7 @@ class DataGenerator {
       )
       val authHeader = "Bearer " + TokenGenerationAndValidation.generateToken(
         payload,
-        TokenCommonClaims.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
+        TokenCommonClaims.buildHeaderClaims(),
         randomSecret,
       )
     }
@@ -160,7 +160,7 @@ class DataGenerator {
       )
       return "Bearer " + TokenGenerationAndValidation.generateToken(
         payload,
-        TokenCommonClaims.buildHeaderClaims(SignatureAlgorithm.HS256.toString(), "JWT"),
+        TokenCommonClaims.buildHeaderClaims(),
         secret,
       )
     }

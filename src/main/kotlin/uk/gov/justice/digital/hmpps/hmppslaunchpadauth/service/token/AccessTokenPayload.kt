@@ -11,12 +11,12 @@ import java.util.*
 class AccessTokenPayload : TokenPayload{
   private fun buildClaims(
     profile: Profile,
-    clientId: UUID, scope: Set<Scope>): LinkedHashMap<String, Any> {
+    clientId: UUID, scopes: Set<Scope>): LinkedHashMap<String, Any> {
     var claims = LinkedHashMap<String, Any>()
     claims["jti"] = UUID.randomUUID().toString()
     claims = TokenCommonClaims.buildCommonClaims(clientId.toString(), profile.id, claims)
     claims["exp"] = LocalDateTime.now().plusHours(1).toEpochSecond(ZoneOffset.UTC)
-    claims["scopes"] = TokenCommonClaims.buildScopeTextsSet(scope)
+    claims["scopes"] = TokenCommonClaims.buildScopeTextsSet(scopes)
     return claims
   }
 
