@@ -130,7 +130,7 @@ class DataGenerator {
       val payload = accessTokenPayload.generatePayload(
         null,
         null,
-        User(USER_ID, "John Smith", "John", "Smith"),
+        User(USER_ID, "John",  "Smith"),
         clientId,
         userApprovedScopes,
         nonce,
@@ -153,7 +153,7 @@ class DataGenerator {
       val payload = accessTokenPayload.generatePayload(
         null,
         null,
-        User(USER_ID, "John Smith", "John", "Smith"),
+        User(USER_ID, "John", "Smith"),
         client.id,
         userApprovedClient.scopes,
         nonce,

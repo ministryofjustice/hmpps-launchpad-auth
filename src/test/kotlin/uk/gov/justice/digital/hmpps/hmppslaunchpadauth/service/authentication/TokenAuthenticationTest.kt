@@ -71,7 +71,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
     val payload = accessTokenPayload.generatePayload(
       null,
       null,
-      User(USER_ID, "John Smith", "John", "Smith"),
+      User(USER_ID, "John", "Smith"),
       clientId,
       userApprovedScopes,
       nonce,
@@ -96,7 +96,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
     val payload = accessTokenPayload.generatePayload(
       null,
       null,
-      User(USER_ID, "John Smith", "John", "Smith"),
+      User(USER_ID, "John", "Smith"),
       clientId,
       userApprovedScopes,
       nonce,
@@ -121,7 +121,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
     val payload = accessTokenPayload.generatePayload(
       null,
       null,
-      User(USER_ID, "John Smith", "John", "Smith"),
+      User(USER_ID, "John Smith", "Smith"),
       clientId,
       userApprovedScopes,
       nonce,

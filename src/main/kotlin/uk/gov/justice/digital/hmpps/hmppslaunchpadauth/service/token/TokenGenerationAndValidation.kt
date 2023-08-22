@@ -17,7 +17,6 @@ import javax.crypto.spec.SecretKeySpec
 class TokenGenerationAndValidation {
 
   companion object {
-    private val logger = LoggerFactory.getLogger(TokenGenerationAndValidation::class.java)
     fun generateToken(
       payloadMap: HashMap<String, Any>,
       headerMap: HashMap<String, Any>,
@@ -30,8 +29,8 @@ class TokenGenerationAndValidation {
           .signWith(SignatureAlgorithm.HS256, secret.toByteArray(Charsets.UTF_8))
           .compact()
       } catch (e: Exception) {
-        logger.debug("Exception during token creation {}", e.message)
-        throw ApiException("Exception during token creation", HttpStatus.INTERNAL_SERVER_ERROR.value(), ApiErrorTypes.SERVER_ERROR.toString(), "Exception during token creation")
+        val message = String.format("Exception during token creation {}", e.message)
+        throw ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR.value(), ApiErrorTypes.SERVER_ERROR.toString(), "Exception during token creation")
       }
     }
 
@@ -62,8 +61,8 @@ class TokenGenerationAndValidation {
     }
 
     private fun invalidTokenFormat(token: String) {
-      logger.error("Invalid bearer token format {}", token)
-      throw ApiException(UNAUTHORIZED_MSG, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), "Invalid token")
+      val message =  String.format("Invalid bearer token format %s", token)
+      throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), "Invalid token")
     }
   }
 }

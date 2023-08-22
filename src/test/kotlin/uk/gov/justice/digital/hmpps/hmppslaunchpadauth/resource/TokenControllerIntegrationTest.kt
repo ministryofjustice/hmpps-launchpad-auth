@@ -235,7 +235,7 @@ class TokenControllerIntegrationTest(
     assertEquals(userID.toString(), claims["sub"])
     assertEquals("Test User", claims["name"])
     assertEquals("Test", claims["given_name"])
-    assertEquals("user", claims["family_name"])
+    assertEquals("User", claims["family_name"])
   }
 
   private fun assertAccessTokenClaims(accessToken: String) {

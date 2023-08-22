@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class Establishment(
   val id: String,
+  @JsonProperty("agency_id")
   val agencyId: String,
   val name: String,
   @JsonProperty("display_name")
