@@ -31,7 +31,7 @@ class HmppsLaunchpadAuthExceptionHandler {
 
   @ExceptionHandler(SsoException::class)
   fun handleApiException(e: SsoException): RedirectView {
-    log.info("Validation exception: {}", e.message)
+    log.error("Validation exception: {}", e.message)
     return RedirectView("${e.redirectUri}?error=${e.error}&error_description=${e.errorDescription}")
   }
 

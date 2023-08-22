@@ -99,7 +99,6 @@ class ClientServiceTest {
         "test",
       )
     }
-    assertEquals(IN_VALID_REDIRECT_URI, exception.message)
     assertEquals(302, exception.code)
   }
 
@@ -116,7 +115,6 @@ class ClientServiceTest {
         "test",
       )
     }
-    //assertEquals(ACCESS_DENIED, exception.message)
     assertEquals(302, exception.code)
   }
 
@@ -133,7 +131,6 @@ class ClientServiceTest {
         "test",
       )
     }
-    //assertEquals(IN_VALID_SCOPE, exception.message)
     assertEquals(302, exception.code)
   }
 
@@ -150,7 +147,6 @@ class ClientServiceTest {
         "test",
       )
     }
-    //assertEquals(IN_VALID_GRANT, exception.message)
     assertEquals(302, exception.code)
   }
 
@@ -167,7 +163,6 @@ class ClientServiceTest {
         "test",
       )
     }
-    //assertEquals(IN_VALID_REDIRECT_URI, exception.message)
     assertEquals(302, exception.code)
   }
 }

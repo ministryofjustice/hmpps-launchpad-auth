@@ -14,7 +14,7 @@ import java.util.*
 @Service("basicAuthentication")
 class BasicAuthentication(
   private var clientService: ClientService,
-  private var encoder: BCryptPasswordEncoder,
+  private var passwordEncoder: BCryptPasswordEncoder,
 ) : Authentication {
   companion object {
     private const val BASIC = "Basic "
@@ -30,27 +30,25 @@ class BasicAuthentication(
       val credentialInfo = String(decoder.decode(token))
       validateCredentialFormat(credentialInfo)
       val chunks = credentialInfo.split(":")
-      validateChunksSize(chunks.size, credentialInfo)
+      validateChunksSize(chunks.size)
       val clientId = chunks[0]
       val clientSecret = chunks[1]
       val client = clientService.getClientById(UUID.fromString(clientId)).orElseThrow {
         val message = String.format("Client record with id %s do not exist", clientId)
-        logger.debug(message)
         throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
       }
       if (!client.enabled) {
         val message = String.format("Client record with id %s is not enabled", clientId)
-        logger.debug(message)
         throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
       }
-      if (encoder.matches(clientSecret, client.secret)) {
+      if (passwordEncoder.matches(clientSecret, client.secret)) {
+        logger.info("Successful basic auth login for client id {}", clientId)
         return AuthenticationInfo(client.id)
       } else {
         throw ApiException(UNAUTHORIZED_MSG, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
       }
     } else {
       val message = "Invalid basic authorisation header format"
-      logger.debug(message)
       throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
     }
   }
@@ -58,15 +56,13 @@ class BasicAuthentication(
   private fun validateCredentialFormat(credentialInfo: String) {
     if (!credentialInfo.contains(":")) {
       val message = "Invalid auth header basic format"
-      logger.debug(message)
       throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
     }
   }
 
-  private fun validateChunksSize(size: Int, credentialInfo: String) {
+  private fun validateChunksSize(size: Int) {
     if (size != CHUNKS_SIZE) {
       val message = "Invalid auth header basic format"
-      logger.debug(message)
       throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
     }
   }

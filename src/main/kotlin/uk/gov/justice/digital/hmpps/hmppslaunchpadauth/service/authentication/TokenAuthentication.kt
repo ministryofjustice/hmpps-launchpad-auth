@@ -48,6 +48,7 @@ class TokenAuthentication(
         validateUserIdFormat(userId)
         val scopes = getClaim("scopes", claims) as Any
         val scopesEnum = validateScopeInClaims(scopes)
+        logger.info("Successful token authentication for client {} user id {}", clientId, userId)
         return AuthenticationUserInfo(clientId, userId, scopesEnum)
       } else {
         throw ApiException(UNAUTHORIZED_MSG, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
@@ -62,7 +63,6 @@ class TokenAuthentication(
     val claim = claims[claimName]
     if (claim == null) {
       val message = String.format("Required claim %s not found in access token", claimName)
-      logger.error(message)
       throw ApiException(
         message,
         HttpStatus.UNAUTHORIZED.value(),
@@ -78,8 +78,8 @@ class TokenAuthentication(
       val jwsClaims = TokenGenerationAndValidation.parseClaims(token, secret)
       return jwsClaims.body
     } catch (e: JwtException) {
-      logger.error("Exception during token authentication {}", e.message)
-      throw ApiException(e.message!!, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.INVALID_TOKEN.toString(), INVALID_TOKEN_MSG)
+      val message = String.format("Exception during parsing claims in token authentication %s", e.message)
+      throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.INVALID_TOKEN.toString(), INVALID_TOKEN_MSG)
     }
   }
 
@@ -88,7 +88,6 @@ class TokenAuthentication(
       TokenGenerationAndValidation.validateExpireTime(exp)
     } catch (e: IllegalArgumentException) {
       val message = String.format("Exception during token expire time validation {}", e.message)
-      logger.error(message)
       throw ApiException(
         message,
         HttpStatus.UNAUTHORIZED.value(),
@@ -102,9 +101,9 @@ class TokenAuthentication(
     try {
       return UUID.fromString(value)
     } catch (e: IllegalArgumentException) {
-      logger.warn("Invalid claim name {} format in token", claimName)
+      val message = String.format("Exception during token authentication invalid UUID string in %s", claimName)
       throw ApiException(
-        "Invalid token",
+        message,
         HttpStatus.UNAUTHORIZED.value(),
         ApiErrorTypes.UNAUTHORIZED.toString(),
         INVALID_TOKEN_MSG,
@@ -115,7 +114,6 @@ class TokenAuthentication(
   private fun validateUserIdFormat(sub: String) {
     if (!userIdValidator.isValid(sub)) {
       val message = String.format("Invalid user id %s format in token", sub)
-      logger.debug(message)
       throw ApiException(
         message,
         HttpStatus.UNAUTHORIZED.value(),
@@ -147,7 +145,6 @@ class TokenAuthentication(
           scopeEnums.add(scopeEnum)
         } catch (e: IllegalArgumentException) {
           val message = String.format("Scope %s in token not in auth service scope list", scope)
-          logger.debug(message)
           throw ApiException(
             message,
             HttpStatus.UNAUTHORIZED.value(),

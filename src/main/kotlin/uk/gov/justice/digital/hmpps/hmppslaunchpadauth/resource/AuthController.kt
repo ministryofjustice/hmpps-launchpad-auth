@@ -21,7 +21,6 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
   companion object {
     const val MAX_STATE_OR_NONCE_SIZE = 128
     const val SSO_SUPPORTED_RESPONSE_TYPE = "code"
-    private val logger = LoggerFactory.getLogger(AuthController::class.java)
   }
 
   @GetMapping("/authorize")
@@ -68,7 +67,6 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
     if (value != null) {
       if (value.length > MAX_STATE_OR_NONCE_SIZE) {
         val message = String.format("%s size exceeds 128 char size limit", paramName)
-        logger.error(message)
         throw SsoException(message, REDIRECTION_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), INVALID_REQUEST_MSG, redirectUri)
       }
     }
@@ -77,7 +75,6 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
   private fun validateResponseType(responseType: String, redirectUri: String) {
     if (responseType != SSO_SUPPORTED_RESPONSE_TYPE) {
       val message = String.format("Response type: %s is not supported", responseType)
-      logger.error(message)
       throw SsoException(message, REDIRECTION_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), INVALID_REQUEST_MSG, redirectUri)
     }
   }

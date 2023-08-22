@@ -33,7 +33,6 @@ class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProc
       val message = "User id not found in payload"
       logger.error(message)
       throw IllegalArgumentException(message)
-      //throw ApiException(ACCESS_DENIED, HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.ACCESS_DENIED.toString(), ACCESS_DENIED)
     }
   }
 

@@ -27,9 +27,9 @@ class TokenController(
   @PostMapping("/token", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
   fun generateToken(
     @RequestParam(required = false) code: UUID?,
-    @RequestParam("grant_type", required = false) grant: String,
+    @RequestParam("grant_type", required = false) grant: String?,
     @RequestParam("redirect_uri", required = false) redirectUri: URI?,
-    @RequestParam("refresh_token") refreshToken: String?,
+    @RequestParam("refresh_token", required = false) refreshToken: String?,
     @RequestParam(required = false) nonce: String?,
     @RequestHeader(HttpHeaders.AUTHORIZATION, required = true) authorization: String
   ): ResponseEntity<Token> {

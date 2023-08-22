@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.ACCESS_DENIED_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_CLIENT_ID
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_SCOPE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.getResponseHeaders
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
@@ -34,9 +35,6 @@ class UserApprovedClientController(
   private var userApprovedClientService: UserApprovedClientService,
   private var userIdValidator: UserIdValidator
 ) {
-  companion object {
-    private val logger = LoggerFactory.getLogger(UserApprovedClientController::class.java)
-  }
 
   @GetMapping("/users/{user-id}/clients", produces = [MediaType.APPLICATION_JSON_VALUE])
   fun getUserApprovedClients(
@@ -46,8 +44,8 @@ class UserApprovedClientController(
     @RequestHeader(HttpHeaders.AUTHORIZATION, required = true) authorization: String,
   ): ResponseEntity<PagedResult<UserApprovedClientDto>> {
     val authenticationInfo = authentication.authenticate(authorization) as AuthenticationUserInfo
-    validateScope(Scope.USER_CLIENTS_READ, authenticationInfo.userApprovedScope)
     validateUserId(userId, authenticationInfo.userId)
+    validateScope(Scope.USER_CLIENTS_READ, authenticationInfo.userApprovedScope)
     val pageNum = validatePage(page)
     val pageSize = validatePageSize(size)
     val userApprovedClients = userApprovedClientService
@@ -62,22 +60,28 @@ class UserApprovedClientController(
     @RequestHeader(HttpHeaders.AUTHORIZATION, required = true) authorization: String,
   ): ResponseEntity<Void> {
     val authenticationInfo = authentication.authenticate(authorization) as AuthenticationUserInfo
-    validateScope(Scope.USER_CLIENTS_DELETE, authenticationInfo.userApprovedScope)
     validateUserId(userId, authenticationInfo.userId)
+    validateClientId(clientId, authenticationInfo.clientId)
+    validateScope(Scope.USER_CLIENTS_DELETE, authenticationInfo.userApprovedScope)
     userApprovedClientService.revokeClientAccess(userId, clientId)
     return ResponseEntity.status(HttpStatus.NO_CONTENT).headers(getResponseHeaders()).build()
+  }
+
+  private fun validateClientId(clientId: UUID, clientIdFromToken: UUID) {
+    if (!clientId.equals(clientIdFromToken)) {
+      val message = String.format("Client id %S in api path do not match with client id %s in token", clientId, clientIdFromToken)
+      throw ApiException(message, HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.INVALID_REQUEST.toString(), INVALID_CLIENT_ID)
+    }
   }
 
 
   private fun validateUserId(userId: String, userIdFromToken: String) {
     if (userId != userIdFromToken) {
       val message  = String.format("User id %s in token do not match with user id %s in api path", userIdFromToken, userId)
-      logger.error(message)
       throw ApiException(message, 400, ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid user id in api path")
     }
     if (!userIdValidator.isValid(userId)) {
       val message = String.format("invalid user id format %s", userId)
-      logger.error(message)
       throw ApiException(message, HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid user id format")
     }
   }

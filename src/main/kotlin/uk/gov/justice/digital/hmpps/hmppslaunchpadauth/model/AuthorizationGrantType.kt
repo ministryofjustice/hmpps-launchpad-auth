@@ -11,14 +11,6 @@ enum class AuthorizationGrantType(private val grantType: String) {
   }
 
   companion object {
-    fun isStringMatchEnumValue(value: String, grants: Set<AuthorizationGrantType>): Boolean {
-      grants.forEach { grant ->
-        if (value == grant.toString()) {
-          return true
-        }
-      }
-      return false
-    }
 
     fun getAuthorizationGrantTypeByStringValue(value: String): AuthorizationGrantType {
       AuthorizationGrantType.values().forEach { grantType ->

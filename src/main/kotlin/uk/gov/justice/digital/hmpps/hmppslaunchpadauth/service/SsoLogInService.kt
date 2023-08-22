@@ -60,6 +60,13 @@ class SsoLogInService(
       redirectUri,
       clientId,
     )
+    logger.info(
+      "Single sign on request received for client: {}, with response_type: {}, scopes: {}, redirect_uri: {}",
+      clientId,
+      responseType,
+      scopes,
+      redirectUri
+    )
     return UriComponentsBuilder.fromHttpUrl(azureOauthUrl)
       .queryParam("response_type", "id_token")
       .queryParam("client_id", launchpadClientId)
@@ -73,19 +80,20 @@ class SsoLogInService(
 
   fun updateSsoRequest(token: String?, state: UUID): Any {
     var ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {
-      logger.warn("State send on callback url do not exist {}", state)
-      ApiException("Permission denied as sso request with state send from azure redirect not found", HttpStatus.FORBIDDEN.value(), ApiErrorTypes.ACCESS_DENIED.toString(), "Permission not granted")
+      val message = String.format("State send on callback url do not exist %s", state)
+      ApiException(message, HttpStatus.FORBIDDEN.value(), ApiErrorTypes.ACCESS_DENIED.toString(), "Permission not granted")
     }
     val clientId = ssoRequest.client.id
     val client = clientService.getClientById(clientId).orElseThrow {
-      logger.warn("Client of sso request  do not exist {}", clientId)
-      SsoException("Permission denied as client not found", REDIRECTION_CODE, ApiErrorTypes.INVALID_CLIENT.toString(), "Client not found", ssoRequest.client.redirectUri)
+      val message = String.format("Client of sso request  do not exist %s", clientId)
+      SsoException(message, REDIRECTION_CODE, ApiErrorTypes.INVALID_CLIENT.toString(), "Client not found", ssoRequest.client.redirectUri)
     }
     var approvalRequired = false
     if (token != null) {
       ssoRequest = updateSsoRequestWithUserId(token, ssoRequest)
       if (client.autoApprove) {
         createOrUpdateUserApprovedClient(ssoRequest, true)
+        logger.info("Successful sso login for client {} and user id {}", ssoRequest.client.id, ssoRequest.userId)
         return RedirectView(buildClientRedirectUrl(ssoRequest))
       } else {
         // Auto Approve = false and user approval is required
@@ -102,6 +110,7 @@ class SsoLogInService(
     if (approvalRequired) {
       return buildModelAndView(state, ssoRequest, client)
     } else {
+      logger.info("Successful sso login for client {} and user id {}", ssoRequest.client.id, ssoRequest.userId)
       return RedirectView(buildClientRedirectUrl(ssoRequest))
     }
   }
@@ -124,7 +133,6 @@ class SsoLogInService(
       ssoRequest.userId = userId
       return ssoRequestService.updateSsoRequest(ssoRequest)
     } catch (e: IllegalArgumentException) {
-      logger.error(e.message)
       throw SsoException(e.message!!, REDIRECTION_CODE, ApiErrorTypes.SERVER_ERROR.toString(), "Exception in token processing", ssoRequest.client.redirectUri)
     }
   }

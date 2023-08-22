@@ -7,6 +7,7 @@ class AuthServiceConstant {
   companion object {
     const val CODE = "code"
     const val INVALID_CODE_MSG = "Invalid code"
+    const val INVALID_CLIENT_ID = "Invalid client id"
     const val ACCESS_DENIED_MSG = "Permission denied"
     const val INVALID_SCOPE = "The requested scope is invalid or not found."
     const val INVALID_RESPONSE_TYPE_MSG = "The requested response type is invalid"
