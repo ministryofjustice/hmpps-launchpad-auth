@@ -130,7 +130,7 @@ class TokenService(
     val idTokenPayloadClaims = idTokenPayload.generatePayload(
       prisonerData.booking,
       prisonerData.establishment,
-      prisonerData.profile,
+      prisonerData.user,
       clientId,
       scopes,
       nonce,
@@ -139,7 +139,7 @@ class TokenService(
     val accessTokenPayloadClaims = accessTokenPayload.generatePayload(
       null,
       null,
-      prisonerData.profile,
+      prisonerData.user,
       clientId,
       scopes,
       nonce,
@@ -156,7 +156,7 @@ class TokenService(
       refreshTokenPayloadClaims = refreshTokenPayload.generatePayload(
         null,
         null,
-        prisonerData.profile,
+        prisonerData.user,
         clientId,
         scopes,
         nonce,

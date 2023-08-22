@@ -9,7 +9,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Profile
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.User
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.AccessTokenPayload
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenCommonClaims
@@ -130,7 +130,7 @@ class DataGenerator {
       val payload = accessTokenPayload.generatePayload(
         null,
         null,
-        Profile(USER_ID, "John Smith", "John", "Smith"),
+        User(USER_ID, "John Smith", "John", "Smith"),
         clientId,
         userApprovedScopes,
         nonce,
@@ -153,7 +153,7 @@ class DataGenerator {
       val payload = accessTokenPayload.generatePayload(
         null,
         null,
-        Profile(USER_ID, "John Smith", "John", "Smith"),
+        User(USER_ID, "John Smith", "John", "Smith"),
         client.id,
         userApprovedClient.scopes,
         nonce,

@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication
 
-import io.jsonwebtoken.SignatureAlgorithm
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -23,7 +22,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantT
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Profile
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.User
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.AccessTokenPayload
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenCommonClaims
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
@@ -72,7 +71,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
     val payload = accessTokenPayload.generatePayload(
       null,
       null,
-      Profile(USER_ID, "John Smith", "John", "Smith"),
+      User(USER_ID, "John Smith", "John", "Smith"),
       clientId,
       userApprovedScopes,
       nonce,
@@ -97,7 +96,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
     val payload = accessTokenPayload.generatePayload(
       null,
       null,
-      Profile(USER_ID, "John Smith", "John", "Smith"),
+      User(USER_ID, "John Smith", "John", "Smith"),
       clientId,
       userApprovedScopes,
       nonce,
@@ -122,7 +121,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
     val payload = accessTokenPayload.generatePayload(
       null,
       null,
-      Profile(USER_ID, "John Smith", "John", "Smith"),
+      User(USER_ID, "John Smith", "John", "Smith"),
       clientId,
       userApprovedScopes,
       nonce,
