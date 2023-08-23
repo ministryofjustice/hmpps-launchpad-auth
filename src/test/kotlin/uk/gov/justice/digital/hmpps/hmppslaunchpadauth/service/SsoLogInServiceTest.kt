@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.servlet.view.RedirectView
@@ -170,6 +172,6 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
         ssoRequest.id,
       )
     }
-    assertEquals(ACCESS_DENIED_CODE, exception.code)
+    assertEquals(HttpStatus.FORBIDDEN.value(), exception.code)
   }
 }

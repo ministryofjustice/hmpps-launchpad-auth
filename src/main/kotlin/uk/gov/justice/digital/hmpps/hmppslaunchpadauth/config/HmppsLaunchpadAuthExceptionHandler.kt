@@ -15,7 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
 class HmppsLaunchpadAuthExceptionHandler {
 
   @ExceptionHandler(ApiException::class)
-  fun handleApiException(e: ApiException): ResponseEntity<ApiError> {
+  fun handleSingleSignOnException(e: ApiException): ResponseEntity<ApiError> {
     log.error("Api Exception: {}", e.message)
     return ResponseEntity
       .status(e.code)
@@ -28,7 +28,7 @@ class HmppsLaunchpadAuthExceptionHandler {
   }
 
   @ExceptionHandler(SsoException::class)
-  fun handleApiException(e: SsoException): RedirectView {
+  fun handleSingleSignOnException(e: SsoException): RedirectView {
     log.error("Single sign on exception: {}", e.message)
     return RedirectView("${e.redirectUri}?error=${e.error}&error_description=${e.errorDescription}")
   }
@@ -41,7 +41,7 @@ class HmppsLaunchpadAuthExceptionHandler {
       .body(
         ApiError(
           error = ApiErrorTypes.SERVER_ERROR.toString(),
-          errorDescription = "Internal Server ERROR",
+          errorDescription = "Internal Server Error",
         ),
       )
   }

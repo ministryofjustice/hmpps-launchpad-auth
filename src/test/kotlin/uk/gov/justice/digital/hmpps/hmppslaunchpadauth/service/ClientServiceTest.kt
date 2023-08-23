@@ -10,6 +10,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
@@ -17,13 +18,6 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.ClientReposito
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
 import java.util.*
-
-const val ACCESS_DENIED = "Access denied"
-const val IN_VALID_SCOPE = "The requested scope is invalid or not found."
-const val IN_VALID_GRANT = "The requested response type is invalid or not found."
-const val IN_VALID_REDIRECT_URI = "The requested redirect uri is invalid or not found"
-const val BAD_REQUEST_CODE = 400
-const val ACCESS_DENIED_CODE = 403
 
 @ExtendWith(MockitoExtension::class)
 class ClientServiceTest {
@@ -72,7 +66,7 @@ class ClientServiceTest {
   fun `validate params when client record do not exist`() {
     val clientId = UUID.randomUUID()
     Mockito.`when`(clientRepository.findById(clientId)).thenReturn(Optional.empty())
-    val exception = assertThrows(ApiException::class.java) {
+    val exception = assertThrows(SsoException::class.java) {
       clientService.validateParams(
         clientId,
         AuthorizationGrantType.AUTHORIZATION_CODE.toString(),
@@ -88,7 +82,7 @@ class ClientServiceTest {
   @Test
   fun `validate param invalid url value`() {
     Mockito.`when`(clientRepository.findById(client.id)).thenReturn(Optional.of(client))
-    val exception = assertThrows(ApiException::class.java) {
+    val exception = assertThrows(SsoException::class.java) {
       clientService.validateParams(
         client.id,
         "code",
@@ -104,7 +98,7 @@ class ClientServiceTest {
   @Test
   fun `validate param enabled is false`() {
     Mockito.`when`(clientRepository.findById(client.id)).thenReturn(Optional.of(DataGenerator.buildClient(false, true)))
-    val exception = assertThrows(ApiException::class.java) {
+    val exception = assertThrows(SsoException::class.java) {
       clientService.validateParams(
         client.id,
         AuthorizationGrantType.AUTHORIZATION_CODE.toString(),
@@ -120,7 +114,7 @@ class ClientServiceTest {
   @Test
   fun `validate params when invalid scope`() {
     Mockito.`when`(clientRepository.findById(client.id)).thenReturn(Optional.of(client))
-    val exception = assertThrows(ApiException::class.java) {
+    val exception = assertThrows(SsoException::class.java) {
       clientService.validateParams(
         client.id,
         AuthorizationGrantType.AUTHORIZATION_CODE.toString(),
@@ -136,7 +130,7 @@ class ClientServiceTest {
   @Test
   fun `validate params when invalid grant`() {
     Mockito.`when`(clientRepository.findById(client.id)).thenReturn(Optional.of(client))
-    val exception = assertThrows(ApiException::class.java) {
+    val exception = assertThrows(SsoException::class.java) {
       clientService.validateParams(
         client.id,
         "random_code",
@@ -152,7 +146,7 @@ class ClientServiceTest {
   @Test
   fun `validate Params when redirect url not in registered url list`() {
     Mockito.`when`(clientRepository.findById(client.id)).thenReturn(Optional.of(client))
-    val exception = assertThrows(ApiException::class.java) {
+    val exception = assertThrows(SsoException::class.java) {
       clientService.validateParams(
         client.id,
         "code",
