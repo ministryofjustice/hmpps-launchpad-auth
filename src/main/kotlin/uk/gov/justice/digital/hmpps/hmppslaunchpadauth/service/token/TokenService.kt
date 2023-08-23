@@ -149,7 +149,7 @@ class TokenService(
       nonce,
     )
     val accessTokenPayload = AccessTokenPayload()
-    val accessTokenPayloadClaims = accessTokenPayload.generatePayload(prisonerData.user, clientId, scopes,)
+    val accessTokenPayloadClaims = accessTokenPayload.generatePayload(prisonerData.user, clientId, scopes)
     var refreshTokenPayloadClaims = LinkedHashMap<String, Any>()
     if (refreshTokenPayloadOld != null) {
       val claims = refreshTokenPayloadOld.body

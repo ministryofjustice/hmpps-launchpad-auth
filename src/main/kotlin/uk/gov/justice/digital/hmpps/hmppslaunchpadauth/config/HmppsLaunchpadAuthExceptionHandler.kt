@@ -50,4 +50,3 @@ class HmppsLaunchpadAuthExceptionHandler {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 }
-
