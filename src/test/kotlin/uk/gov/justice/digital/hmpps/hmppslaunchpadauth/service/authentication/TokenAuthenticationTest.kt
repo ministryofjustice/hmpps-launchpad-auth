@@ -69,12 +69,9 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
     val accessTokenPayload = AccessTokenPayload()
     val nonce = "random_nonce"
     val payload = accessTokenPayload.generatePayload(
-      null,
-      null,
       User(USER_ID, "John", "Smith"),
       clientId,
       userApprovedScopes,
-      nonce,
     )
     val authHeader = "Bearer " + TokenGenerationAndValidation.generateToken(
       payload,
@@ -94,12 +91,9 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
     val accessTokenPayload = AccessTokenPayload()
     val nonce = "random_nonce"
     val payload = accessTokenPayload.generatePayload(
-      null,
-      null,
       User(USER_ID, "John", "Smith"),
       clientId,
       userApprovedScopes,
-      nonce,
     )
     val authHeader = "Bearer " + TokenGenerationAndValidation.generateToken(
       payload,
@@ -119,23 +113,18 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
     val accessTokenPayload = AccessTokenPayload()
     val nonce = "random_nonce"
     val payload = accessTokenPayload.generatePayload(
-      null,
-      null,
       User(USER_ID, "John Smith", "Smith"),
       clientId,
       userApprovedScopes,
-      nonce,
     )
     val authHeader = "Bearer " + TokenGenerationAndValidation.generateToken(
       payload,
       TokenCommonClaims.buildHeaderClaims(),
       secret,
     )
-   /* Mockito.`when`(clientService.getClientById(clientId)).thenReturn(Optional.of(client))*/
     val exception = assertThrows(ApiException::class.java) {
       tokenAuthentication.authenticate(authHeader)
     }
-    //assertEquals(exception.message, UNAUTHORIZED)
     assertEquals(exception.code, HttpStatus.UNAUTHORIZED.value())
   }
 

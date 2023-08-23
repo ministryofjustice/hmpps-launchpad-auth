@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
-class RefreshTokenPayload : TokenPayload{
+class RefreshTokenPayload {
   private fun buildClaims(
     user: User,
     clientId: UUID, scopes: Set<Scope>): LinkedHashMap<String, Any> {
@@ -20,13 +20,10 @@ class RefreshTokenPayload : TokenPayload{
     return claims
   }
 
-  override fun generatePayload(
-    booking: Booking?,
-    establishment: Establishment?,
+  fun generatePayload(
     user: User,
     clientId: UUID,
     scopes: Set<Scope>,
-    nonce: String?,
   ): LinkedHashMap<String, Any> {
     return buildClaims(user, clientId, scopes)
   }

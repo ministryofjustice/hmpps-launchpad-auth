@@ -82,7 +82,6 @@ class ClientServiceTest {
         "test",
       )
     }
-    //assertEquals(ACCESS_DENIED, exception.message)
     assertEquals(302, exception.code)
   }
 

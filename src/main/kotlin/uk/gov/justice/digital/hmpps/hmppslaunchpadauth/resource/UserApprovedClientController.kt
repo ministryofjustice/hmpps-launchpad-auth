@@ -13,9 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.ACCESS_DENIED_MSG
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_CLIENT_ID
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_SCOPE
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.getResponseHeaders
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_CLIENT_ID_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_SCOPE_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
@@ -49,7 +48,7 @@ class UserApprovedClientController(
     val pageSize = validatePageSize(size)
     val userApprovedClients = userApprovedClientService
       .getUserApprovedClientsByUserId(userId, pageNum.toInt(), pageSize.toInt())
-    return ResponseEntity.status(HttpStatus.OK).headers(getResponseHeaders()).body(userApprovedClients)
+    return ResponseEntity.status(HttpStatus.OK).body(userApprovedClients)
   }
 
   @DeleteMapping("/users/{user-id}/clients/{client-id}")
@@ -63,13 +62,13 @@ class UserApprovedClientController(
     validateClientId(clientId, authenticationInfo.clientId)
     validateScope(Scope.USER_CLIENTS_DELETE, authenticationInfo.userApprovedScope)
     userApprovedClientService.revokeClientAccess(userId, clientId)
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).headers(getResponseHeaders()).build()
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
   }
 
   private fun validateClientId(clientId: UUID, clientIdFromToken: UUID) {
     if (!clientId.equals(clientIdFromToken)) {
       val message = String.format("Client id %S in api path do not match with client id %s in token", clientId, clientIdFromToken)
-      throw ApiException(message, HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.INVALID_REQUEST.toString(), INVALID_CLIENT_ID)
+      throw ApiException(message, HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.INVALID_REQUEST.toString(), INVALID_CLIENT_ID_MSG)
     }
   }
 
@@ -109,7 +108,7 @@ class UserApprovedClientController(
 
   private fun validateScope(scope: Scope, scopes:Set<Scope>) {
     if (!scopes.contains(scope)) {
-      throw ApiException(ACCESS_DENIED_MSG, HttpStatus.FORBIDDEN.value(), ApiErrorTypes.INVALID_SCOPE.toString(), INVALID_SCOPE)
+      throw ApiException(ACCESS_DENIED_MSG, HttpStatus.FORBIDDEN.value(), ApiErrorTypes.INVALID_SCOPE.toString(), INVALID_SCOPE_MSG)
     }
   }
 }

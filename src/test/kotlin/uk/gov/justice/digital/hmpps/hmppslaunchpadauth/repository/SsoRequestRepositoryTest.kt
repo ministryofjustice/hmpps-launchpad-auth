@@ -57,7 +57,7 @@ class SsoRequestRepositoryTest(@Autowired private var ssoRequestRepository: SsoR
   }
 
   @Test
-  fun `delete sso request by id`(){
+  fun `delete sso request by id`() {
     val expected = DataGenerator.buildSsoRequest()
     expected.authorizationCode = UUID.randomUUID()
     ssoRequestRepository.save(expected)
@@ -81,5 +81,4 @@ class SsoRequestRepositoryTest(@Autowired private var ssoRequestRepository: SsoR
     assertEquals(expected.redirectUri, result.redirectUri)
     assertEquals(expected.nonce, result.nonce)
   }
-
 }

@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
@@ -11,8 +10,8 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.User
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.AccessTokenPayload
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenCommonClaims
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -96,7 +95,7 @@ class DataGenerator {
       )
     }
 
-    fun createValidAccessToken() {
+    /*fun createValidAccessToken() {
       val password = UUID.randomUUID().toString()
       val scopes = setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ)
       val grants = setOf(AuthorizationGrantType.AUTHORIZATION_CODE)
@@ -126,21 +125,18 @@ class DataGenerator {
         LocalDateTime.now(ZoneOffset.UTC),
       )
       val accessTokenPayload = AccessTokenPayload()
-      val nonce = "random_nonce"
+      // val nonce = "random_nonce"
       val payload = accessTokenPayload.generatePayload(
-        null,
-        null,
         User(USER_ID, "John",  "Smith"),
         clientId,
         userApprovedScopes,
-        nonce,
       )
       val authHeader = "Bearer " + TokenGenerationAndValidation.generateToken(
         payload,
         TokenCommonClaims.buildHeaderClaims(),
         randomSecret,
       )
-    }
+    }*/
 
     fun generateAccessToken(
       client: Client,
@@ -151,12 +147,9 @@ class DataGenerator {
       val accessTokenPayload = AccessTokenPayload()
       val nonce = "random_nonce"
       val payload = accessTokenPayload.generatePayload(
-        null,
-        null,
         User(USER_ID, "John", "Smith"),
         client.id,
         userApprovedClient.scopes,
-        nonce,
       )
       return "Bearer " + TokenGenerationAndValidation.generateToken(
         payload,

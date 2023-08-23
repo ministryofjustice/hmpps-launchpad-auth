@@ -8,10 +8,12 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
-class AccessTokenPayload : TokenPayload{
+class AccessTokenPayload {
   private fun buildClaims(
     user: User,
-    clientId: UUID, scopes: Set<Scope>): LinkedHashMap<String, Any> {
+    clientId: UUID,
+    scopes: Set<Scope>
+  ): LinkedHashMap<String, Any> {
     var claims = LinkedHashMap<String, Any>()
     claims["jti"] = UUID.randomUUID().toString()
     claims = TokenCommonClaims.buildCommonClaims(clientId.toString(), user.id, claims)
@@ -20,13 +22,10 @@ class AccessTokenPayload : TokenPayload{
     return claims
   }
 
-  override fun generatePayload(
-    booking: Booking?,
-    establishment: Establishment?,
+  fun generatePayload(
     user: User,
     clientId: UUID,
-    scopes: Set<Scope>,
-    nonce: String?,
+    scopes: Set<Scope>
   ): LinkedHashMap<String, Any> {
     return buildClaims(user, clientId, scopes)
   }

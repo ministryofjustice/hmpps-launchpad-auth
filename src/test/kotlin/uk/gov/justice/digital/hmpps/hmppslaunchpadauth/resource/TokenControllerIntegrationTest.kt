@@ -15,14 +15,16 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.http.RequestEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.ApiError
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Token
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto
@@ -44,7 +46,6 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
-
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -162,6 +163,7 @@ class TokenControllerIntegrationTest(
       object : ParameterizedTypeReference<Token>() {},
     )
     token = response.body
+    assertResponseHeaders(response.headers)
     assertNotNull(token.idToken)
     assertNotNull(token.accessToken)
     assertNotNull(token.refreshToken)
@@ -173,17 +175,17 @@ class TokenControllerIntegrationTest(
 
     // use expire refreshToken
     var exception = Assertions.assertThrows(HttpClientErrorException::class.java) {
-      val refreshToken = updateTokenExpireTime(token.refreshToken, LocalDateTime.now().minusHours(1).toEpochSecond(ZoneOffset.UTC))
+      val refreshToken =
+        updateTokenExpireTime(token.refreshToken, LocalDateTime.now().minusHours(1).toEpochSecond(ZoneOffset.UTC))
       url =
-        URI("$baseUrl:$port/v1/oauth2/token?grant_type=refresh_token&nonce=anything&refresh_token=${refreshToken}")
+        URI("$baseUrl:$port/v1/oauth2/token?grant_type=refresh_token&nonce=anything&refresh_token=$refreshToken")
       response = restTemplate.exchange(
         RequestEntity<Any>(headers, HttpMethod.POST, url),
         object : ParameterizedTypeReference<Token>() {},
       )
     }
     assertEquals(400, exception.statusCode.value())
-
-
+    assertResponseHeaders(exception.responseHeaders)
 
     // using access token in auth header
     headers.remove("Authorization")
@@ -194,6 +196,7 @@ class TokenControllerIntegrationTest(
       object : ParameterizedTypeReference<PagedResult<UserApprovedClientDto>>() {},
     )
     var pagedResult = apiResponse.body as PagedResult<UserApprovedClientDto>
+    assertResponseHeaders(apiResponse.headers)
     assertEquals(200, apiResponse.statusCode.value())
     assertNotNull(pagedResult.content)
 
@@ -206,11 +209,11 @@ class TokenControllerIntegrationTest(
         url,
         HttpMethod.GET,
         HttpEntity<Any>(headers),
-        ErrorResponse::class.java,
+        ApiError::class.java,
       )
     }
     assertEquals(401, exception.statusCode.value())
-
+    assertResponseHeaders(exception.responseHeaders)
     // Using refresh token in auth header expected response should be Http 401
     headers.remove("Authorization")
     headers.add("Authorization", "Bearer " + token.refreshToken)
@@ -220,10 +223,11 @@ class TokenControllerIntegrationTest(
         url,
         HttpMethod.GET,
         HttpEntity<Any>(headers),
-        ErrorResponse::class.java,
+        ApiError::class.java,
       )
     }
     assertEquals(401, exception.statusCode.value())
+    assertResponseHeaders(exception.responseHeaders)
   }
 
   private fun assertIdTokenClaims(idToken: String) {
@@ -247,7 +251,6 @@ class TokenControllerIntegrationTest(
     assertEquals(userID, claims["sub"])
     val scopes = claims["scopes"] as ArrayList<String>
     assertScopes(scopes, userApprovedClientOne.scopes)
-
   }
 
   private fun assertRefreshTokenClaims(refreshToken: String) {
@@ -278,4 +281,12 @@ class TokenControllerIntegrationTest(
       .compact()
   }
 
+  private fun assertResponseHeaders(httpHeaders: HttpHeaders) {
+    assertEquals(listOf(MediaType.APPLICATION_JSON_VALUE), httpHeaders[HttpHeaders.CONTENT_TYPE])
+    assertEquals(listOf("no-cache, no-store, max-age=0, must-revalidate"), httpHeaders[HttpHeaders.CACHE_CONTROL])
+    assertEquals(listOf("no-cache"), httpHeaders[HttpHeaders.PRAGMA])
+    assertEquals(listOf("0"), httpHeaders[HttpHeaders.EXPIRES])
+    assertEquals(listOf("DENY"), httpHeaders["X-Frame-Options"])
+    assertEquals(listOf("nosniff"), httpHeaders["X-Content-Type-Options"])
+  }
 }

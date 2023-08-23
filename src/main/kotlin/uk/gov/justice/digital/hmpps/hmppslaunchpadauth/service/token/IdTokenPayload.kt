@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
-class IdTokenPayload : TokenPayload {
+class IdTokenPayload  {
 
   private fun buildClaims(
     booking: Booking,
@@ -33,7 +33,7 @@ class IdTokenPayload : TokenPayload {
     return claims
   }
 
-  override fun generatePayload(
+  fun generatePayload(
     booking: Booking?,
     establishment: Establishment?,
     user: User,

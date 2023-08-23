@@ -19,8 +19,6 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ACCESS_DENIED_CODE
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.BAD_REQUEST_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoLogInService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import java.time.LocalDateTime

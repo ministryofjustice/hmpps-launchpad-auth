@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.servlet.view.RedirectView
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.getResponseHeaders
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.ApiError
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
@@ -17,10 +16,9 @@ class HmppsLaunchpadAuthExceptionHandler {
 
   @ExceptionHandler(ApiException::class)
   fun handleApiException(e: ApiException): ResponseEntity<ApiError> {
-    log.error("Exception: {}", e.message)
+    log.error("Api Exception: {}", e.message)
     return ResponseEntity
       .status(e.code)
-      .headers(getResponseHeaders())
       .body(
         ApiError(
           e.error,
@@ -31,7 +29,7 @@ class HmppsLaunchpadAuthExceptionHandler {
 
   @ExceptionHandler(SsoException::class)
   fun handleApiException(e: SsoException): RedirectView {
-    log.error("Validation exception: {}", e.message)
+    log.error("Single sign on exception: {}", e.message)
     return RedirectView("${e.redirectUri}?error=${e.error}&error_description=${e.errorDescription}")
   }
 
@@ -39,7 +37,7 @@ class HmppsLaunchpadAuthExceptionHandler {
   fun handleException(e: java.lang.Exception): ResponseEntity<ApiError?>? {
     log.error("Unexpected exception", e)
     return ResponseEntity
-      .status(500)
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
       .body(
         ApiError(
           error = ApiErrorTypes.SERVER_ERROR.toString(),
@@ -53,19 +51,3 @@ class HmppsLaunchpadAuthExceptionHandler {
   }
 }
 
-data class ErrorResponse(
-  val status: Int,
-  val errorCode: Int? = null,
-  val userMessage: String? = null,
-  val developerMessage: String? = null,
-  val moreInfo: String? = null,
-) {
-  constructor(
-    status: HttpStatus,
-    errorCode: Int? = null,
-    userMessage: String? = null,
-    developerMessage: String? = null,
-    moreInfo: String? = null,
-  ) :
-    this(status.value(), errorCode, userMessage, developerMessage, moreInfo)
-}

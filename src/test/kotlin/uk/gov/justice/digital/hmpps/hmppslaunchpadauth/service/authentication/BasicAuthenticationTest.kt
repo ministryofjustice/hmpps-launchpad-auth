@@ -1,7 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication
 
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -63,7 +64,6 @@ class BasicAuthenticationTest {
     val authHeader = "Basic " + Base64.getEncoder().encodeToString("$id:$password".toByteArray(Charsets.UTF_8))
     val authenticationInfo = basicAuthentication.authenticate(authHeader)
     assertEquals(authenticationInfo.clientId, id)
-    // assertEquals(authenticationInfo.clientScope, scopes)
   }
 
   @Test
@@ -122,7 +122,6 @@ class BasicAuthenticationTest {
     val exception = assertThrows(ApiException::class.java) {
       basicAuthentication.authenticate(authHeader)
     }
-    //assertEquals(exception.message, UNAUTHORIZED_MSG)
     assertEquals(exception.code, HttpStatus.UNAUTHORIZED.value())
   }
 
@@ -152,7 +151,6 @@ class BasicAuthenticationTest {
     val exception = assertThrows(ApiException::class.java) {
       basicAuthentication.authenticate(authHeader)
     }
-    //assertEquals(exception.message, UNAUTHORIZED_MSG)
     assertEquals(exception.code, HttpStatus.UNAUTHORIZED.value())
   }
 
@@ -162,7 +160,6 @@ class BasicAuthenticationTest {
     val exception = assertThrows(ApiException::class.java) {
       basicAuthentication.authenticate(authHeader)
     }
-    //assertEquals(exception.message, UNAUTHORIZED_MSG)
     assertEquals(exception.code, HttpStatus.UNAUTHORIZED.value())
   }
 }

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.getResponseHeaders
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Token
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication.Authentication
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenService
@@ -31,12 +30,12 @@ class TokenController(
     @RequestParam("redirect_uri", required = false) redirectUri: URI?,
     @RequestParam("refresh_token", required = false) refreshToken: String?,
     @RequestParam(required = false) nonce: String?,
-    @RequestHeader(HttpHeaders.AUTHORIZATION, required = true) authorization: String
+    @RequestHeader(HttpHeaders.AUTHORIZATION, required = true) authorization: String,
   ): ResponseEntity<Token> {
     val authenticationInfo = authentication.authenticate(authorization)
     val clientId = authenticationInfo.clientId
     val token = tokenService
       .validateRequestAndGenerateToken(code, grant, redirectUri, clientId, refreshToken, authenticationInfo, nonce)
-    return ResponseEntity.status(HttpStatus.OK).headers(getResponseHeaders()).body(token)
+    return ResponseEntity.status(HttpStatus.OK).body(token)
   }
 }
