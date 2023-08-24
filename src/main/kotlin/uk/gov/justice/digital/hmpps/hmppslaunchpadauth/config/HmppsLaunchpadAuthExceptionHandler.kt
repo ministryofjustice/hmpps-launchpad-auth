@@ -20,7 +20,7 @@ import java.util.*
 class HmppsLaunchpadAuthExceptionHandler {
 
   @ExceptionHandler(ApiException::class)
-  fun handleSingleSignOnException(e: ApiException): ResponseEntity<ApiError> {
+  fun handleApiException(e: ApiException): ResponseEntity<ApiError> {
     log.error("Api Exception: {}", e.message)
     return ResponseEntity
       .status(e.code)
