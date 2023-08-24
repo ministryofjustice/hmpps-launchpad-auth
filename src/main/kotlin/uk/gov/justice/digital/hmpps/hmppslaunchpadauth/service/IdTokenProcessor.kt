@@ -16,12 +16,13 @@ class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProc
   }
 
   override fun getUserId(token: String, nonce: String): String {
-    logger.debug("Id token received: {}", token)
+    logger.debug("Id token received from azure ad: {}", token)
     val decoder = Base64.getDecoder()
     val chunks = token.split(".")
     val payload = String(decoder.decode(chunks[1]))
     val nonceInIdToken = getClaimFromPayload(payload, "nonce")
     validateNonce(nonceInIdToken, nonce)
+    // The claim containing user id will be checked again after integrating with prison api
     val userId = getClaimFromPayload(payload, "email")
     if (userId != null) {
       if (!userIdValidator.isValid(userId)) {
@@ -31,7 +32,6 @@ class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProc
       return userId
     } else {
       val message = "User id not found in payload"
-      logger.error(message)
       throw IllegalArgumentException(message)
     }
   }
@@ -39,9 +39,7 @@ class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProc
   private fun validateNonce(nonceToken: String, nonceSsoRequest: String) {
     if (nonceToken != nonceSsoRequest) {
       val message = "Nonce in sso request not matching with nonce in id token payload"
-      logger.error(message)
       throw IllegalArgumentException(message)
-      //throw ApiException(ACCESS_DENIED, HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.ACCESS_DENIED.toString(), ACCESS_DENIED)
     }
   }
 
@@ -50,8 +48,7 @@ class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProc
       val jsonObject = JSONObject(payload)
       return jsonObject.getString(claimName)
     } catch (exception: JSONException) {
-      logger.error("Claim: {} not found in id token payload", claimName)
-      val message = String.format("Claim: %s not found", claimName)
+      val message = "Claim: $claimName not found"
       throw ApiException(message, 500, ApiErrorTypes.SERVER_ERROR.toString(), "Internal server error")
     }
   }

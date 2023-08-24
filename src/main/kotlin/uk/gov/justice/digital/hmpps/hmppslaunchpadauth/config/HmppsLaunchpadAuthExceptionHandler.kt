@@ -3,13 +3,18 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.config
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.HttpMediaTypeNotSupportedException
+import org.springframework.web.bind.MissingRequestHeaderException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.servlet.view.RedirectView
+import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.ApiError
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
+import java.util.*
 
 @RestControllerAdvice
 class HmppsLaunchpadAuthExceptionHandler {
@@ -30,12 +35,54 @@ class HmppsLaunchpadAuthExceptionHandler {
   @ExceptionHandler(SsoException::class)
   fun handleSingleSignOnException(e: SsoException): RedirectView {
     log.error("Single sign on exception: {}", e.message)
-    return RedirectView("${e.redirectUri}?error=${e.error}&error_description=${e.errorDescription}")
+    val url = UriComponentsBuilder.fromHttpUrl(e.redirectUri)
+      .queryParam("error", e.error)
+      .queryParam("error_description", e.errorDescription)
+      .queryParamIfPresent("state", Optional.ofNullable(e.state))
+      .build().toUriString()
+    return RedirectView(url)
+  }
+
+  @ExceptionHandler(MissingRequestHeaderException::class)
+  fun handleApiMissingRequestHeader(e: MissingRequestHeaderException): ResponseEntity<ApiError> {
+    log.error("Exception due to missing required header in api request: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.BAD_REQUEST.value())
+      .body(
+        ApiError(
+          error = ApiErrorTypes.INVALID_REQUEST.toString(),
+          errorDescription = "${e.message}",
+        ),
+      )
+  }
+
+  @ExceptionHandler(HttpMediaTypeNotSupportedException::class)
+  fun handleApiMediaTypeNotSupported(e: HttpMediaTypeNotSupportedException): ResponseEntity<ApiError> {
+    log.error("Exception due to invalid or missing media type header in api request: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.BAD_REQUEST.value())
+      .body(
+        ApiError(
+          error = ApiErrorTypes.INVALID_REQUEST.toString(),
+          errorDescription = "${e.message}",
+        ),
+      )
   }
 
   @ExceptionHandler(java.lang.Exception::class)
   fun handleException(e: java.lang.Exception): ResponseEntity<ApiError?>? {
-    log.error("Unexpected exception", e)
+    if (e is MethodArgumentTypeMismatchException) {
+      log.error("MethodArgumentTypeMismatchException due to invalid request {}", e.message)
+      return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST.value())
+        .body(
+          ApiError(
+            error = ApiErrorTypes.INVALID_REQUEST.toString(),
+            errorDescription = "Invalid value passed in  ${e.name}, ${e.rootCause?.message}",
+          ),
+        )
+    }
+    log.error("Unexpected exception {}", e.message)
     return ResponseEntity
       .status(HttpStatus.INTERNAL_SERVER_ERROR)
       .body(

@@ -17,6 +17,7 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.RequestEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -184,7 +185,7 @@ class TokenControllerIntegrationTest(
         object : ParameterizedTypeReference<Token>() {},
       )
     }
-    assertEquals(400, exception.statusCode.value())
+    assertEquals(HttpStatus.BAD_REQUEST.value(), exception.statusCode.value())
     assertResponseHeaders(exception.responseHeaders)
 
     // using access token in auth header
@@ -197,7 +198,7 @@ class TokenControllerIntegrationTest(
     )
     var pagedResult = apiResponse.body as PagedResult<UserApprovedClientDto>
     assertResponseHeaders(apiResponse.headers)
-    assertEquals(200, apiResponse.statusCode.value())
+    assertEquals(HttpStatus.OK.value(), apiResponse.statusCode.value())
     assertNotNull(pagedResult.content)
 
     // Using id token in auth header expected response should be Http 401
@@ -212,7 +213,7 @@ class TokenControllerIntegrationTest(
         ApiError::class.java,
       )
     }
-    assertEquals(401, exception.statusCode.value())
+    assertEquals(HttpStatus.FORBIDDEN.value(), exception.statusCode.value())
     assertResponseHeaders(exception.responseHeaders)
     // Using refresh token in auth header expected response should be Http 401
     headers.remove("Authorization")
@@ -226,7 +227,7 @@ class TokenControllerIntegrationTest(
         ApiError::class.java,
       )
     }
-    assertEquals(401, exception.statusCode.value())
+    assertEquals(HttpStatus.FORBIDDEN.value(), exception.statusCode.value())
     assertResponseHeaders(exception.responseHeaders)
   }
 

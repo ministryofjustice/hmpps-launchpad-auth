@@ -1,9 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.CODE
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_CLIENT_ID_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_REDIRECT_URI_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_RESPONSE_TYPE_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_SCOPE_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.REDIRECTION_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
@@ -13,7 +15,6 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.ClientReposito
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
-
 
 @Service
 class ClientService(private var clientRepository: ClientRepository) {
@@ -31,32 +32,46 @@ class ClientService(private var clientRepository: ClientRepository) {
     nonce: String?,
   ) {
     val client = clientRepository.findById(clientId).orElseThrow {
-      val message = String.format("Client with client_id %s does not exist", clientId)
-      SsoException(message, REDIRECTION_CODE, "invalid_clientId", "Invalid client id", redirectUri)
+      val message = "Client with client_id $clientId does not exist"
+      SsoException(message, REDIRECTION_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), INVALID_CLIENT_ID_MSG, redirectUri, state)
     }
-    isEnabled(client.enabled, redirectUri)
-    validateScopes(scopes, client.scopes, redirectUri)
-    validateResponseType(responseType, redirectUri)
-    validateUri(redirectUri, client.registeredRedirectUris)
+    isEnabled(client.enabled, redirectUri, state)
+    validateScopes(scopes, client.scopes, redirectUri, state)
+    validateResponseType(responseType, redirectUri, state)
+    validateUri(redirectUri, client.registeredRedirectUris, state)
   }
 
-  private fun isEnabled(enabled: Boolean, redirectUri: String) {
+  private fun isEnabled(enabled: Boolean, redirectUri: String, state: String?) {
     if (!enabled) {
-      throw SsoException("Client not enabled", REDIRECTION_CODE, ApiErrorTypes.INVALID_CLIENT.toString(), "Client is disabled", redirectUri)
+      throw SsoException(
+        "Client not enabled",
+        REDIRECTION_CODE,
+        ApiErrorTypes.INVALID_REQUEST.toString(),
+        INVALID_CLIENT_ID_MSG,
+        redirectUri,
+        state,
+      )
     }
   }
 
-  private fun validateUri(uri: String, redirectUris: Set<String>) {
+  private fun validateUri(redirectUri: String, redirectUris: Set<String>, state: String?) {
     try {
-      URL(uri)
-      validateRedirectUri(uri, redirectUris)
+      URL(redirectUri)
+      validateRedirectUri(redirectUri, redirectUris, state)
     } catch (exception: MalformedURLException) {
-      val message = String.format("Not a valid redirect url: %s", uri)
-      throw SsoException(message, REDIRECTION_CODE, ApiErrorTypes.INVALID_REDIRECT_URI.toString(), "Redirect url invalid or not listed", uri)
+      val message = "Not a valid redirect uri: $redirectUri"
+      throw SsoException(
+        message,
+        REDIRECTION_CODE,
+        ApiErrorTypes.INVALID_REQUEST.toString(),
+        INVALID_REDIRECT_URI_MSG,
+        redirectUri,
+        state,
+      )
     }
   }
 
-  private fun validateScopes(scopes: String, clientScopes: Set<Scope>, redirectUri: String) {
+  private fun validateScopes(scopes: String, clientScopes: Set<Scope>, redirectUri: String, state: String?) {
     val scopeList: List<String>
     if (scopes.contains(" ")) {
       val scopeValues = scopes.replace("\\s+".toRegex(), " ")
@@ -66,23 +81,44 @@ class ClientService(private var clientRepository: ClientRepository) {
     }
     scopeList.forEach { x ->
       if (!Scope.isStringMatchEnumValue(x, clientScopes)) {
-        val message = String.format("Scope %s not matching with client scope set", x)
-        throw SsoException(message, REDIRECTION_CODE, ApiErrorTypes.INVALID_SCOPE.toString(), "Invalid scope", redirectUri)
+        val message = "Scope $x not matching with client scope set"
+        throw SsoException(
+          message,
+          REDIRECTION_CODE,
+          ApiErrorTypes.INVALID_SCOPE.toString(),
+          INVALID_SCOPE_MSG,
+          redirectUri,
+          state,
+        )
       }
     }
   }
 
-  private fun validateResponseType(responseType: String, redirectUri: String) {
+  private fun validateResponseType(responseType: String, redirectUri: String, state: String?) {
     if (responseType != CODE) {
-      val message = String.format("Invalid response type %s send in sso  request", responseType)
-      throw SsoException(message, REDIRECTION_CODE, ApiErrorTypes.INVALID_RESPONSE_TYPE.toString(), INVALID_RESPONSE_TYPE_MSG, redirectUri)
+      val message = "Invalid response type $responseType send in sso  request"
+      throw SsoException(
+        message,
+        REDIRECTION_CODE,
+        ApiErrorTypes.INVALID_REQUEST.toString(),
+        INVALID_RESPONSE_TYPE_MSG,
+        redirectUri,
+        state,
+      )
     }
   }
 
-  private fun validateRedirectUri(uri: String, redirectUris: Set<String>) {
-    if (!redirectUris.contains(uri)) {
-      val message = String.format("Redirect uri not matching with client redirect uri: %s", uri)
-      throw SsoException(message, REDIRECTION_CODE, ApiErrorTypes.INVALID_REDIRECT_URI.toString(), "Invalid redirect uri or not listed", uri)
+  private fun validateRedirectUri(redirectUri: String, redirectUris: Set<String>, state: String?) {
+    if (!redirectUris.contains(redirectUri)) {
+      val message = "Redirect uri not matching with client redirect uri: $redirectUri"
+      throw SsoException(
+        message,
+        REDIRECTION_CODE,
+        ApiErrorTypes.INVALID_REQUEST.toString(),
+        INVALID_REDIRECT_URI_MSG,
+        redirectUri,
+        state,
+      )
     }
   }
 }

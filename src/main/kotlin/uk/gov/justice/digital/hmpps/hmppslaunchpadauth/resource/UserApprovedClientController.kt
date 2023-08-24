@@ -31,7 +31,7 @@ import java.util.*
 class UserApprovedClientController(
   @Qualifier("tokenAuthentication") private var authentication: Authentication,
   private var userApprovedClientService: UserApprovedClientService,
-  private var userIdValidator: UserIdValidator
+  private var userIdValidator: UserIdValidator,
 ) {
 
   @GetMapping("/users/{user-id}/clients", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -67,20 +67,29 @@ class UserApprovedClientController(
 
   private fun validateClientId(clientId: UUID, clientIdFromToken: UUID) {
     if (!clientId.equals(clientIdFromToken)) {
-      val message = String.format("Client id %S in api path do not match with client id %s in token", clientId, clientIdFromToken)
-      throw ApiException(message, HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.INVALID_REQUEST.toString(), INVALID_CLIENT_ID_MSG)
+      val message = "Client id $clientId in api path do not match with client id $clientIdFromToken in token"
+      throw ApiException(
+        message,
+        HttpStatus.BAD_REQUEST.value(),
+        ApiErrorTypes.INVALID_REQUEST.toString(),
+        INVALID_CLIENT_ID_MSG,
+      )
     }
   }
 
-
   private fun validateUserId(userId: String, userIdFromToken: String) {
     if (userId != userIdFromToken) {
-      val message  = String.format("User id %s in token do not match with user id %s in api path", userIdFromToken, userId)
+      val message = "User id $userIdFromToken in token do not match with user id $userId in api path"
       throw ApiException(message, 400, ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid user id in api path")
     }
     if (!userIdValidator.isValid(userId)) {
-      val message = String.format("invalid user id format %s", userId)
-      throw ApiException(message, HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid user id format")
+      val message = "Invalid user id format $userId"
+      throw ApiException(
+        message,
+        HttpStatus.BAD_REQUEST.value(),
+        ApiErrorTypes.INVALID_REQUEST.toString(),
+        "Invalid user id format",
+      )
     }
   }
 
@@ -106,9 +115,14 @@ class UserApprovedClientController(
     return size
   }
 
-  private fun validateScope(scope: Scope, scopes:Set<Scope>) {
+  private fun validateScope(scope: Scope, scopes: Set<Scope>) {
     if (!scopes.contains(scope)) {
-      throw ApiException(ACCESS_DENIED_MSG, HttpStatus.FORBIDDEN.value(), ApiErrorTypes.INVALID_SCOPE.toString(), INVALID_SCOPE_MSG)
+      throw ApiException(
+        ACCESS_DENIED_MSG,
+        HttpStatus.FORBIDDEN.value(),
+        ApiErrorTypes.INVALID_SCOPE.toString(),
+        INVALID_SCOPE_MSG,
+      )
     }
   }
 }

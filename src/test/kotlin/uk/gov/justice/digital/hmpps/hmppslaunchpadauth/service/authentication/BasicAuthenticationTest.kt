@@ -151,7 +151,7 @@ class BasicAuthenticationTest {
     val exception = assertThrows(ApiException::class.java) {
       basicAuthentication.authenticate(authHeader)
     }
-    assertEquals(exception.code, HttpStatus.UNAUTHORIZED.value())
+    assertEquals(HttpStatus.FORBIDDEN.value(), exception.code)
   }
 
   @Test
@@ -160,6 +160,6 @@ class BasicAuthenticationTest {
     val exception = assertThrows(ApiException::class.java) {
       basicAuthentication.authenticate(authHeader)
     }
-    assertEquals(exception.code, HttpStatus.UNAUTHORIZED.value())
+    assertEquals(HttpStatus.FORBIDDEN.value(), exception.code)
   }
 }

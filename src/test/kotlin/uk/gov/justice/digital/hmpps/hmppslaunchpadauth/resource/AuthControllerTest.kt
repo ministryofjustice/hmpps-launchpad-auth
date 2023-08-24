@@ -136,7 +136,12 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
     )
     Mockito.`when`(ssoLoginService.updateSsoRequest(null, ssoRequest.id))
       .thenReturn(RedirectView("${ssoRequest.client.redirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}"))
-    val redirectView = authController.authorizeClient(ssoRequest.id, "approved", ssoRequest.client.redirectUri) as RedirectView
+    val redirectView = authController.authorizeClient(
+      ssoRequest.id,
+      ssoRequest.client.state,
+      "approved",
+      ssoRequest.client.redirectUri,
+    ) as RedirectView
     assertNotNull(redirectView)
     assertEquals(
       redirectView.url,
@@ -158,7 +163,7 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
     Mockito.`when`(ssoLoginService.updateSsoRequest(null, ssoRequest.id))
       .thenReturn("${ssoRequest.client.redirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}")
     val exception = assertThrows(ApiException::class.java) {
-      authController.authorizeClient(ssoRequest.id, "cancelled", ssoRequest.client.redirectUri)
+      authController.authorizeClient(ssoRequest.id, ssoRequest.client.state, "cancelled", ssoRequest.client.redirectUri)
     }
     assertEquals(302, exception.code)
   }

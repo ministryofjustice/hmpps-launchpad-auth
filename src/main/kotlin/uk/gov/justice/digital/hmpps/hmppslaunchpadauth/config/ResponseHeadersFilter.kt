@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 
-@WebFilter(urlPatterns = ["/v1/oauth2/token", "/v1/users/**"])
+@WebFilter
 @Component
 class ResponseHeadersFilter : Filter {
   override fun doFilter(request: ServletRequest?, response: ServletResponse?, chain: FilterChain?) {

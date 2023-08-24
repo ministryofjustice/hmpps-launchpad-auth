@@ -4,12 +4,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.ACCESS_DENIED_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.UNAUTHORIZED_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ClientService
 import java.util.*
-
 
 @Service("basicAuthentication")
 class BasicAuthentication(
@@ -22,7 +22,6 @@ class BasicAuthentication(
     private val logger = LoggerFactory.getLogger(BasicAuthentication::class.java)
   }
 
-
   override fun authenticate(credential: String): AuthenticationInfo {
     if (credential.startsWith(BASIC)) {
       val token = credential.replace(BASIC, "")
@@ -34,36 +33,66 @@ class BasicAuthentication(
       val clientId = chunks[0]
       val clientSecret = chunks[1]
       val client = clientService.getClientById(UUID.fromString(clientId)).orElseThrow {
-        val message = String.format("Client record with id %s do not exist", clientId)
-        throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
+        val message = "Client record with id $clientId do not exist"
+        throw ApiException(
+          message,
+          HttpStatus.UNAUTHORIZED.value(),
+          ApiErrorTypes.ACCESS_DENIED.toString(),
+          ACCESS_DENIED_MSG,
+        )
       }
       if (!client.enabled) {
-        val message = String.format("Client record with id %s is not enabled", clientId)
-        throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
+        val message = "Client record with id $clientId is not enabled"
+        throw ApiException(
+          message,
+          HttpStatus.FORBIDDEN.value(),
+          ApiErrorTypes.ACCESS_DENIED.toString(),
+          ACCESS_DENIED_MSG,
+        )
       }
       if (passwordEncoder.matches(clientSecret, client.secret)) {
         logger.info("Successful basic auth login for client id {}", clientId)
         return AuthenticationInfo(client.id)
       } else {
-        throw ApiException(UNAUTHORIZED_MSG, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
+        throw ApiException(
+          UNAUTHORIZED_MSG,
+          HttpStatus.UNAUTHORIZED.value(),
+          ApiErrorTypes.ACCESS_DENIED.toString(),
+          ACCESS_DENIED_MSG,
+        )
       }
     } else {
       val message = "Invalid basic authorisation header format"
-      throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
+      throw ApiException(
+        message,
+        HttpStatus.FORBIDDEN.value(),
+        ApiErrorTypes.ACCESS_DENIED.toString(),
+        ACCESS_DENIED_MSG,
+      )
     }
   }
 
   private fun validateCredentialFormat(credentialInfo: String) {
     if (!credentialInfo.contains(":")) {
       val message = "Invalid auth header basic format"
-      throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
+      throw ApiException(
+        message,
+        HttpStatus.FORBIDDEN.value(),
+        ApiErrorTypes.ACCESS_DENIED.toString(),
+        ACCESS_DENIED_MSG,
+      )
     }
   }
 
   private fun validateChunksSize(size: Int) {
     if (size != CHUNKS_SIZE) {
       val message = "Invalid auth header basic format"
-      throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), UNAUTHORIZED_MSG)
+      throw ApiException(
+        message,
+        HttpStatus.FORBIDDEN.value(),
+        ApiErrorTypes.ACCESS_DENIED.toString(),
+        ACCESS_DENIED_MSG,
+      )
     }
   }
 }

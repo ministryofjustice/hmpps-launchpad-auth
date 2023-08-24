@@ -5,9 +5,7 @@ import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.UNAUTHORIZED_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import java.time.LocalDateTime
@@ -29,7 +27,7 @@ class TokenGenerationAndValidation {
           .signWith(SignatureAlgorithm.HS256, secret.toByteArray(Charsets.UTF_8))
           .compact()
       } catch (e: Exception) {
-        val message = String.format("Exception during token creation {}", e.message)
+        val message = "Exception during token creation ${e.message}"
         throw ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR.value(), ApiErrorTypes.SERVER_ERROR.toString(), "Exception during token creation")
       }
     }
@@ -61,8 +59,8 @@ class TokenGenerationAndValidation {
     }
 
     private fun invalidTokenFormat(token: String) {
-      val message =  String.format("Invalid bearer token format %s", token)
-      throw ApiException(message, HttpStatus.UNAUTHORIZED.value(), ApiErrorTypes.UNAUTHORIZED.toString(), "Invalid token")
+      val message =  "Invalid bearer token format $token"
+      throw ApiException(message, HttpStatus.FORBIDDEN.value(), ApiErrorTypes.INVALID_TOKEN.toString(), "Invalid token")
     }
   }
 }

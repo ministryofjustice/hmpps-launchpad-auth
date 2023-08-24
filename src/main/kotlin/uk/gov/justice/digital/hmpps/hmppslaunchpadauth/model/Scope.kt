@@ -53,7 +53,7 @@ enum class Scope(val scope: String) {
     }
 
     fun cleanScopes(scopes: String): Set<String> {
-      var scopeList: List<String>
+      val scopeList: List<String>
       if (scopes.contains(" ")) {
         val scopeValues = scopes.replace("\\s+".toRegex(), " ")
         scopeList = scopeValues.split("\\s".toRegex())
@@ -69,7 +69,7 @@ enum class Scope(val scope: String) {
           return scope
         }
       }
-      throw IllegalArgumentException("Invalid scope value")
+      throw IllegalArgumentException("Invalid scope value $value")
     }
   }
 }

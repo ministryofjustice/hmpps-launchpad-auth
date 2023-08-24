@@ -5,13 +5,13 @@ import io.jsonwebtoken.Jws
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.ACCESS_DENIED_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.EXPIRE_TOKEN_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_CODE_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_GRANT_TYPE_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_REDIRECT_URI_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_REQUEST_MSG
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.UNAUTHORIZED_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_TOKEN_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Token
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
@@ -52,12 +52,12 @@ class TokenService(
   ): Token {
     val client = clientService.getClientById(clientId)
       .orElseThrow {
-        val message = String.format("Client with id %s not found", clientId)
+        val message = "Client with id $clientId not found"
         throw ApiException(
           message,
-          HttpStatus.UNAUTHORIZED.value(),
-          ApiErrorTypes.UNAUTHORIZED.toString(),
-          UNAUTHORIZED_MSG,
+          HttpStatus.FORBIDDEN.value(),
+          ApiErrorTypes.ACCESS_DENIED.toString(),
+          ACCESS_DENIED_MSG,
         )
       }
     if (code != null && grantType == AuthorizationGrantType.AUTHORIZATION_CODE.toString() && redirectUri != null) {
@@ -78,7 +78,7 @@ class TokenService(
     validateGrant(grantType, client.authorizedGrantTypes)
     val ssoRequest = ssoRequestService.getSsoRequestByAuthorizationCode(code)
       .orElseThrow {
-        val message = String.format("Sso Request with code %s not found", code)
+        val message = "Sso Request with code $code not found"
         throw ApiException(
           message,
           HttpStatus.BAD_REQUEST.value(),
@@ -87,11 +87,7 @@ class TokenService(
         )
       }
     if (!ssoRequest.client.id.equals(client.id)) {
-      val message = String.format(
-        "Client id %s in token do not match with sso request client id %s",
-        client.id,
-        ssoRequest.client.id,
-      )
+      val message = "Client id ${client.id} in token do not match with sso request client id ${ssoRequest.client.id}"
       throw ApiException(
         message,
         HttpStatus.BAD_REQUEST.value(),
@@ -118,17 +114,16 @@ class TokenService(
     val userApprovedClient =
       userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userId, client.id)
         .orElseThrow {
-          val message =
-            String.format("User approved client  with user id %s and client id %s not found", userId, client.id)
+          val message = "User approved client  with user id $userId and client id ${client.id} not found"
           throw ApiException(
             message,
-            HttpStatus.UNAUTHORIZED.value(),
-            ApiErrorTypes.UNAUTHORIZED.toString(),
-            UNAUTHORIZED_MSG,
+            HttpStatus.FORBIDDEN.value(),
+            ApiErrorTypes.ACCESS_DENIED.toString(),
+            ACCESS_DENIED_MSG,
           )
         }
     validateScopeInRefreshTokenClaims(scopes, userApprovedClient.scopes)
-    return generateToken(userId, client.id, userApprovedClient.scopes, nonce, refreshTokenPayloadOld)
+    return generateToken(userId, client.id, userApprovedClient.scopes, nonce, refreshTokenPayloadOld.body)
   }
 
   private fun generateToken(
@@ -136,7 +131,7 @@ class TokenService(
     clientId: UUID,
     scopes: Set<Scope>,
     nonce: String?,
-    refreshTokenPayloadOld: Jws<Claims>?,
+    refreshTokenPayloadOld: Claims?,
   ): Token {
     val prisonerData = prisonerApiService.getPrisonerData(prisonerId)
     val idTokenPayload = IdTokenPayload()
@@ -150,16 +145,20 @@ class TokenService(
     )
     val accessTokenPayload = AccessTokenPayload()
     val accessTokenPayloadClaims = accessTokenPayload.generatePayload(prisonerData.user, clientId, scopes)
+    val accessTokenId = accessTokenPayloadClaims["jti"] as String
     var refreshTokenPayloadClaims = LinkedHashMap<String, Any>()
     if (refreshTokenPayloadOld != null) {
-      val claims = refreshTokenPayloadOld.body
-      claims.keys.forEach { value ->
+      refreshTokenPayloadOld["ati"] = accessTokenId
+      refreshTokenPayloadOld.keys.forEach { value ->
         val v = value as String
-        refreshTokenPayloadClaims[v] = claims[value] as Any
+        refreshTokenPayloadClaims[v] = refreshTokenPayloadOld[value] as Any
       }
+      refreshTokenPayloadClaims
     } else {
       val refreshTokenPayload = RefreshTokenPayload()
+      val accessTokenId = accessTokenPayloadClaims["jti"] as String
       refreshTokenPayloadClaims = refreshTokenPayload.generatePayload(
+        accessTokenId,
         prisonerData.user,
         clientId,
         scopes,
@@ -177,7 +176,6 @@ class TokenService(
         TokenCommonClaims.buildHeaderClaims(),
         secret,
       )
-    refreshTokenPayloadClaims["ati"] = accessTokenPayloadClaims["jti"] as String
     val refreshToken = TokenGenerationAndValidation
       .generateToken(
         refreshTokenPayloadClaims,
@@ -190,14 +188,14 @@ class TokenService(
   private fun validateGrant(grantType: String, authorizationGrantType: Set<AuthorizationGrantType>) {
     val grant = AuthorizationGrantType.getAuthorizationGrantTypeByStringValue(grantType)
     if (!authorizationGrantType.contains(grant)) {
-      val message = String.format("Invalid grant type %s sent in get token request", grantType)
+      val message = "Invalid grant type: $grantType sent in get token request"
       throw ApiException(message, 400, ApiErrorTypes.INVALID_GRANT.toString(), INVALID_GRANT_TYPE_MSG)
     }
   }
 
   private fun validateRedirectUri(redirectUri: URI, ssoRequest: SsoRequest) {
     if (ssoRequest.client.redirectUri != redirectUri.toString()) {
-      val message = String.format("Redirect uri sent in token request not in list %s", redirectUri)
+      val message = "Redirect uri: $redirectUri sent in token request not in list"
       throw ApiException(
         message,
         HttpStatus.BAD_REQUEST.value(),
@@ -214,7 +212,7 @@ class TokenService(
       throw ApiException(
         "Expired refresh token",
         HttpStatus.BAD_REQUEST.value(),
-        ApiErrorTypes.EXPIRED_REFRESH_TOKEN.toString(),
+        ApiErrorTypes.EXPIRED_TOKEN.toString(),
         EXPIRE_TOKEN_MSG,
       )
     }
@@ -223,7 +221,7 @@ class TokenService(
   private fun getClaim(claimName: String, claims: Claims): Any {
     val claim = claims[claimName]
     if (claim == null) {
-      val message = String.format("Required claim %s not found in refresh token query parameter", claimName)
+      val message = "Required claim $claimName not found in refresh token query parameter"
       throw ApiException(
         message,
         HttpStatus.BAD_REQUEST.value(),
@@ -251,20 +249,16 @@ class TokenService(
           message,
           HttpStatus.BAD_REQUEST.value(),
           ApiErrorTypes.INVALID_REQUEST.toString(),
-          "invalid token",
+          INVALID_TOKEN_MSG,
         )
       }
       if (clientId.toString() != clientIdInRefreshToken) {
-        val message = String.format(
-          "client id %s from auth header do not match with aud %s in refresh token",
-          clientId,
-          clientIdInRefreshToken,
-        )
+        val message = "client id $clientId from auth header do not match with aud $clientIdInRefreshToken in refresh token"
         throw ApiException(
           message,
-          HttpStatus.BAD_REQUEST.value(),
-          ApiErrorTypes.INVALID_REQUEST.toString(),
-          "Invalid request",
+          HttpStatus.FORBIDDEN.value(),
+          ApiErrorTypes.ACCESS_DENIED.toString(),
+          INVALID_REQUEST_MSG,
         )
       }
       return claims
@@ -272,9 +266,9 @@ class TokenService(
       val message = "Refresh token signature is invalid"
       throw ApiException(
         message,
-        HttpStatus.BAD_REQUEST.value(),
+        HttpStatus.FORBIDDEN.value(),
         ApiErrorTypes.INVALID_REQUEST.toString(),
-        "Invalid refresh token",
+        ACCESS_DENIED_MSG,
       )
     }
   }
@@ -294,13 +288,13 @@ class TokenService(
   }
 
   private fun checkIfAccessToken(claims: Claims) {
-    val ati = claims["ati"]
+    val ati = claims["ati"] as String
     if (ati == null) {
       throw ApiException(
         "Access token sent as refresh token in query param",
-        HttpStatus.UNAUTHORIZED.value(),
-        ApiErrorTypes.UNAUTHORIZED.toString(),
-        AuthServiceConstant.INVALID_TOKEN_MSG,
+        HttpStatus.BAD_REQUEST.value(),
+        ApiErrorTypes.INVALID_TOKEN.toString(),
+        INVALID_TOKEN_MSG,
       )
     }
   }
@@ -309,12 +303,12 @@ class TokenService(
     try {
       return UUID.fromString(value)
     } catch (e: IllegalArgumentException) {
-      val message = String.format("Exception during token authentication invalid UUID string in %s", claimName)
+      val message = "Exception during token authentication invalid UUID string in $claimName"
       throw ApiException(
         message,
-        HttpStatus.UNAUTHORIZED.value(),
-        ApiErrorTypes.UNAUTHORIZED.toString(),
-        AuthServiceConstant.INVALID_TOKEN_MSG,
+        HttpStatus.FORBIDDEN.value(),
+        ApiErrorTypes.ACCESS_DENIED.toString(),
+        INVALID_TOKEN_MSG,
       )
     }
   }

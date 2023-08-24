@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.view.RedirectView
 import org.springframework.web.util.UriComponentsBuilder
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.ACCESS_DENIED_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_CLIENT_ID_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.REDIRECTION_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
@@ -80,13 +82,13 @@ class SsoLogInService(
 
   fun updateSsoRequest(token: String?, state: UUID): Any {
     var ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {
-      val message = String.format("State send on callback url do not exist %s", state)
-      ApiException(message, HttpStatus.FORBIDDEN.value(), ApiErrorTypes.ACCESS_DENIED.toString(), "Permission not granted")
+      val message = "State $state send on callback url do not exist"
+      ApiException(message, HttpStatus.FORBIDDEN.value(), ApiErrorTypes.ACCESS_DENIED.toString(), ACCESS_DENIED_MSG)
     }
     val clientId = ssoRequest.client.id
     val client = clientService.getClientById(clientId).orElseThrow {
-      val message = String.format("Client of sso request  do not exist %s", clientId)
-      SsoException(message, REDIRECTION_CODE, ApiErrorTypes.INVALID_CLIENT.toString(), "Client not found", ssoRequest.client.redirectUri)
+      val message = "Client $clientId of sso request do not exist"
+      SsoException(message, REDIRECTION_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), INVALID_CLIENT_ID_MSG, ssoRequest.client.redirectUri, ssoRequest.client.state)
     }
     var approvalRequired = false
     if (token != null) {
@@ -133,7 +135,14 @@ class SsoLogInService(
       ssoRequest.userId = userId
       return ssoRequestService.updateSsoRequest(ssoRequest)
     } catch (e: IllegalArgumentException) {
-      throw SsoException(e.message!!, REDIRECTION_CODE, ApiErrorTypes.SERVER_ERROR.toString(), "Exception in token processing", ssoRequest.client.redirectUri)
+      throw SsoException(
+        e.message!!,
+        REDIRECTION_CODE,
+        ApiErrorTypes.SERVER_ERROR.toString(),
+        "Exception in token processing",
+        ssoRequest.client.redirectUri,
+        ssoRequest.client.state,
+      )
     }
   }
 
@@ -184,6 +193,7 @@ class SsoLogInService(
     modelAndView.addObject("scopes", Scope.getTemplateTextByScopes(ssoRequest.client.scopes).sortedDescending())
     modelAndView.addObject("client", client)
     modelAndView.addObject("redirectUri", ssoRequest.client.redirectUri)
+    modelAndView.addObject("clientState", ssoRequest.client.state)
     return modelAndView
   }
 }

@@ -5,6 +5,6 @@ class SsoException(
   override val code: Int,
   override val error: String,
   override val errorDescription: String,
-  val redirectUri: String
-): ApiException(message, code, error, errorDescription) {
-}
+  val redirectUri: String,
+  val state: String?,
+) : ApiException(message, code, error, errorDescription)
