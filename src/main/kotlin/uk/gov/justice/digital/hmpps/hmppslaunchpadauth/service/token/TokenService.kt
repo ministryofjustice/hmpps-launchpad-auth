@@ -163,19 +163,19 @@ class TokenService(
       )
     }
     val idToken = TokenGenerationAndValidation
-      .generateToken(
+      .generateJwtToken(
         idTokenPayloadClaims,
         TokenCommonClaims.buildHeaderClaims(),
         secret,
       )
     val accessToken = TokenGenerationAndValidation
-      .generateToken(
+      .generateJwtToken(
         accessTokenPayloadClaims,
         TokenCommonClaims.buildHeaderClaims(),
         secret,
       )
     val refreshToken = TokenGenerationAndValidation
-      .generateToken(
+      .generateJwtToken(
         refreshTokenPayloadClaims,
         TokenCommonClaims.buildHeaderClaims(),
         secret,

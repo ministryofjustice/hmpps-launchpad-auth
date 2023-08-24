@@ -72,7 +72,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
       clientId,
       userApprovedScopes,
     )
-    val authHeader = "Bearer " + TokenGenerationAndValidation.generateToken(
+    val authHeader = "Bearer " + TokenGenerationAndValidation.generateJwtToken(
       payload,
       TokenCommonClaims.buildHeaderClaims(),
       secret,
@@ -94,7 +94,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
       clientId,
       userApprovedScopes,
     )
-    val authHeader = "Bearer " + TokenGenerationAndValidation.generateToken(
+    val authHeader = "Bearer " + TokenGenerationAndValidation.generateJwtToken(
       payload,
       TokenCommonClaims.buildHeaderClaims(),
       randomSecret,

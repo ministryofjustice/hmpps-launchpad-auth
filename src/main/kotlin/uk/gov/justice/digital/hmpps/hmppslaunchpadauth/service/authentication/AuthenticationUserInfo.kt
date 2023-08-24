@@ -7,4 +7,4 @@ class AuthenticationUserInfo(
   override val clientId: UUID,
   val userId: String,
   val userApprovedScope: Set<Scope>,
-  ): AuthenticationInfo(clientId)
+) : AuthenticationInfo(clientId)

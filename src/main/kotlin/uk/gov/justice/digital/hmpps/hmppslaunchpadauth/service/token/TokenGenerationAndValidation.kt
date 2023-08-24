@@ -20,7 +20,7 @@ class TokenGenerationAndValidation {
 
   companion object {
     private val mapper = Jackson2ObjectMapperBuilder()
-    fun generateToken(
+    fun generateJwtToken(
       payloadMap: HashMap<String, Any>,
       headerMap: HashMap<String, Any>,
       secret: String,

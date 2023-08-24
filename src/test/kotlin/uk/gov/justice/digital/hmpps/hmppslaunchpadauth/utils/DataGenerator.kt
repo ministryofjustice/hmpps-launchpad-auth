@@ -152,7 +152,7 @@ class DataGenerator {
         client.id,
         userApprovedClient.scopes,
       )
-      return "Bearer " + TokenGenerationAndValidation.generateToken(
+      return "Bearer " + TokenGenerationAndValidation.generateJwtToken(
         payload,
         TokenCommonClaims.buildHeaderClaims(),
         secret,
