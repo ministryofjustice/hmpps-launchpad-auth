@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Booking
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Establishment
@@ -8,13 +9,16 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
-class IdTokenPayload  {
+class IdTokenPayload {
 
   private fun buildClaims(
     booking: Booking,
     establishment: Establishment,
     user: User,
-    clientId: UUID, scopes: Set<Scope>, nonce: String?): LinkedHashMap<String, Any> {
+    clientId: UUID,
+    scopes: Set<Scope>,
+    nonce: String?,
+  ): LinkedHashMap<String, Any> {
     var claims = LinkedHashMap<String, Any>()
     claims["name"] = "${user.givenName} ${user.familyName}"
     claims["given_name"] = user.givenName

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -21,11 +22,14 @@ import java.util.*
 @ActiveProfiles("test")
 class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProcessor) {
 
+  @Value("\${auth.service.secret}")
+  private lateinit var secret: String
+
   @Test
   fun `test get user id when nonce match`() {
     val nonce = UUID.randomUUID()
     val userUniqueId = "G2320VD"
-    var userId = idTokenProcessor.getUserId(DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userUniqueId), nonce.toString())
+    var userId = idTokenProcessor.getUserId(DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userUniqueId, secret), nonce.toString())
     assertEquals(userId, userId)
   }
 
@@ -34,7 +38,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
     val nonce = UUID.randomUUID()
     val exception = assertThrows(ApiException::class.java) {
       idTokenProcessor.getUserId(
-        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, null),
+        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, null, secret),
         nonce.toString(),
       )
     }
@@ -47,7 +51,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
     val nonce = UUID.randomUUID()
     assertThrows(IllegalArgumentException::class.java) {
       idTokenProcessor.getUserId(
-        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "test@moj.com"),
+        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "test@moj.com", secret),
         UUID.randomUUID().toString(),
       )
     }

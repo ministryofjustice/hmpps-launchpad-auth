@@ -1,8 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token
 
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Booking
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Establishment
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.User
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -12,7 +10,7 @@ class AccessTokenPayload {
   private fun buildClaims(
     user: User,
     clientId: UUID,
-    scopes: Set<Scope>
+    scopes: Set<Scope>,
   ): LinkedHashMap<String, Any> {
     var claims = LinkedHashMap<String, Any>()
     claims["jti"] = UUID.randomUUID().toString()
@@ -25,7 +23,7 @@ class AccessTokenPayload {
   fun generatePayload(
     user: User,
     clientId: UUID,
-    scopes: Set<Scope>
+    scopes: Set<Scope>,
   ): LinkedHashMap<String, Any> {
     return buildClaims(user, clientId, scopes)
   }

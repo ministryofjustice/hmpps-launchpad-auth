@@ -86,7 +86,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
 
   @Test
   fun `authenticate token created from other secret`() {
-    val randomSecret = "random_secret_xxx"
+    val randomSecret = "random_secret_xxx_random_secret_xxx"
     val accessTokenPayload = AccessTokenPayload()
     val nonce = "random_nonce"
     val payload = accessTokenPayload.generatePayload(

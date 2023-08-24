@@ -7,7 +7,7 @@ azure:
   launchpad-redirectUri: http://localhost:8080/v1/oauth2/callback
 auth:
   service:
-    secret: random_secret
+    secret: random_secret_random_secret_random_secret
 management.endpoint:
   health.cache.time-to-live: 0
   info.cache.time-to-live: 0

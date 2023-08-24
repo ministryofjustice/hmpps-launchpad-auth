@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.security.Keys
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
@@ -57,7 +58,7 @@ class DataGenerator {
       )
     }
 
-    fun jwtBuilder(issue: Instant, exp: Instant, nonce: UUID, userId: String?): String {
+    fun jwtBuilder(issue: Instant, exp: Instant, nonce: UUID, userId: String?, secret: String): String {
       val issueDate = Date.from(issue)
       val expDate = Date.from(exp)
       return Jwts.builder()
@@ -72,8 +73,8 @@ class DataGenerator {
         .setIssuedAt(issueDate)
         .setExpiration(expDate)
         .signWith(
+          Keys.hmacShaKeyFor(secret.toByteArray(Charsets.UTF_8)),
           SignatureAlgorithm.HS256,
-          "random secret",
         )
         .compact()
     }

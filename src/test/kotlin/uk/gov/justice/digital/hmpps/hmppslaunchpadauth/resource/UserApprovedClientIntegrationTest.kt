@@ -91,7 +91,12 @@ class UserApprovedClientIntegrationTest(
       dateTimeInUTC,
     )
     userApprovedClientRepository.save(userApprovedClientOne)
-    authorizationHeader = DataGenerator.generateAccessToken(clientDBOne, userApprovedClientOne, "test nonce", "random_secret")
+    authorizationHeader = DataGenerator.generateAccessToken(
+      clientDBOne,
+      userApprovedClientOne,
+      "test nonce",
+      "random_secret_random_secret_random_secret",
+    )
   }
 
   @AfterEach
@@ -102,7 +107,7 @@ class UserApprovedClientIntegrationTest(
 
   @Test
   fun `get user approved clients by user id`() {
-    val headers = LinkedMultiValueMap<String, String>();
+    val headers = LinkedMultiValueMap<String, String>()
     headers.add("Authorization", authorizationHeader)
     val url = URI("$baseUrl:$port/v1/users/$userID/clients?page=1&size=20")
     val response = restTemplate.exchange(
@@ -124,7 +129,7 @@ class UserApprovedClientIntegrationTest(
 
   @Test
   fun `revoke client access`() {
-    val headers = LinkedMultiValueMap<String, String>();
+    val headers = LinkedMultiValueMap<String, String>()
     headers.add("Authorization", authorizationHeader)
     val url = URI("$baseUrl:$port/v1/users/$userID/clients/$clientId")
     val response = restTemplate.exchange(

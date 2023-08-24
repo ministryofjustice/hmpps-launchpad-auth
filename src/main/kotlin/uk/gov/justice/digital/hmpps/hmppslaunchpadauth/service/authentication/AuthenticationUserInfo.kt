@@ -5,7 +5,6 @@ import java.util.*
 
 class AuthenticationUserInfo(
   override val clientId: UUID,
-  // override val clientScope: Set<Scope>,
   val userId: String,
   val userApprovedScope: Set<Scope>,
   ): AuthenticationInfo(clientId)

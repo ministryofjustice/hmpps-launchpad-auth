@@ -24,7 +24,6 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoRequestService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.UserApprovedClientService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication.AuthenticationInfo
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.PrisonerApiService
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.validator.UserIdValidator
 import java.net.URI
 import java.util.*
 
@@ -36,7 +35,6 @@ class TokenService(
   private var clientService: ClientService,
   private var ssoRequestService: SsoRequestService,
   private var userApprovedClientService: UserApprovedClientService,
-  private var userIdValidator: UserIdValidator,
 ) {
   @Value("\${auth.service.secret}")
   private lateinit var secret: String
@@ -241,19 +239,11 @@ class TokenService(
       validateAndGetUUIDInClaim(jti, "jti")
       getClaim("iat", claims.body) as Int
       validateExpireTime(exp)
-      val userIdInRefreshToken = getClaim("sub", claims.body) as String
+      getClaim("sub", claims.body) as String
       val clientIdInRefreshToken = getClaim("aud", claims.body) as String
-      if (!userIdValidator.isValid(userIdInRefreshToken)) {
-        val message = "Sub in refresh token do not match valid regex"
-        throw ApiException(
-          message,
-          HttpStatus.BAD_REQUEST.value(),
-          ApiErrorTypes.INVALID_REQUEST.toString(),
-          INVALID_TOKEN_MSG,
-        )
-      }
       if (clientId.toString() != clientIdInRefreshToken) {
-        val message = "client id $clientId from auth header do not match with aud $clientIdInRefreshToken in refresh token"
+        val message =
+          "client id $clientId from auth header do not match with aud $clientIdInRefreshToken in refresh token"
         throw ApiException(
           message,
           HttpStatus.FORBIDDEN.value(),
@@ -288,7 +278,7 @@ class TokenService(
   }
 
   private fun checkIfAccessToken(claims: Claims) {
-    val ati = claims["ati"] as String
+    val ati = claims["ati"]
     if (ati == null) {
       throw ApiException(
         "Access token sent as refresh token in query param",
