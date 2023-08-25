@@ -146,6 +146,7 @@ class TokenService(
     val accessTokenId = accessTokenPayloadClaims["jti"] as String
     var refreshTokenPayloadClaims = LinkedHashMap<String, Any>()
     if (refreshTokenPayloadOld != null) {
+      accessTokenPayloadClaims["scopes"] = refreshTokenPayloadOld["scopes"] as Any
       refreshTokenPayloadOld["ati"] = accessTokenId
       refreshTokenPayloadOld.keys.forEach { value ->
         val v = value as String
