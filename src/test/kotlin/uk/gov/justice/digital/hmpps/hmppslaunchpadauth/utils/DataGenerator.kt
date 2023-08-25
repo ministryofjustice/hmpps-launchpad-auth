@@ -2,12 +2,17 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.security.Keys
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.User
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.AccessTokenPayload
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenCommonClaims
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -15,7 +20,11 @@ import java.util.*
 
 const val REDIRECT_URI = "https://launchpad.com"
 const val LOGO_URI = "$REDIRECT_URI/logo"
+const val USER_ID = "G2320VD"
+
 class DataGenerator {
+  val CLIENT_ID = UUID.randomUUID()
+
   companion object {
     fun buildClient(enabled: Boolean, autoApprove: Boolean): Client {
       return Client(
@@ -49,35 +58,104 @@ class DataGenerator {
       )
     }
 
-    fun jwtBuilder(issue: Instant, exp: Instant, nonce: UUID, userId: String?): String {
+    fun jwtBuilder(issue: Instant, exp: Instant, nonce: UUID, userId: String?, secret: String): String {
       val issueDate = Date.from(issue)
       val expDate = Date.from(exp)
       return Jwts.builder()
         .setIssuer("RandomIssuer")
         .setSubject("login")
         .setAudience("test audience")
-        //.claim("preferred_username", "testuser@test.com")
-        .claim("name", "Varun Kumar")
+        // .claim("preferred_username", "testuser@test.com")
+        .claim("name", "Test User")
         .claim("scope", "openid")
         .claim("nonce", nonce)
         .claim("email", userId)
         .setIssuedAt(issueDate)
         .setExpiration(expDate)
         .signWith(
+          Keys.hmacShaKeyFor(secret.toByteArray(Charsets.UTF_8)),
           SignatureAlgorithm.HS256,
-          "random secret",
         )
         .compact()
     }
 
-    fun buildUserApprovedClient(userId: String, clientId: UUID, scopes: Set<Scope>, createdDate: LocalDateTime, lastModifiedDate: LocalDateTime): UserApprovedClient {
+    fun buildUserApprovedClient(
+      userId: String,
+      clientId: UUID,
+      scopes: Set<Scope>,
+      createdDate: LocalDateTime,
+      lastModifiedDate: LocalDateTime,
+    ): UserApprovedClient {
       return UserApprovedClient(
         UUID.randomUUID(),
         userId,
         clientId,
         scopes,
         createdDate,
-        lastModifiedDate
+        lastModifiedDate,
+      )
+    }
+
+    /*fun createValidAccessToken() {
+      val password = UUID.randomUUID().toString()
+      val scopes = setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ)
+      val grants = setOf(AuthorizationGrantType.AUTHORIZATION_CODE)
+      val redirectUri = REDIRECT_URI
+      val logoUri = LOGO_URI
+      val clientId = UUID.randomUUID()
+      val randomSecret = UUID.randomUUID().toString()
+      val client = Client(
+        clientId,
+        BCryptPasswordEncoder().encode(password),
+        scopes,
+        grants,
+        setOf(redirectUri),
+        true,
+        true,
+        "Test App",
+        logoUri,
+        "Test Description",
+      )
+      val userApprovedScopes = setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ)
+      val userApprovedClient = UserApprovedClient(
+        UUID.randomUUID(),
+        USER_ID,
+        clientId,
+        userApprovedScopes,
+        LocalDateTime.now(ZoneOffset.UTC),
+        LocalDateTime.now(ZoneOffset.UTC),
+      )
+      val accessTokenPayload = AccessTokenPayload()
+      // val nonce = "random_nonce"
+      val payload = accessTokenPayload.generatePayload(
+        User(USER_ID, "John",  "Smith"),
+        clientId,
+        userApprovedScopes,
+      )
+      val authHeader = "Bearer " + TokenGenerationAndValidation.generateToken(
+        payload,
+        TokenCommonClaims.buildHeaderClaims(),
+        randomSecret,
+      )
+    }*/
+
+    fun generateAccessToken(
+      client: Client,
+      userApprovedClient: UserApprovedClient,
+      nonce: String?,
+      secret: String,
+    ): String {
+      val accessTokenPayload = AccessTokenPayload()
+      val nonce = "random_nonce"
+      val payload = accessTokenPayload.generatePayload(
+        User(USER_ID, "John", "Smith"),
+        client.id,
+        userApprovedClient.scopes,
+      )
+      return "Bearer " + TokenGenerationAndValidation.generateJwtToken(
+        payload,
+        TokenCommonClaims.buildHeaderClaims(),
+        secret,
       )
     }
   }

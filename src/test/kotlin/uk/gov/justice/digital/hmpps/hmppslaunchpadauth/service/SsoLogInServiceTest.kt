@@ -10,9 +10,11 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.servlet.view.RedirectView
@@ -47,6 +49,9 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
 
   @MockBean
   private lateinit var userApprovedClientService: UserApprovedClientService
+
+  @Value("\${auth.service.secret}")
+  private lateinit var secret: String
 
   private lateinit var ssoRequest: SsoRequest
   private lateinit var client: Client
@@ -120,7 +125,7 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
   @Test
   fun `test update sso request with user id when auto approved is true`() {
     val nonce = UUID.randomUUID()
-    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userID)
+    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userID, secret)
     ssoRequest.userId = null
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
@@ -136,7 +141,7 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
   @Test
   fun `test update sso request with user id when auto approved is false`() {
     val nonce = UUID.randomUUID()
-    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userID)
+    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userID, secret)
     ssoRequest.userId = null
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
@@ -170,7 +175,6 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
         ssoRequest.id,
       )
     }
-    assertEquals(ACCESS_DENIED, exception.message)
-    assertEquals(ACCESS_DENIED_CODE, exception.code)
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
   }
 }

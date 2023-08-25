@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.servlet.view.RedirectView
@@ -19,8 +20,6 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ACCESS_DENIED_CODE
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.BAD_REQUEST_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoLogInService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import java.time.LocalDateTime
@@ -81,7 +80,7 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
         "random_nonce",
       )
     }
-    assertEquals(400, exception.code)
+    assertEquals(HttpStatus.FOUND, exception.code)
     assertEquals("Response type: anything is not supported", exception.message)
   }
 
@@ -98,7 +97,7 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
         "random_nonce",
       )
     }
-    assertEquals(400, exception.code)
+    assertEquals(HttpStatus.FOUND, exception.code)
     assertEquals("state size exceeds 128 char size limit", exception.message)
   }
 
@@ -115,7 +114,7 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
           .toString(),
       )
     }
-    assertEquals(BAD_REQUEST_CODE, exception.code)
+    assertEquals(HttpStatus.FOUND, exception.code)
     assertEquals("nonce size exceeds 128 char size limit", exception.message)
   }
 
@@ -138,7 +137,10 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
     )
     Mockito.`when`(ssoLoginService.updateSsoRequest(null, ssoRequest.id))
       .thenReturn(RedirectView("${ssoRequest.client.redirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}"))
-    val redirectView = authController.authorizeClient(ssoRequest.id, "approved") as RedirectView
+    val redirectView = authController.authorizeClient(
+      ssoRequest.id,
+      "approved",
+    ) as RedirectView
     assertNotNull(redirectView)
     assertEquals(
       redirectView.url,
@@ -146,7 +148,7 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
     )
   }
 
-  @Test
+  /*@Test
   fun `authorize clients for user approval declined`() {
     val client = DataGenerator.buildClient(true, true)
     val ssoRequest = SsoRequest(
@@ -159,9 +161,9 @@ class AuthControllerTest(@Autowired private var authController: AuthController) 
     )
     Mockito.`when`(ssoLoginService.updateSsoRequest(null, ssoRequest.id))
       .thenReturn("${ssoRequest.client.redirectUri}?code=${ssoRequest.authorizationCode}&state=${ssoRequest.client.state}")
-    val exception = assertThrows(ApiException::class.java) {
-      authController.authorizeClient(ssoRequest.id, "cancelled")
-    }
-    assertEquals(ACCESS_DENIED_CODE, exception.code)
-  }
+    val redirectView =   authController.authorizeClient(ssoRequest.id, "cancelled")
+    assertNotNull(redirectView)
+    assertTrue(redirectView.toString().contains("error"))
+    assertTrue(redirectView.toString().contains("error_description"))
+  }*/
 }

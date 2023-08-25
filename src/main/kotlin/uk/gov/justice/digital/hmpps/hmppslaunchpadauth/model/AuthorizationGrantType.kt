@@ -1,7 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model
 
 enum class AuthorizationGrantType(private val grantType: String) {
-  AUTHORIZATION_CODE("code"),
+  AUTHORIZATION_CODE("authorization_code"),
   REFRESH_TOKEN("refresh_token"), ;
 
   override fun toString(): String {
@@ -9,13 +9,14 @@ enum class AuthorizationGrantType(private val grantType: String) {
   }
 
   companion object {
-    fun isStringMatchEnumValue(value: String, grants: Set<AuthorizationGrantType>): Boolean {
-      grants.forEach { grant ->
-        if (value == grant.toString()) {
-          return true
+
+    fun getAuthorizationGrantTypeByStringValue(value: String): AuthorizationGrantType {
+      AuthorizationGrantType.values().forEach { grantType ->
+        if (value == grantType.toString()) {
+          return grantType
         }
       }
-      return false
+      throw IllegalArgumentException(String.format("Invalid grant value %s", value))
     }
   }
 }

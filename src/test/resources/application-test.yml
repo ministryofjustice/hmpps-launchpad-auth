@@ -5,7 +5,9 @@ azure:
   issuer-url: https://login.microsoftonline.com/103ab093-fd63-4ca9-a293-4aee1490a490/v2.0
   client-id: test audience
   launchpad-redirectUri: http://localhost:8080/v1/oauth2/callback
-
+auth:
+  service:
+    secret: random_secret_random_secret_random_secret
 management.endpoint:
   health.cache.time-to-live: 0
   info.cache.time-to-live: 0

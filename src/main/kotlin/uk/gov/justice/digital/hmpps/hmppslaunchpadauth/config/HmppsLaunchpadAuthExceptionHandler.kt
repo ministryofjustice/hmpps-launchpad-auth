@@ -2,39 +2,93 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.config
 
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.ResponseEntity
+import org.springframework.web.HttpMediaTypeNotSupportedException
+import org.springframework.web.bind.MissingRequestHeaderException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
+import org.springframework.web.servlet.view.RedirectView
+import org.springframework.web.util.UriComponentsBuilder
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.ApiError
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
+import java.util.*
 
 @RestControllerAdvice
 class HmppsLaunchpadAuthExceptionHandler {
 
   @ExceptionHandler(ApiException::class)
-  fun handleApiException(e: ApiException): ResponseEntity<ErrorResponse> {
-    log.info("Validation exception: {}", e.message)
+  fun handleApiException(e: ApiException): ResponseEntity<ApiError> {
+    log.error("Api Exception: {}", e.message)
     return ResponseEntity
       .status(e.code)
       .body(
-        ErrorResponse(
-          errorCode = e.code,
-          status = HttpStatus.valueOf(e.code),
-          userMessage = e.message,
+        ApiError(
+          e.error,
+          e.errorDescription,
+        ),
+      )
+  }
+
+  @ExceptionHandler(SsoException::class)
+  fun handleSingleSignOnException(e: SsoException): RedirectView {
+    log.error("Single sign on exception: {}", e.message)
+    val url = UriComponentsBuilder.fromHttpUrl(e.redirectUri)
+      .queryParam("error", e.error)
+      .queryParam("error_description", e.errorDescription)
+      .queryParamIfPresent("state", Optional.ofNullable(e.state))
+      .build().toUriString()
+    return RedirectView(url)
+  }
+
+  @ExceptionHandler(MissingRequestHeaderException::class)
+  fun handleApiMissingRequestHeader(e: MissingRequestHeaderException): ResponseEntity<ApiError> {
+    log.error("Exception due to missing required header in api request: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.BAD_REQUEST.value())
+      .body(
+        ApiError(
+          error = ApiErrorTypes.INVALID_REQUEST.toString(),
+          errorDescription = "${e.message}",
+        ),
+      )
+  }
+
+  @ExceptionHandler(HttpMediaTypeNotSupportedException::class)
+  fun handleApiMediaTypeNotSupported(e: HttpMediaTypeNotSupportedException): ResponseEntity<ApiError> {
+    log.error("Exception due to invalid or missing media type header in api request: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.BAD_REQUEST.value())
+      .body(
+        ApiError(
+          error = ApiErrorTypes.INVALID_REQUEST.toString(),
+          errorDescription = "${e.message}",
         ),
       )
   }
 
   @ExceptionHandler(java.lang.Exception::class)
-  fun handleException(e: java.lang.Exception): ResponseEntity<ErrorResponse?>? {
-    log.error("Unexpected exception", e)
+  fun handleException(e: java.lang.Exception): ResponseEntity<ApiError?>? {
+    if (e is MethodArgumentTypeMismatchException) {
+      log.error("MethodArgumentTypeMismatchException due to invalid request {}", e.message)
+      return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST.value())
+        .body(
+          ApiError(
+            error = ApiErrorTypes.INVALID_REQUEST.toString(),
+            errorDescription = "Invalid value passed in  ${e.name}, ${e.rootCause?.message}",
+          ),
+        )
+    }
+    log.error("Unexpected exception {}", e.message)
     return ResponseEntity
-      .status(INTERNAL_SERVER_ERROR)
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
       .body(
-        ErrorResponse(
-          status = INTERNAL_SERVER_ERROR,
-          userMessage = "Unexpected error: ${e.message}",
-          developerMessage = e.message,
+        ApiError(
+          error = ApiErrorTypes.SERVER_ERROR.toString(),
+          errorDescription = "Internal Server Error",
         ),
       )
   }
@@ -42,21 +96,4 @@ class HmppsLaunchpadAuthExceptionHandler {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
-}
-
-data class ErrorResponse(
-  val status: Int,
-  val errorCode: Int? = null,
-  val userMessage: String? = null,
-  val developerMessage: String? = null,
-  val moreInfo: String? = null,
-) {
-  constructor(
-    status: HttpStatus,
-    errorCode: Int? = null,
-    userMessage: String? = null,
-    developerMessage: String? = null,
-    moreInfo: String? = null,
-  ) :
-    this(status.value(), errorCode, userMessage, developerMessage, moreInfo)
 }

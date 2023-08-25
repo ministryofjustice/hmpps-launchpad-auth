@@ -1,36 +1,38 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.servlet.view.RedirectView
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ACCESS_DENIED
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ACCESS_DENIED_CODE
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.BAD_REQUEST_CODE
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_REQUEST_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoLogInService
 import java.util.*
-
-const val MAX_STATE_OR_NONCE_SIZE = 128
-const val SSO_SUPPORTED_RESPONSE_TYPE = "code"
 
 @RestController
 @RequestMapping("/v1/oauth2")
 class AuthController(private var ssoLoginService: SsoLogInService) {
+  companion object {
+    const val MAX_STATE_OR_NONCE_SIZE = 128
+    const val SSO_SUPPORTED_RESPONSE_TYPE = "code"
+  }
+
   @GetMapping("/authorize")
   fun authorize(
-    @RequestParam("client_id", required = true) clientId: UUID,
-    @RequestParam("response_type", required = true) responseType: String,
-    @RequestParam("scope", required = true) scope: String,
-    @RequestParam("redirect_uri", required = true) redirectUri: String,
-    @RequestParam("state", required = false) state: String?,
-    @RequestParam("nonce", required = false) nonce: String?,
+    @RequestParam("client_id") clientId: UUID,
+    @RequestParam("response_type") responseType: String,
+    @RequestParam scope: String,
+    @RequestParam("redirect_uri") redirectUri: String,
+    @RequestParam(required = false) state: String?,
+    @RequestParam(required = false) nonce: String?,
   ): RedirectView {
-    validateResponseType(responseType)
-    validateSize(state, "state")
-    validateSize(nonce, "nonce")
+    validateResponseType(responseType, redirectUri, state)
+    validateSize(state, "state", redirectUri, state)
+    validateSize(nonce, "nonce", redirectUri, state)
     val url = ssoLoginService.initiateSsoLogin(clientId, responseType, scope, redirectUri, state, nonce)
     return RedirectView(url)
   }
@@ -38,37 +40,52 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
   @PostMapping("/callback", consumes = ["application/x-www-form-urlencoded"])
   fun getAuthCode(
     @RequestParam("id_token", required = false) token: String?,
-    @RequestParam("state", required = true) state: UUID,
+    @RequestParam state: UUID,
   ): Any {
     return ssoLoginService.updateSsoRequest(token, state)
   }
 
   @PostMapping("/authorize-client", consumes = ["application/x-www-form-urlencoded"])
   fun authorizeClient(
-    @RequestParam("state", required = true) state: UUID,
-    @RequestParam("userApproval", required = true) userApproval: String?,
+    @RequestParam state: UUID,
+    @RequestParam("user_approval") userApproval: String,
   ): Any {
     if (userApproval == "approved") {
       return ssoLoginService.updateSsoRequest(null, state)
     } else {
       // user did not approved the client so delete sso request
-      ssoLoginService.cancelAccess(state)
-      throw ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+      return ssoLoginService.cancelAccess(state)
     }
   }
 
-  private fun validateSize(value: String?, paramName: String) {
+  private fun validateSize(value: String?, paramName: String, redirectUri: String, clientState: String?) {
     // validate query param length, optional param can be null or if not null should not exceed 128 max size
     if (value != null) {
       if (value.length > MAX_STATE_OR_NONCE_SIZE) {
-        throw ApiException(String.format("%s size exceeds 128 char size limit", paramName), BAD_REQUEST_CODE)
+        val message = "$paramName size exceeds 128 char size limit"
+        throw SsoException(
+          message,
+          HttpStatus.FOUND,
+          ApiErrorTypes.INVALID_REQUEST.toString(),
+          INVALID_REQUEST_MSG,
+          redirectUri,
+          clientState,
+        )
       }
     }
   }
 
-  private fun validateResponseType(responseType: String) {
+  private fun validateResponseType(responseType: String, redirectUri: String, clientState: String?) {
     if (responseType != SSO_SUPPORTED_RESPONSE_TYPE) {
-      throw ApiException(String.format("Response type: %s is not supported", responseType), BAD_REQUEST_CODE)
+      val message = "Response type: $responseType is not supported"
+      throw SsoException(
+        message,
+        HttpStatus.FOUND,
+        ApiErrorTypes.INVALID_REQUEST.toString(),
+        INVALID_REQUEST_MSG,
+        redirectUri,
+        clientState,
+      )
     }
   }
 }

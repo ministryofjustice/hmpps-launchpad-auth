@@ -2,11 +2,17 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.view.RedirectView
 import org.springframework.web.util.UriComponentsBuilder
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.ACCESS_DENIED_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_CLIENT_ID_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_SCOPE_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
@@ -34,7 +40,9 @@ class SsoLogInService(
   @Value("\${azure.issuer-url}")
   private lateinit var issuerUrl: String
 
-  private val logger = LoggerFactory.getLogger(SsoLogInService::class.java)
+  companion object {
+    private val logger = LoggerFactory.getLogger(SsoLogInService::class.java)
+  }
 
   fun initiateSsoLogin(
     clientId: UUID,
@@ -44,9 +52,16 @@ class SsoLogInService(
     state: String?,
     nonce: String?,
   ): String {
+    logger.info(
+      "Single sign on request received for client: {}, with response_type: {}, scopes: {}, redirect_uri: {}",
+      clientId,
+      responseType,
+      scopes,
+      redirectUri,
+    )
     clientService.validateParams(clientId, responseType, scopes, redirectUri, state, nonce)
     val scopeSet = Scope.cleanScopes(scopes)
-    val scopesEnums = Scope.getScopesByValues(scopeSet)
+    val scopesEnums = getScopeEnumsFromValues(scopeSet)
     val ssoRequest = ssoRequestService.generateSsoRequest(
       scopesEnums,
       state,
@@ -67,19 +82,27 @@ class SsoLogInService(
 
   fun updateSsoRequest(token: String?, state: UUID): Any {
     var ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {
-      logger.warn("State send on callback url do not exist {}", state)
-      ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+      val message = "State $state send on callback url do not exist"
+      ApiException(message, HttpStatus.FORBIDDEN, ApiErrorTypes.ACCESS_DENIED.toString(), ACCESS_DENIED_MSG)
     }
     val clientId = ssoRequest.client.id
     val client = clientService.getClientById(clientId).orElseThrow {
-      logger.warn("Client of sso request  do not exist {}", clientId)
-      ApiException(ACCESS_DENIED, ACCESS_DENIED_CODE)
+      val message = "Client $clientId of sso request do not exist"
+      SsoException(
+        message,
+        HttpStatus.FOUND,
+        ApiErrorTypes.INVALID_REQUEST.toString(),
+        INVALID_CLIENT_ID_MSG,
+        ssoRequest.client.redirectUri,
+        ssoRequest.client.state,
+      )
     }
     var approvalRequired = false
     if (token != null) {
       ssoRequest = updateSsoRequestWithUserId(token, ssoRequest)
       if (client.autoApprove) {
         createOrUpdateUserApprovedClient(ssoRequest, true)
+        logger.info("Successful sso login for client {} and user id {}", ssoRequest.client.id, ssoRequest.userId)
         return RedirectView(buildClientRedirectUrl(ssoRequest))
       } else {
         // Auto Approve = false and user approval is required
@@ -96,13 +119,21 @@ class SsoLogInService(
     if (approvalRequired) {
       return buildModelAndView(state, ssoRequest, client)
     } else {
+      logger.info("Successful sso login for client {} and user id {}", ssoRequest.client.id, ssoRequest.userId)
       return RedirectView(buildClientRedirectUrl(ssoRequest))
     }
   }
 
-  fun cancelAccess(state: UUID) {
-    // user cancel approval in sso login user approval dialog
+  fun cancelAccess(state: UUID): RedirectView {
+    val ssoRequest = ssoRequestService.getSsoRequestById(state)
+      .orElseThrow {
+        val message = "Sso request not found for state $state send when user not allowed the access in approval page"
+        ApiException(message, HttpStatus.FORBIDDEN, ApiErrorTypes.ACCESS_DENIED.toString(), ACCESS_DENIED_MSG)
+      }
     ssoRequestService.deleteSsoRequestById(state)
+    logger.info("User {} did not approve the access for client {}", ssoRequest.userId, ssoRequest.client.id)
+    val url = buildClientRedirectUrlAccessForNotApproved(ssoRequest)
+    return RedirectView(url)
   }
 
   private fun buildClientRedirectUrl(ssoRequest: SsoRequest): String {
@@ -112,10 +143,29 @@ class SsoLogInService(
       .build().toUriString()
   }
 
+  private fun buildClientRedirectUrlAccessForNotApproved(ssoRequest: SsoRequest): String {
+    return UriComponentsBuilder.fromHttpUrl(ssoRequest.client.redirectUri)
+      .queryParam("error", ApiErrorTypes.ACCESS_DENIED.toString())
+      .queryParam("error_description", ACCESS_DENIED_MSG)
+      .queryParamIfPresent("state", Optional.ofNullable(ssoRequest.client.state))
+      .build().toUriString()
+  }
+
   private fun updateSsoRequestWithUserId(token: String, ssoRequest: SsoRequest): SsoRequest {
-    val userId = tokenProcessor.getUserId(token, ssoRequest.nonce.toString())
-    ssoRequest.userId = userId
-    return ssoRequestService.updateSsoRequest(ssoRequest)
+    try {
+      val userId = tokenProcessor.getUserId(token, ssoRequest.nonce.toString())
+      ssoRequest.userId = userId
+      return ssoRequestService.updateSsoRequest(ssoRequest)
+    } catch (e: IllegalArgumentException) {
+      throw SsoException(
+        e.message!!,
+        HttpStatus.FOUND,
+        ApiErrorTypes.SERVER_ERROR.toString(),
+        "Exception in token processing",
+        ssoRequest.client.redirectUri,
+        ssoRequest.client.state,
+      )
+    }
   }
 
   private fun createOrUpdateUserApprovedClient(ssoRequest: SsoRequest, canSaveIfNotExist: Boolean): Boolean {
@@ -128,7 +178,9 @@ class SsoLogInService(
         )
       if (userApprovedClientIfExist.isPresent) {
         val userApprovedClient = userApprovedClientIfExist.get()
-        if (!((userApprovedClient.scopes.containsAll(ssoRequest.client.scopes) && ssoRequest.client.scopes.containsAll(userApprovedClient.scopes)))
+        if (!((userApprovedClient.scopes.containsAll(ssoRequest.client.scopes) && ssoRequest.client.scopes.containsAll(
+            userApprovedClient.scopes,
+          )))
         ) {
           // if record exist approval require only when scope varies
           approvalRequired = true
@@ -165,5 +217,14 @@ class SsoLogInService(
     modelAndView.addObject("scopes", Scope.getTemplateTextByScopes(ssoRequest.client.scopes).sortedDescending())
     modelAndView.addObject("client", client)
     return modelAndView
+  }
+
+  private fun getScopeEnumsFromValues(scopes: Set<String>): Set<Scope> {
+    try {
+      return Scope.getScopesByValues(scopes)
+    } catch (e: IllegalArgumentException) {
+      val message = "Invalid scope ${e.message}"
+      throw ApiException(message, HttpStatus.BAD_REQUEST, ApiErrorTypes.INVALID_SCOPE.toString(), INVALID_SCOPE_MSG)
+    }
   }
 }

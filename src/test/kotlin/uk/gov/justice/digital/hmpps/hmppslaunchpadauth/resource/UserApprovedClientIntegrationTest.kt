@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.RequestEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.RestTemplate
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.config.TestConfig
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
@@ -25,6 +26,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.ClientRepository
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedClientRepository
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
 import java.net.URI
@@ -55,6 +57,7 @@ class UserApprovedClientIntegrationTest(
   private lateinit var clientDBOne: Client
   private lateinit var userApprovedClientOne: UserApprovedClient
   private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+  private lateinit var authorizationHeader: String
 
   @BeforeEach
   fun beforeEach() {
@@ -73,7 +76,7 @@ class UserApprovedClientIntegrationTest(
       setOf(AuthorizationGrantType.AUTHORIZATION_CODE, AuthorizationGrantType.REFRESH_TOKEN),
       setOf(REDIRECT_URI),
       true,
-      true,
+      false,
       "Test App",
       LOGO_URI,
       "This is test App",
@@ -83,11 +86,17 @@ class UserApprovedClientIntegrationTest(
       id,
       userID,
       clientId,
-      setOf(Scope.USER_CLIENTS_READ),
+      setOf(Scope.USER_CLIENTS_READ, Scope.USER_CLIENTS_DELETE),
       dateTimeInUTC,
       dateTimeInUTC,
     )
     userApprovedClientRepository.save(userApprovedClientOne)
+    authorizationHeader = DataGenerator.generateAccessToken(
+      clientDBOne,
+      userApprovedClientOne,
+      "test nonce",
+      "random_secret_random_secret_random_secret",
+    )
   }
 
   @AfterEach
@@ -98,9 +107,11 @@ class UserApprovedClientIntegrationTest(
 
   @Test
   fun `get user approved clients by user id`() {
+    val headers = LinkedMultiValueMap<String, String>()
+    headers.add("Authorization", authorizationHeader)
     val url = URI("$baseUrl:$port/v1/users/$userID/clients?page=1&size=20")
     val response = restTemplate.exchange(
-      RequestEntity<Any>(HttpMethod.GET, url),
+      RequestEntity<Any>(headers, HttpMethod.GET, url),
       object : ParameterizedTypeReference<PagedResult<UserApprovedClientDto>>() {},
     )
     val pagedResult = response.body as PagedResult<UserApprovedClientDto>
@@ -118,9 +129,11 @@ class UserApprovedClientIntegrationTest(
 
   @Test
   fun `revoke client access`() {
+    val headers = LinkedMultiValueMap<String, String>()
+    headers.add("Authorization", authorizationHeader)
     val url = URI("$baseUrl:$port/v1/users/$userID/clients/$clientId")
     val response = restTemplate.exchange(
-      RequestEntity<Any>(HttpMethod.DELETE, url),
+      RequestEntity<Any>(headers, HttpMethod.DELETE, url),
       object : ParameterizedTypeReference<ResponseEntity<Void>>() {},
     )
     assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
