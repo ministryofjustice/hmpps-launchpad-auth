@@ -9,7 +9,7 @@ class TokenCommonClaims {
     fun buildHeaderClaims(): LinkedHashMap<String, Any> {
       val headerClaims = LinkedHashMap<String, Any>()
       headerClaims["alg"] = "HS256"
-      headerClaims["type"] = "JWT"
+      headerClaims["typ"] = "JWT"
       return headerClaims
     }
 
