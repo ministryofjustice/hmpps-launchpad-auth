@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
@@ -43,7 +44,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
       )
     }
     assertEquals("Claim: email not found", exception.message)
-    assertEquals(500, exception.code)
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.code)
   }
 
   @Test

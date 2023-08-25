@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.ACCESS_DENIED_MSG
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.UNAUTHORIZED_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ClientService
@@ -36,7 +35,7 @@ class BasicAuthentication(
         val message = "Client record with id $clientId do not exist"
         throw ApiException(
           message,
-          HttpStatus.UNAUTHORIZED.value(),
+          HttpStatus.FORBIDDEN,
           ApiErrorTypes.ACCESS_DENIED.toString(),
           ACCESS_DENIED_MSG,
         )
@@ -45,7 +44,7 @@ class BasicAuthentication(
         val message = "Client record with id $clientId is not enabled"
         throw ApiException(
           message,
-          HttpStatus.FORBIDDEN.value(),
+          HttpStatus.FORBIDDEN,
           ApiErrorTypes.ACCESS_DENIED.toString(),
           ACCESS_DENIED_MSG,
         )
@@ -55,8 +54,8 @@ class BasicAuthentication(
         return AuthenticationInfo(client.id)
       } else {
         throw ApiException(
-          UNAUTHORIZED_MSG,
-          HttpStatus.UNAUTHORIZED.value(),
+          ACCESS_DENIED_MSG,
+          HttpStatus.FORBIDDEN,
           ApiErrorTypes.ACCESS_DENIED.toString(),
           ACCESS_DENIED_MSG,
         )
@@ -65,7 +64,7 @@ class BasicAuthentication(
       val message = "Invalid basic authorisation header format"
       throw ApiException(
         message,
-        HttpStatus.FORBIDDEN.value(),
+        HttpStatus.FORBIDDEN,
         ApiErrorTypes.ACCESS_DENIED.toString(),
         ACCESS_DENIED_MSG,
       )
@@ -77,7 +76,7 @@ class BasicAuthentication(
       val message = "Invalid auth header basic format"
       throw ApiException(
         message,
-        HttpStatus.FORBIDDEN.value(),
+        HttpStatus.FORBIDDEN,
         ApiErrorTypes.ACCESS_DENIED.toString(),
         ACCESS_DENIED_MSG,
       )
@@ -89,7 +88,7 @@ class BasicAuthentication(
       val message = "Invalid auth header basic format"
       throw ApiException(
         message,
-        HttpStatus.FORBIDDEN.value(),
+        HttpStatus.FORBIDDEN,
         ApiErrorTypes.ACCESS_DENIED.toString(),
         ACCESS_DENIED_MSG,
       )

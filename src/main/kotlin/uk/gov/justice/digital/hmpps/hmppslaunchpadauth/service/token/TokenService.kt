@@ -53,7 +53,7 @@ class TokenService(
         val message = "Client with id $clientId not found"
         throw ApiException(
           message,
-          HttpStatus.FORBIDDEN.value(),
+          HttpStatus.FORBIDDEN,
           ApiErrorTypes.ACCESS_DENIED.toString(),
           ACCESS_DENIED_MSG,
         )
@@ -65,7 +65,7 @@ class TokenService(
     } else {
       throw ApiException(
         INVALID_REQUEST_MSG,
-        HttpStatus.BAD_REQUEST.value(),
+        HttpStatus.BAD_REQUEST,
         ApiErrorTypes.INVALID_REQUEST.toString(),
         INVALID_REQUEST_MSG,
       )
@@ -79,7 +79,7 @@ class TokenService(
         val message = "Sso Request with code $code not found"
         throw ApiException(
           message,
-          HttpStatus.BAD_REQUEST.value(),
+          HttpStatus.BAD_REQUEST,
           ApiErrorTypes.INVALID_CODE.toString(),
           INVALID_CODE_MSG,
         )
@@ -88,7 +88,7 @@ class TokenService(
       val message = "Client id ${client.id} in token do not match with sso request client id ${ssoRequest.client.id}"
       throw ApiException(
         message,
-        HttpStatus.BAD_REQUEST.value(),
+        HttpStatus.BAD_REQUEST,
         ApiErrorTypes.INVALID_CODE.toString(),
         INVALID_CODE_MSG,
       )
@@ -115,7 +115,7 @@ class TokenService(
           val message = "User approved client  with user id $userId and client id ${client.id} not found"
           throw ApiException(
             message,
-            HttpStatus.FORBIDDEN.value(),
+            HttpStatus.FORBIDDEN,
             ApiErrorTypes.ACCESS_DENIED.toString(),
             ACCESS_DENIED_MSG,
           )
@@ -184,10 +184,16 @@ class TokenService(
   }
 
   private fun validateGrant(grantType: String, authorizationGrantType: Set<AuthorizationGrantType>) {
-    val grant = AuthorizationGrantType.getAuthorizationGrantTypeByStringValue(grantType)
-    if (!authorizationGrantType.contains(grant)) {
+    var grantEnum: AuthorizationGrantType
+    try {
+      grantEnum = AuthorizationGrantType.getAuthorizationGrantTypeByStringValue(grantType)
+    } catch (e: IllegalArgumentException) {
+      val message = "$grantType is invalid grant type"
+      throw ApiException(message, HttpStatus.BAD_REQUEST, ApiErrorTypes.INVALID_GRANT.toString(), INVALID_GRANT_TYPE_MSG)
+    }
+    if (!authorizationGrantType.contains(grantEnum)) {
       val message = "Invalid grant type: $grantType sent in get token request"
-      throw ApiException(message, 400, ApiErrorTypes.INVALID_GRANT.toString(), INVALID_GRANT_TYPE_MSG)
+      throw ApiException(message, HttpStatus.BAD_REQUEST, ApiErrorTypes.INVALID_GRANT.toString(), INVALID_GRANT_TYPE_MSG)
     }
   }
 
@@ -196,7 +202,7 @@ class TokenService(
       val message = "Redirect uri: $redirectUri sent in token request not in list"
       throw ApiException(
         message,
-        HttpStatus.BAD_REQUEST.value(),
+        HttpStatus.BAD_REQUEST,
         ApiErrorTypes.INVALID_REDIRECT_URI.toString(),
         INVALID_REDIRECT_URI_MSG,
       )
@@ -209,7 +215,7 @@ class TokenService(
     } catch (e: IllegalArgumentException) {
       throw ApiException(
         "Expired refresh token",
-        HttpStatus.BAD_REQUEST.value(),
+        HttpStatus.BAD_REQUEST,
         ApiErrorTypes.EXPIRED_TOKEN.toString(),
         EXPIRE_TOKEN_MSG,
       )
@@ -222,7 +228,7 @@ class TokenService(
       val message = "Required claim $claimName not found in refresh token query parameter"
       throw ApiException(
         message,
-        HttpStatus.BAD_REQUEST.value(),
+        HttpStatus.BAD_REQUEST,
         ApiErrorTypes.INVALID_REQUEST.toString(),
         "Invalid refresh token",
       )
@@ -246,7 +252,7 @@ class TokenService(
           "client id $clientId from auth header do not match with aud $clientIdInRefreshToken in refresh token"
         throw ApiException(
           message,
-          HttpStatus.FORBIDDEN.value(),
+          HttpStatus.FORBIDDEN,
           ApiErrorTypes.ACCESS_DENIED.toString(),
           INVALID_REQUEST_MSG,
         )
@@ -256,7 +262,7 @@ class TokenService(
       val message = "Refresh token signature is invalid"
       throw ApiException(
         message,
-        HttpStatus.FORBIDDEN.value(),
+        HttpStatus.FORBIDDEN,
         ApiErrorTypes.INVALID_REQUEST.toString(),
         ACCESS_DENIED_MSG,
       )
@@ -269,7 +275,7 @@ class TokenService(
       if (!Scope.isStringMatchEnumValue(scope, scopeApprovedByUser)) {
         throw ApiException(
           "Scope in refresh token do not match with scopes approved by user",
-          HttpStatus.BAD_REQUEST.value(),
+          HttpStatus.BAD_REQUEST,
           ApiErrorTypes.INVALID_REQUEST.toString(),
           "Invalid refresh token",
         )
@@ -282,7 +288,7 @@ class TokenService(
     if (ati == null) {
       throw ApiException(
         "Access token sent as refresh token in query param",
-        HttpStatus.BAD_REQUEST.value(),
+        HttpStatus.BAD_REQUEST,
         ApiErrorTypes.INVALID_TOKEN.toString(),
         INVALID_TOKEN_MSG,
       )
@@ -296,7 +302,7 @@ class TokenService(
       val message = "Exception during token authentication invalid UUID string in $claimName"
       throw ApiException(
         message,
-        HttpStatus.FORBIDDEN.value(),
+        HttpStatus.FORBIDDEN,
         ApiErrorTypes.ACCESS_DENIED.toString(),
         INVALID_TOKEN_MSG,
       )

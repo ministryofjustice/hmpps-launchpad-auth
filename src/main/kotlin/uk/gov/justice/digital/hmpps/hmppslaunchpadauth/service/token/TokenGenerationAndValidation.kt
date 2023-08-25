@@ -35,7 +35,7 @@ class TokenGenerationAndValidation {
           .compact()
       } catch (e: Exception) {
         val message = "Exception during token creation ${e.message}"
-        throw ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR.value(), ApiErrorTypes.SERVER_ERROR.toString(), "Exception during token creation")
+        throw ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), "Exception during token creation")
       }
     }
 
@@ -67,7 +67,7 @@ class TokenGenerationAndValidation {
 
     private fun invalidTokenFormat(token: String) {
       val message = "Invalid bearer token format $token"
-      throw ApiException(message, HttpStatus.FORBIDDEN.value(), ApiErrorTypes.INVALID_TOKEN.toString(), "Invalid token")
+      throw ApiException(message, HttpStatus.FORBIDDEN, ApiErrorTypes.INVALID_TOKEN.toString(), "Invalid token")
     }
   }
 }

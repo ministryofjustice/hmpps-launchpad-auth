@@ -70,7 +70,7 @@ class UserApprovedClientController(
       val message = "Client id $clientId in api path do not match with client id $clientIdFromToken in token"
       throw ApiException(
         message,
-        HttpStatus.BAD_REQUEST.value(),
+        HttpStatus.BAD_REQUEST,
         ApiErrorTypes.INVALID_REQUEST.toString(),
         INVALID_CLIENT_ID_MSG,
       )
@@ -80,13 +80,13 @@ class UserApprovedClientController(
   private fun validateUserId(userId: String, userIdFromToken: String) {
     if (userId != userIdFromToken) {
       val message = "User id $userIdFromToken in token do not match with user id $userId in api path"
-      throw ApiException(message, 400, ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid user id in api path")
+      throw ApiException(message, HttpStatus.BAD_REQUEST, ApiErrorTypes.INVALID_REQUEST.toString(), "Invalid user id in api path")
     }
     if (!userIdValidator.isValid(userId)) {
       val message = "Invalid user id format $userId"
       throw ApiException(
         message,
-        HttpStatus.BAD_REQUEST.value(),
+        HttpStatus.BAD_REQUEST,
         ApiErrorTypes.INVALID_REQUEST.toString(),
         "Invalid user id format",
       )
@@ -97,9 +97,13 @@ class UserApprovedClientController(
     if (page == null) {
       return 1
     }
+    if (page >= Int.MAX_VALUE) {
+      val message = "page cannot have value $page"
+      throw ApiException(message, HttpStatus.BAD_REQUEST, ApiErrorTypes.INVALID_REQUEST.toString(), message)
+    }
     if (page < 1) {
       val message = "page cannot be less than 1"
-      throw ApiException(message, HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.INVALID_REQUEST.toString(), message)
+      throw ApiException(message, HttpStatus.BAD_REQUEST, ApiErrorTypes.INVALID_REQUEST.toString(), message)
     }
     return page
   }
@@ -110,7 +114,7 @@ class UserApprovedClientController(
     }
     if (size > 20 || size < 1) {
       val message = "size cannot be more than 20 and less than 1"
-      throw ApiException(message, HttpStatus.BAD_REQUEST.value(), ApiErrorTypes.INVALID_REQUEST.toString(), message)
+      throw ApiException(message, HttpStatus.BAD_REQUEST, ApiErrorTypes.INVALID_REQUEST.toString(), message)
     }
     return size
   }
@@ -119,7 +123,7 @@ class UserApprovedClientController(
     if (!scopes.contains(scope)) {
       throw ApiException(
         ACCESS_DENIED_MSG,
-        HttpStatus.FORBIDDEN.value(),
+        HttpStatus.FORBIDDEN,
         ApiErrorTypes.INVALID_SCOPE.toString(),
         INVALID_SCOPE_MSG,
       )

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
+import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
@@ -75,7 +76,7 @@ class ClientServiceTest {
         "test",
       )
     }
-    assertEquals(302, exception.code)
+    assertEquals(HttpStatus.FOUND, exception.code)
   }
 
   @Test
@@ -91,7 +92,7 @@ class ClientServiceTest {
         "test",
       )
     }
-    assertEquals(302, exception.code)
+    assertEquals(HttpStatus.FOUND, exception.code)
   }
 
   @Test
@@ -107,7 +108,7 @@ class ClientServiceTest {
         "test",
       )
     }
-    assertEquals(302, exception.code)
+    assertEquals(HttpStatus.FOUND, exception.code)
   }
 
   @Test
@@ -123,7 +124,7 @@ class ClientServiceTest {
         "test",
       )
     }
-    assertEquals(302, exception.code)
+    assertEquals(HttpStatus.FOUND, exception.code)
   }
 
   @Test
@@ -139,7 +140,7 @@ class ClientServiceTest {
         "test",
       )
     }
-    assertEquals(302, exception.code)
+    assertEquals(HttpStatus.FOUND, exception.code)
   }
 
   @Test
@@ -155,6 +156,6 @@ class ClientServiceTest {
         "test",
       )
     }
-    assertEquals(302, exception.code)
+    assertEquals(HttpStatus.FOUND, exception.code)
   }
 }

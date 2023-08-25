@@ -1,12 +1,12 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_CLIENT_ID_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_REDIRECT_URI_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_RESPONSE_TYPE_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_SCOPE_MSG
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.REDIRECTION_CODE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
@@ -33,7 +33,7 @@ class ClientService(private var clientRepository: ClientRepository) {
   ) {
     val client = clientRepository.findById(clientId).orElseThrow {
       val message = "Client with client_id $clientId does not exist"
-      SsoException(message, REDIRECTION_CODE, ApiErrorTypes.INVALID_REQUEST.toString(), INVALID_CLIENT_ID_MSG, redirectUri, state)
+      SsoException(message, HttpStatus.FOUND, ApiErrorTypes.INVALID_REQUEST.toString(), INVALID_CLIENT_ID_MSG, redirectUri, state)
     }
     isEnabled(client.enabled, redirectUri, state)
     validateScopes(scopes, client.scopes, redirectUri, state)
@@ -45,7 +45,7 @@ class ClientService(private var clientRepository: ClientRepository) {
     if (!enabled) {
       throw SsoException(
         "Client not enabled",
-        REDIRECTION_CODE,
+        HttpStatus.FOUND,
         ApiErrorTypes.INVALID_REQUEST.toString(),
         INVALID_CLIENT_ID_MSG,
         redirectUri,
@@ -62,7 +62,7 @@ class ClientService(private var clientRepository: ClientRepository) {
       val message = "Not a valid redirect uri: $redirectUri"
       throw SsoException(
         message,
-        REDIRECTION_CODE,
+        HttpStatus.FOUND,
         ApiErrorTypes.INVALID_REQUEST.toString(),
         INVALID_REDIRECT_URI_MSG,
         redirectUri,
@@ -84,7 +84,7 @@ class ClientService(private var clientRepository: ClientRepository) {
         val message = "Scope $x not matching with client scope set"
         throw SsoException(
           message,
-          REDIRECTION_CODE,
+          HttpStatus.FOUND,
           ApiErrorTypes.INVALID_SCOPE.toString(),
           INVALID_SCOPE_MSG,
           redirectUri,
@@ -99,7 +99,7 @@ class ClientService(private var clientRepository: ClientRepository) {
       val message = "Invalid response type $responseType send in sso  request"
       throw SsoException(
         message,
-        REDIRECTION_CODE,
+        HttpStatus.FOUND,
         ApiErrorTypes.INVALID_REQUEST.toString(),
         INVALID_RESPONSE_TYPE_MSG,
         redirectUri,
@@ -113,7 +113,7 @@ class ClientService(private var clientRepository: ClientRepository) {
       val message = "Redirect uri not matching with client redirect uri: $redirectUri"
       throw SsoException(
         message,
-        REDIRECTION_CODE,
+        HttpStatus.FOUND,
         ApiErrorTypes.INVALID_REQUEST.toString(),
         INVALID_REDIRECT_URI_MSG,
         redirectUri,

@@ -49,7 +49,7 @@ class TokenAuthentication(
       } else {
         throw ApiException(
           INVALID_TOKEN_MSG,
-          HttpStatus.FORBIDDEN.value(),
+          HttpStatus.FORBIDDEN,
           ApiErrorTypes.INVALID_TOKEN.toString(),
           INVALID_TOKEN_MSG,
         )
@@ -57,7 +57,7 @@ class TokenAuthentication(
     } else {
       throw ApiException(
         INVALID_TOKEN_MSG,
-        HttpStatus.FORBIDDEN.value(),
+        HttpStatus.FORBIDDEN,
         ApiErrorTypes.INVALID_TOKEN.toString(),
         INVALID_TOKEN_MSG,
       )
@@ -70,7 +70,7 @@ class TokenAuthentication(
       val message = "Required claim $claimName not found in access token"
       throw ApiException(
         message,
-        HttpStatus.FORBIDDEN.value(),
+        HttpStatus.FORBIDDEN,
         ApiErrorTypes.ACCESS_DENIED.toString(),
         INVALID_TOKEN_MSG,
       )
@@ -86,7 +86,7 @@ class TokenAuthentication(
       val message = "Exception during parsing claims in token authentication ${e.message}"
       throw ApiException(
         message,
-        HttpStatus.FORBIDDEN.value(),
+        HttpStatus.FORBIDDEN,
         ApiErrorTypes.ACCESS_DENIED.toString(),
         INVALID_TOKEN_MSG,
       )
@@ -100,7 +100,7 @@ class TokenAuthentication(
       val message = "Exception during token expire time validation ${e.message}"
       throw ApiException(
         message,
-        HttpStatus.FORBIDDEN.value(),
+        HttpStatus.FORBIDDEN,
         ApiErrorTypes.EXPIRED_TOKEN.toString(),
         EXPIRE_TOKEN_MSG,
       )
@@ -114,7 +114,7 @@ class TokenAuthentication(
       val message = "Exception during token authentication invalid UUID string in $claimName"
       throw ApiException(
         message,
-        HttpStatus.FORBIDDEN.value(),
+        HttpStatus.FORBIDDEN,
         ApiErrorTypes.ACCESS_DENIED.toString(),
         INVALID_TOKEN_MSG,
       )
@@ -126,7 +126,7 @@ class TokenAuthentication(
     if (ati != null) {
       throw ApiException(
         "Refresh token sent as bearer auth token",
-        HttpStatus.FORBIDDEN.value(),
+        HttpStatus.FORBIDDEN,
         ApiErrorTypes.ACCESS_DENIED.toString(),
         INVALID_TOKEN_MSG,
       )
@@ -145,7 +145,7 @@ class TokenAuthentication(
           val message = "Scope $scope in token not in auth service scope list"
           throw ApiException(
             message,
-            HttpStatus.FORBIDDEN.value(),
+            HttpStatus.FORBIDDEN,
             ApiErrorTypes.ACCESS_DENIED.toString(),
             ACCESS_DENIED_MSG,
           )
@@ -155,7 +155,7 @@ class TokenAuthentication(
     } else {
       throw ApiException(
         "Access token do not contain scopes",
-        HttpStatus.FORBIDDEN.value(),
+        HttpStatus.FORBIDDEN,
         ApiErrorTypes.INVALID_TOKEN.toString(),
         INVALID_TOKEN_MSG,
       )

@@ -11,7 +11,7 @@ import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.UNAUTHORIZED_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.ACCESS_DENIED_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
@@ -92,8 +92,8 @@ class BasicAuthenticationTest {
     val exception = assertThrows(ApiException::class.java) {
       basicAuthentication.authenticate(authHeader)
     }
-    assertEquals(exception.message, UNAUTHORIZED_MSG)
-    assertEquals(exception.code, HttpStatus.UNAUTHORIZED.value())
+    assertEquals(exception.message, ACCESS_DENIED_MSG)
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
   }
 
   @Test
@@ -122,7 +122,7 @@ class BasicAuthenticationTest {
     val exception = assertThrows(ApiException::class.java) {
       basicAuthentication.authenticate(authHeader)
     }
-    assertEquals(exception.code, HttpStatus.UNAUTHORIZED.value())
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
   }
 
   @Test
@@ -151,7 +151,7 @@ class BasicAuthenticationTest {
     val exception = assertThrows(ApiException::class.java) {
       basicAuthentication.authenticate(authHeader)
     }
-    assertEquals(HttpStatus.FORBIDDEN.value(), exception.code)
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
   }
 
   @Test
@@ -160,6 +160,6 @@ class BasicAuthenticationTest {
     val exception = assertThrows(ApiException::class.java) {
       basicAuthentication.authenticate(authHeader)
     }
-    assertEquals(HttpStatus.FORBIDDEN.value(), exception.code)
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
   }
 }

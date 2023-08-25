@@ -3,9 +3,11 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 import org.json.JSONException
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INTERNAL_SERVER_ERROR_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.validator.UserIdValidator
 import java.util.*
 
@@ -49,7 +51,7 @@ class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProc
       return jsonObject.getString(claimName)
     } catch (exception: JSONException) {
       val message = "Claim: $claimName not found"
-      throw ApiException(message, 500, ApiErrorTypes.SERVER_ERROR.toString(), "Internal server error")
+      throw ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), INTERNAL_SERVER_ERROR_MSG)
     }
   }
 }

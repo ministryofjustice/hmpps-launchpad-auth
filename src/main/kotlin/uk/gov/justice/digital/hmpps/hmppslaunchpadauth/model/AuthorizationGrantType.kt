@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model
 
-import java.lang.IllegalArgumentException
-
 enum class AuthorizationGrantType(private val grantType: String) {
   AUTHORIZATION_CODE("authorization_code"),
   REFRESH_TOKEN("refresh_token"), ;

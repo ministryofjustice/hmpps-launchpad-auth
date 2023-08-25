@@ -14,7 +14,6 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
-
 @Service
 class SsoRequestService(
   private var ssoRequestRepository: SsoRequestRepository,
@@ -22,6 +21,7 @@ class SsoRequestService(
   companion object {
     private val logger = LoggerFactory.getLogger(SsoRequestService::class.java)
   }
+
   fun createSsoRequest(ssoRequest: SsoRequest): SsoRequest {
     val ssoRequestCreated = ssoRequestRepository.save(ssoRequest)
     logger.info("Sso request created for user of  client: {}", ssoRequestCreated.client.id)
@@ -60,12 +60,12 @@ class SsoRequestService(
         val message = "Duplicate uuid created multiple time for auth code"
         throw SsoException(
           message,
-          HttpStatus.INTERNAL_SERVER_ERROR.value(),
+          HttpStatus.INTERNAL_SERVER_ERROR,
           ApiErrorTypes.SERVER_ERROR.toString(),
           INTERNAL_SERVER_ERROR_MSG,
           redirectUri,
           state,
-          )
+        )
       }
       logger.debug("Authorization code exist in sso request db record so creating new")
       authorizationCode = UUID.randomUUID()

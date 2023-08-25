@@ -102,7 +102,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
     val exception = assertThrows(ApiException::class.java) {
       tokenAuthentication.authenticate(authHeader)
     }
-    assertEquals(HttpStatus.FORBIDDEN.value(), exception.code)
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
   }
 
   /*@Test
@@ -132,7 +132,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
     val exception = assertThrows(ApiException::class.java) {
       tokenAuthentication.authenticate(authHeader)
     }
-    assertEquals(HttpStatus.FORBIDDEN.value(), exception.code)
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
   }
 
   private fun buildClient(enabled: Boolean): Client {

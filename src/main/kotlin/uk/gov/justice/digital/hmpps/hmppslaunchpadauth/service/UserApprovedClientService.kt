@@ -63,7 +63,7 @@ class UserApprovedClientService(
         val message = "Client id $clientId not found"
         throw ApiException(
           message,
-          HttpStatus.BAD_REQUEST.value(),
+          HttpStatus.BAD_REQUEST,
           ApiErrorTypes.INVALID_REQUEST.toString(),
           INVALID_REQUEST_MSG,
         )
@@ -72,7 +72,7 @@ class UserApprovedClientService(
       val message = "Requested action not permitted"
       throw ApiException(
         message,
-        HttpStatus.BAD_REQUEST.value(),
+        HttpStatus.BAD_REQUEST,
         ApiErrorTypes.INVALID_REQUEST.toString(),
         INVALID_REQUEST_MSG,
       )
@@ -82,7 +82,7 @@ class UserApprovedClientService(
         val message = "No record found for user id:$userId and client id:$clientId"
         throw ApiException(
           message,
-          HttpStatus.BAD_REQUEST.value(),
+          HttpStatus.BAD_REQUEST,
           ApiErrorTypes.INVALID_REQUEST.toString(),
           INVALID_REQUEST_MSG,
         )
@@ -99,7 +99,7 @@ class UserApprovedClientService(
         val message = "Client id ${userApprovedClient.clientId} not found"
         throw ApiException(
           message,
-          HttpStatus.BAD_REQUEST.value(),
+          HttpStatus.BAD_REQUEST,
           ApiErrorTypes.INVALID_REQUEST.toString(),
           INVALID_REQUEST_MSG,
         )

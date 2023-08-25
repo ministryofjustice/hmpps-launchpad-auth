@@ -175,6 +175,6 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
         ssoRequest.id,
       )
     }
-    assertEquals(HttpStatus.FORBIDDEN.value(), exception.code)
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
   }
 }
