@@ -52,6 +52,13 @@ class SsoLogInService(
     state: String?,
     nonce: String?,
   ): String {
+    logger.info(
+      "Single sign on request received for client: {}, with response_type: {}, scopes: {}, redirect_uri: {}",
+      clientId,
+      responseType,
+      scopes,
+      redirectUri,
+    )
     clientService.validateParams(clientId, responseType, scopes, redirectUri, state, nonce)
     val scopeSet = Scope.cleanScopes(scopes)
     val scopesEnums = getScopeEnumsFromValues(scopeSet)
@@ -61,13 +68,6 @@ class SsoLogInService(
       nonce,
       redirectUri,
       clientId,
-    )
-    logger.info(
-      "Single sign on request received for client: {}, with response_type: {}, scopes: {}, redirect_uri: {}",
-      clientId,
-      responseType,
-      scopes,
-      redirectUri,
     )
     return UriComponentsBuilder.fromHttpUrl(azureOauthUrl)
       .queryParam("response_type", "id_token")

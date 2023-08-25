@@ -36,7 +36,6 @@ class TokenAuthentication(
         checkIfRefreshToken(claims)
         val expireAt = getClaim("exp", claims) as Int
         validateExpireTime(expireAt)
-        TokenGenerationAndValidation.validateExpireTime(expireAt)
         getClaim("jti", claims) as String
         getClaim("iat", claims) as Int
         val aud = getClaim("aud", claims) as String
