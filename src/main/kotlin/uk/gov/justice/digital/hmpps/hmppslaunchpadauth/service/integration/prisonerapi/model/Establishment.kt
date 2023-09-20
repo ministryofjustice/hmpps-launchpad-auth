@@ -2,8 +2,8 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.pris
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
+
 data class Establishment(
-  val id: String,
   @JsonProperty("agency_id")
   val agencyId: String,
   val name: String,

@@ -6,6 +6,7 @@ azure:
 auth:
   service:
     secret: random_secret_random_secret_random_secret
+
 spring:
   application:
     name: hmpps-launchpad-auth
@@ -27,3 +28,70 @@ spring:
     password: password
     locations: classpath:db/migration
     baseline-on-migrate: true
+establishments:
+  establishment:
+      - agencyId: BWI
+        name: berwyn
+        displayName: HMP Berwyn
+        youth: false
+      - agencyId: WLI
+        name: wayland
+        displayName: HMP Wayland
+        youth: false
+      - agencyId: CKI
+        name: cookhamwood
+        displayName: HMYOI Cookham Wood
+        youth: true
+      - agencyId: EEI
+        name: erlestoke
+        displayName: HMP Erlestoke
+        youth: false
+      - agencyId: GHI
+        name: garth
+        displayName: HMP Garth
+        youth: false
+      - agencyId: LHI
+        name: lindholme
+        displayName: HMP Lindholme
+        youth: false
+      - agencyId: NHI
+        name: newhall
+        displayName: HMPYOI New Hall
+        youth: false
+      - agencyId: RNI
+        name: ranby
+        displayName: HMP Ranby
+        youth: false
+      - agencyId: SHI
+        name: stokeheath
+        displayName: HMPYOI Stoke Heath
+        youth: false
+      - agencyId: STI
+        name: styal
+        displayName: HMPYOI Styal
+        youth: false
+      - agencyId: SLI
+        name: swaleside
+        displayName: HMP Swaleside
+        youth: false
+      - agencyId: MTI
+        name: themount
+        displayName: HMP The Mount
+        youth: false
+      - agencyId: FYI
+        name: felthama
+        displayName: HMYOI Feltham A
+        youth: true
+      - agencyId: FMI
+        name: felthamb
+        displayName: HMYOI Feltham B
+        youth: true
+      - agencyId: WNI
+        name: werrington
+        displayName: HMYOI Werrington
+        youth: false
+      - agencyId: WYI
+        name: wetherby
+        formattedName: Wetherby
+        displayName: HMYOI Wetherby
+        youth: true
