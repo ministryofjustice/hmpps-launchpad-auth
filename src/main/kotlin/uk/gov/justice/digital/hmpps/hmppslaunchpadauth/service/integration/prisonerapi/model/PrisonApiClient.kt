@@ -4,17 +4,19 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.RequestEntity
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.RestTemplate
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import java.net.URI
 
 @Component
 class PrisonApiClient(
   private var hmppsAuthClient: HmppsAuthClient,
-  @Qualifier("establishments")
-  private var prisonEstablisments: PrisonEstablisments,
+  @Qualifier("restTemplate")  private var restTemplate: RestTemplate
 ) {
 
   @Value("\${hmpps.prison.url}")
@@ -25,7 +27,7 @@ class PrisonApiClient(
     val headers = LinkedMultiValueMap<String, String>()
     headers.add("Authorization", accessToken)
     headers.add("Content-Type", "application/json")
-    val response = RestTemplate().exchange(
+    val response = restTemplate.exchange(
       RequestEntity<Any>(
         headers,
         HttpMethod.GET,
@@ -33,6 +35,11 @@ class PrisonApiClient(
       ),
       object : ParameterizedTypeReference<PrisonerProfile>() {},
     )
-    return response.body
+    if (response.statusCode.is2xxSuccessful) {
+      return response.body!!
+    } else {
+      throw ApiException("Response code ${response.statusCode.value()} making request to Prison Api", HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), "Server Error" )
+    }
+
   }
 }
