@@ -18,7 +18,7 @@ class PrisonerApiServiceImpl(
 ) : PrisonerApiService {
   override fun getPrisonerData(prisonerId: String): UserClaims {
     val profile = prisonApiClient.getPrisonerProfileToken("G2320VD")
-    val user = User(profile.offenderId, profile.lastName, profile.firstName, )
+    val user = User(prisonerId, profile.lastName, profile.firstName, )
     val establishment = prisonEstablisments.establishment.filter { p -> p.agencyId == profile.agencyId }.get(0)
     val booking = Booking(profile.bookingId)
     return UserClaims(booking, establishment, user)
