@@ -30,6 +30,11 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
     @RequestParam(required = false) state: String?,
     @RequestParam(required = false) nonce: String?,
   ): RedirectView {
+    var scope = scope
+    scope  = scope.replace("openid", "")
+    scope = scope.replace("profile", "")
+    scope = scope.replace("email", "")
+    scope = scope.trimStart()
     validateResponseType(responseType, redirectUri, state)
     validateSize(state, "state", redirectUri, state)
     validateSize(nonce, "nonce", redirectUri, state)
