@@ -10,9 +10,9 @@ import java.util.*
 @Service
 class PrisonerApiServiceImpl : PrisonerApiService {
   override fun getPrisonerData(prisonerId: String): UserClaims {
-    val user = User("G2320VD", "Test", "User")
-    val establishment = Establishment(UUID.randomUUID().toString(), UUID.randomUUID().toString(), "HMPSS_London", "HMPSS_London", false)
-    val booking = Booking(UUID.randomUUID().toString())
+    val user = User("G2320VD", "YKAESSUMAR", "ALORES")
+    val establishment = Establishment("", UUID.randomUUID().toString(), "HMPSS_London", "HMPSS_London", false)
+    val booking = Booking("1201259")
     return UserClaims(booking, establishment, user)
   }
 }
