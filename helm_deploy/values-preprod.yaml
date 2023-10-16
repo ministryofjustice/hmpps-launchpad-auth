@@ -9,6 +9,13 @@ generic-service:
 
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
+    AZURE_AD_TENANT_ID: AZURE_AD_TENANT_ID
+    AZURE_AD_URL: AZURE_AD_URL
+    PRISONER_API_USERNAME: PRISONER_API_USERNAME
+    PRISONER_API_PASSWORD: PRISONER_API_PASSWORD
+    DB_USERNAME: DB_USERNAME
+    DB_PASSWORD: DB_PASSWORD
+    DB_URL: DB_URL
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 # See https://user-guide.cloud-platform.service.justice.gov.uk/documentation/monitoring-an-app/how-to-create-alarms.html#creating-your-own-custom-alerts
