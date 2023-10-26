@@ -28,8 +28,20 @@ class SsoLogInService(
   private var tokenProcessor: TokenProcessor,
   private var userApprovedClientService: UserApprovedClientService,
 ) {
-  @Value("\${azure.oauth2-url}")
-  private lateinit var azureOauthUrl: String
+  // @Value("\${azure.oauth2-url}")
+  // private lateinit var azureOauthUrl: String
+
+  @Value("\${azure.oauth2-base-url}")
+  private lateinit var oauth2BaseUrl: String
+
+  @Value("\${azure.tenant-id}")
+  private lateinit var tenantId: String
+
+  // @Value("\${azure.client-id}")
+  // private lateinit var clientId: String
+
+  @Value("\${azure.oauth2-api-path}")
+  private lateinit var oauth2ApiPath: String
 
   @Value("\${azure.client-id}")
   private lateinit var launchpadClientId: String
@@ -69,7 +81,7 @@ class SsoLogInService(
       redirectUri,
       clientId,
     )
-    return UriComponentsBuilder.fromHttpUrl(azureOauthUrl)
+    return UriComponentsBuilder.fromHttpUrl(builtAzureOauth2Url())
       .queryParam("response_type", "id_token")
       .queryParam("client_id", launchpadClientId)
       .queryParam("scope", "openid")
@@ -226,5 +238,9 @@ class SsoLogInService(
       val message = "Invalid scope ${e.message}"
       throw ApiException(message, HttpStatus.BAD_REQUEST, ApiErrorTypes.INVALID_SCOPE.toString(), INVALID_SCOPE_MSG)
     }
+  }
+
+  private fun builtAzureOauth2Url(): String {
+    return "$oauth2BaseUrl/$tenantId/$oauth2ApiPath"
   }
 }

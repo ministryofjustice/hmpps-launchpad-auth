@@ -39,6 +39,9 @@ class TokenService(
   @Value("\${auth.service.secret}")
   private lateinit var secret: String
 
+  @Value("\${launchpad.iss-url}")
+  private lateinit var issuerUrl: String
+
   fun validateRequestAndGenerateToken(
     code: UUID?,
     grantType: String?,
@@ -140,6 +143,7 @@ class TokenService(
       clientId,
       scopes,
       nonce,
+      issuerUrl,
     )
     val accessTokenPayload = AccessTokenPayload()
     val accessTokenPayloadClaims = accessTokenPayload.generatePayload(prisonerData.user, clientId, scopes)

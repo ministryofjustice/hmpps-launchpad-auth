@@ -10,6 +10,7 @@ import org.springframework.web.servlet.view.RedirectView
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_REQUEST_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoLogInService
 import java.util.*
 
@@ -33,7 +34,8 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
     validateResponseType(responseType, redirectUri, state)
     validateSize(state, "state", redirectUri, state)
     validateSize(nonce, "nonce", redirectUri, state)
-    val url = ssoLoginService.initiateSsoLogin(clientId, responseType, scope, redirectUri, state, nonce)
+    val scopes = Scope.removeWhitelistedScopes(scope)
+    val url = ssoLoginService.initiateSsoLogin(clientId, responseType, scopes, redirectUri, state, nonce)
     return RedirectView(url)
   }
 
