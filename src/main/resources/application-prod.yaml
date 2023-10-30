@@ -1,12 +1,29 @@
 azure:
   oauth2-base-url: https://login.microsoftonline.com/
-  #tenant-id: 103ab093-fd63-4ca9-a293-4aee1490a490
   tenant-id: ${AZURE_AD_TENANT_ID}
   oauth2-api-path: oauth2/v2.0/authorize
-  #oauth2-url: https://login.microsoftonline.com/103ab093-fd63-4ca9-a293-4aee1490a490/oauth2/v2.0/authorize
-  #issuer-url: https://login.microsoftonline.com/103ab093-fd63-4ca9-a293-4aee1490a490/v2.0
-  #client-id: 598471b7-0b6e-4922-a27b-6e4083046e98
   client-id: ${AZURE_AD_CLIENT_ID}
-  launchpad-redirectUri: http://localhost:8080/v1/oauth2/callback
+  launchpad-redirectUri: https://launchpad-auth.hmpps.service.justice.gov.uk/v1/oauth2/callback
 launchpad:
   iss-url: https://launchpad-auth.hmpps.service.justice.gov.uk
+spring:
+  application:
+    name: hmpps-launchpad-auth
+  codec:
+    max-in-memory-size: 10MB
+  jpa:
+    defer-datasource-initialization: false
+    hibernate:
+      ddl-auto: none
+  #change password later when dev environment is set up
+  datasource:
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://${DB_URL}:5432/launchpad
+  flyway:
+    enabled: true
+    url: jdbc:postgresql://${DB_URL}:5432/launchpad
+    user: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    locations: classpath:db/migration
+    baseline-on-migrate: true
