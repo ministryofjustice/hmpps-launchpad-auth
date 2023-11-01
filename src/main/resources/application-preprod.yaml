@@ -2,6 +2,7 @@ azure:
   oauth2-base-url: https://login.microsoftonline.com/
   tenant-id: ${AZURE_TENANT_ID}
   oauth2-api-path: oauth2/v2.0/authorize
+  issuer-url: https://login.microsoftonline.com/${AZURE_TENANT_ID}/v2.0
   client-id: ${AZURE_CLIENT_ID}
   launchpad-redirectUri: https://launchpad-auth-preprod.hmpps.service.justice.gov.uk/v1/oauth2/callback
 launchpad:
@@ -22,10 +23,10 @@ spring:
   datasource:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    url: jdbc:postgresql://${DB_URL}:5432/launchpad
+    url: jdbc:postgresql://${DB_ENDPOINT}/${DB_NAME}
   flyway:
     enabled: true
-    url: jdbc:postgresql://${DB_ENDPOINT}//launchpad
+    url: jdbc:postgresql://${DB_ENDPOINT}/${DB_NAME}
     user: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     locations: classpath:db/migration
