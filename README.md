@@ -29,4 +29,5 @@ For following add and kubernetes secret is not required as postgresql running lo
       DB_ENDPOINT: "localhost"
 
 
-To run from command line use ./gradlew bootRun --args='--spring.profiles.active=dev'
+To run locally from command line use following. For env variable with value XXX, get the values from dev env kubernetes secret.
+AZURE_TENANT_ID=XXX AZURE_CLIENT_ID=XXX DB_ENDPOINT=localhost:5432 DB_NAME=launchpad DB_PASSWORD=password DB_USERNAME=postgres ./gradlew bootRun --args='--spring.profiles.active=dev'
