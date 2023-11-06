@@ -1,17 +1,26 @@
 version: "3"
 services:
+  launchpad-postgres:
+    image: postgres:15.4
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - ./init-for-dev-only.sql:/docker-entrypoint-initdb.d/init-for-dev-only.sql
+    network_mode: "bridge"
   hmpps-launchpad-auth:
     build:
       context: .
-    network_mode: "host"
+    network_mode: "bridge"
     container_name: hmpps-launchpad-auth
     ports:
-      - "8081:8080"
+      - "8080:8080"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health/ping"]
-    environment:
-      - SERVER_PORT=8080
-      - SPRING_PROFILES_ACTIVE=dev
+    env_file:
+      - /path/to_env_files_outside_project_folder
+    depends_on: [launchpad-postgres]
 
-networks:
-  hmpps:
+
