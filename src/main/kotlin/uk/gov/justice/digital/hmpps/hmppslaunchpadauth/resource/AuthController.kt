@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -22,6 +23,9 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
     const val SSO_SUPPORTED_RESPONSE_TYPE = "code"
   }
 
+  @Value("\${launchpad-auth.allowlisted-scopes}")
+  private lateinit var allowListedScopes: String
+
   @GetMapping("/authorize")
   fun authorize(
     @RequestParam("client_id") clientId: UUID,
@@ -34,7 +38,7 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
     validateResponseType(responseType, redirectUri, state)
     validateSize(state, "state", redirectUri, state)
     validateSize(nonce, "nonce", redirectUri, state)
-    val scopes = Scope.removeWhitelistedScopes(scope)
+    val scopes = Scope.removeWhitelistedScopes(scope, allowListedScopes.split(","))
     val url = ssoLoginService.initiateSsoLogin(clientId, responseType, scopes, redirectUri, state, nonce)
     return RedirectView(url)
   }

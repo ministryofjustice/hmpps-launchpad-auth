@@ -28,17 +28,11 @@ class SsoLogInService(
   private var tokenProcessor: TokenProcessor,
   private var userApprovedClientService: UserApprovedClientService,
 ) {
-  // @Value("\${azure.oauth2-url}")
-  // private lateinit var azureOauthUrl: String
-
   @Value("\${azure.oauth2-base-url}")
   private lateinit var oauth2BaseUrl: String
 
   @Value("\${azure.tenant-id}")
   private lateinit var tenantId: String
-
-  // @Value("\${azure.client-id}")
-  // private lateinit var clientId: String
 
   @Value("\${azure.oauth2-api-path}")
   private lateinit var oauth2ApiPath: String
@@ -48,9 +42,6 @@ class SsoLogInService(
 
   @Value("\${azure.launchpad-redirectUri}")
   private lateinit var launchpadRedirectUrl: String
-
-  @Value("\${azure.issuer-url}")
-  private lateinit var issuerUrl: String
 
   companion object {
     private val logger = LoggerFactory.getLogger(SsoLogInService::class.java)
@@ -82,7 +73,7 @@ class SsoLogInService(
       clientId,
     )
     return UriComponentsBuilder.fromHttpUrl(builtAzureOauth2Url())
-      .queryParam("response_type", "id_token")
+      .queryParam("response_type", "id_token email")
       .queryParam("client_id", launchpadClientId)
       .queryParam("scope", "openid")
       .queryParam("state", ssoRequest.id)

@@ -72,13 +72,12 @@ enum class Scope(val scope: String) {
       throw IllegalArgumentException("Invalid scope value $value")
     }
 
-    fun removeWhitelistedScopes(scopesWithWhitelistedScopes: String): String {
+    fun removeWhitelistedScopes(scopesWithWhitelistedScopes: String, allowListedScope: List<String>): String {
       var scopes = scopesWithWhitelistedScopes
-      scopes  = scopes.replace("openid", "")
-      scopes = scopes.replace("profile", "")
-      scopes = scopes.replace("email", "")
-      scopes = scopes.trimStart()
-      return scopes
+      allowListedScope.forEach { scope ->
+        scopes = scopes.replace(scope, "")
+      }
+      return scopes.trim()
     }
   }
 }
