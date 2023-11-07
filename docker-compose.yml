@@ -20,7 +20,7 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health/ping"]
     env_file:
-      - /path/to_env_files_outside_project_folder
+      - dev.env
     depends_on: [launchpad-postgres]
 
 
