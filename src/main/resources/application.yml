@@ -7,7 +7,21 @@ spring:
     name: hmpps-launchpad-auth
   codec:
     max-in-memory-size: 10MB
-
+  jpa:
+    defer-datasource-initialization: false
+    hibernate:
+      ddl-auto: none
+  datasource:
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://${DB_ENDPOINT}/${DB_NAME}
+  flyway:
+    enabled: true
+    url: jdbc:postgresql://${DB_ENDPOINT}/${DB_NAME}
+    user: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    locations: classpath:db/migration
+    baseline-on-migrate: true
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"
     serialization:
@@ -51,3 +65,12 @@ management:
     info:
       cache:
         time-to-live: 2000ms
+launchpad:
+  auth:
+    allowlisted-scopes: openid,email,profile
+    secret: ${LAUNCHPAD_AUTH_SECRET}
+azure:
+  oauth2-base-url: https://login.microsoftonline.com
+  oauth2-api-path: oauth2/v2.0/authorize
+  tenant-id: ${AZURE_TENANT_ID}
+  client-id: ${AZURE_CLIENT_ID}

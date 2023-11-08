@@ -59,7 +59,7 @@ class TokenControllerIntegrationTest(
   @LocalServerPort
   private val port = 0
 
-  @Value("\${auth.service.secret}")
+  @Value("\${launchpad.auth.secret}")
   private lateinit var secret: String
 
   private val baseUrl = "http://localhost"
