@@ -65,9 +65,13 @@ management:
     info:
       cache:
         time-to-live: 2000ms
-launchpad-auth:
-  allowlisted-scopes: openid,email,profile
-  secret: ${LAUNCHPAD_AUTH_SECRET}
+launchpad:
+  auth:
+    allowlisted-scopes: openid,email,profile
+    secret: ${LAUNCHPAD_AUTH_SECRET}
+#launchpad-auth:
+  #allowlisted-scopes: openid,email,profile
+  #secret: ${LAUNCHPAD_AUTH_SECRET}
 azure:
   oauth2-base-url: https://login.microsoftonline.com
   oauth2-api-path: oauth2/v2.0/authorize

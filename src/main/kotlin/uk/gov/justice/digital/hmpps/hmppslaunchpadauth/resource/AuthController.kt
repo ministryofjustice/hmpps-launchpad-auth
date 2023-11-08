@@ -23,7 +23,7 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
     const val SSO_SUPPORTED_RESPONSE_TYPE = "code"
   }
 
-  @Value("\${launchpad-auth.allowlisted-scopes}")
+  @Value("\${launchpad.auth.allowlisted-scopes}")
   private lateinit var allowListedScopes: String
 
   @GetMapping("/authorize")

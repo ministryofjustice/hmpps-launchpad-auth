@@ -23,7 +23,7 @@ import java.util.*
 @ActiveProfiles("test")
 class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProcessor) {
 
-  @Value("\${launchpad-auth.secret}")
+  @Value("\${launchpad.auth.secret}")
   private lateinit var secret: String
 
   @Test
