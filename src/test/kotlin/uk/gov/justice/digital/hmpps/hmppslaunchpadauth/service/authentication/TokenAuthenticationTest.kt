@@ -42,7 +42,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
   @MockBean
   private lateinit var userIdValidator: UserIdValidator
 
-  @Value("\${auth.service.secret}")
+  @Value("\${launchpad-auth.secret}")
   private lateinit var secret: String
 
   private val encoder = BCryptPasswordEncoder()

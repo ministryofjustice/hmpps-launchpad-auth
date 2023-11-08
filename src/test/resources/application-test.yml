@@ -6,11 +6,11 @@ azure:
   oauth2-api-path: oauth2/v2.0/authorize
   client-id: 654321_random_value
   launchpad-redirectUri: http://localhost:8080/v1/oauth2/callback
-launchpad:
+launchpad-auth:
+  allowlisted-scopes: openid,email,profile
+  secret: random_secret_random_secret_random_secret
   iss-url: https://launchpad-auth-dev.hmpps.service.justice.gov.uk
-auth:
-  service:
-    secret: random_secret_random_secret_random_secret
+
 management.endpoint:
   health.cache.time-to-live: 0
   info.cache.time-to-live: 0

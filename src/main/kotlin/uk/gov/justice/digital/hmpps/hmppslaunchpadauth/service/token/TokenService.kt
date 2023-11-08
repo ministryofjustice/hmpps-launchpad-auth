@@ -36,10 +36,10 @@ class TokenService(
   private var ssoRequestService: SsoRequestService,
   private var userApprovedClientService: UserApprovedClientService,
 ) {
-  @Value("\${auth.service.secret}")
+  @Value("\${launchpad-auth.secret}")
   private lateinit var secret: String
 
-  @Value("\${launchpad.iss-url}")
+  @Value("\${launchpad-auth.iss-url}")
   private lateinit var issuerUrl: String
 
   fun validateRequestAndGenerateToken(

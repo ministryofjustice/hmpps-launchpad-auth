@@ -38,7 +38,7 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
     validateResponseType(responseType, redirectUri, state)
     validateSize(state, "state", redirectUri, state)
     validateSize(nonce, "nonce", redirectUri, state)
-    val scopes = Scope.removeWhitelistedScopes(scope, allowListedScopes.split(","))
+    val scopes = Scope.removeAllowListScopesNotRequired(scope, allowListedScopes.split(","))
     val url = ssoLoginService.initiateSsoLogin(clientId, responseType, scopes, redirectUri, state, nonce)
     return RedirectView(url)
   }
