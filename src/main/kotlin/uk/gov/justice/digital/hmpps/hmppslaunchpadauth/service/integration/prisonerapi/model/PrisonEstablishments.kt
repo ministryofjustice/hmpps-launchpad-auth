@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.pris
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "launchpad-auth")
+@ConfigurationProperties(prefix = "establishments")
 data class PrisonEstablishments(
   var agencies: Map<String, Establishment> = HashMap()
 )

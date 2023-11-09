@@ -44,11 +44,8 @@ class HmppsAuthClient(@Qualifier("restTemplate")  private var restTemplate: Rest
   }
 
   private fun getAuthHeader() : String {
-    val decoder  = Base64.getDecoder()
-    val username = String(decoder.decode(hmppsAuthUsername))
-    val password = String(decoder.decode(hmppsAuthPassword))
     val encoder = Base64.getEncoder()
-    val authCode = String(encoder.encode("$username:$password".toByteArray(Charsets.UTF_8)))
+    val authCode = String(encoder.encode("$hmppsAuthUsername:$hmppsAuthPassword".toByteArray(Charsets.UTF_8)))
     return "Basic $authCode"
   }
 }

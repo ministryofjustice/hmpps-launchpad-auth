@@ -1,0 +1,12 @@
+azure:
+  launchpad-redirectUri: https://launchpad-auth-dev.hmpps.service.justice.gov.uk/v1/oauth2/callback
+launchpad:
+  auth:
+    iss-url: https://launchpad-auth-dev.hmpps.service.justice.gov.uk
+hmpps:
+  auth:
+    url: https://sign-in-dev.hmpps.service.justice.gov.uk
+    username: ${HMPPS_AUTH_CLIENT_ID}
+    password: ${HMPPS_AUTH_CLIENT_SECRET}
+  prison:
+    url: https://prison-api-dev.prison.service.justice.gov.uk

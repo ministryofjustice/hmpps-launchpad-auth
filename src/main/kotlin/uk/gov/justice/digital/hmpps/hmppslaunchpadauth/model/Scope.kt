@@ -71,5 +71,13 @@ enum class Scope(val scope: String) {
       }
       throw IllegalArgumentException("Invalid scope value $value")
     }
+
+    fun removeAllowListScopesNotRequired(scopesWithAllowList: String, allowListScopesNotRequired: List<String>): String {
+      var scopes = scopesWithAllowList
+      allowListScopesNotRequired.forEach { scope ->
+        scopes = scopes.replace(scope, "")
+      }
+      return scopes.trim()
+    }
   }
 }

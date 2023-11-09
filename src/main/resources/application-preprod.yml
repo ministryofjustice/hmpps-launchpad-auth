@@ -1,0 +1,5 @@
+azure:
+  launchpad-redirectUri: https://launchpad-auth-preprod.hmpps.service.justice.gov.uk/v1/oauth2/callback
+launchpad:
+  auth:
+    iss-url: https://launchpad-auth-preprod.hmpps.service.justice.gov.uk
