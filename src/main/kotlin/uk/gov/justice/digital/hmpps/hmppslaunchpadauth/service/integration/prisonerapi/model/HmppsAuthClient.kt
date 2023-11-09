@@ -3,8 +3,10 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.pris
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.RequestEntity
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
@@ -27,8 +29,8 @@ class HmppsAuthClient(@Qualifier("restTemplate")  private var restTemplate: Rest
   private lateinit var hmppsAuthPassword: String
   fun getAccessToken(): String {
     val headers = LinkedMultiValueMap<String, String>()
-    headers.add("Authorization", getAuthHeader())
-    headers.add("Content-Type", "application/json")
+    headers.add(HttpHeaders.AUTHORIZATION, getAuthHeader())
+    headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
     val response = restTemplate.exchange(
       RequestEntity<Any>(headers, HttpMethod.POST, URI("$hmppsAuthBaseUrl/auth/oauth/token?grant_type=client_credentials")),
       object : ParameterizedTypeReference<HmppsAuthAccessToken>() {},
