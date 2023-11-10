@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
@@ -22,11 +23,16 @@ class PrisonApiClient(
   @Value("\${hmpps.prison.url}")
   private lateinit var hmppsPrisonApiBaseUrl: String
 
+  companion object {
+    private val logger = LoggerFactory.getLogger(PrisonApiClient::class.java)
+  }
+
   fun getPrisonerProfileToken(offenderId: String): PrisonerProfile {
     val accessToken = hmppsAuthClient.getAccessToken()
     val headers = LinkedMultiValueMap<String, String>()
     headers.add("Authorization", accessToken)
     headers.add("Content-Type", "application/json")
+    logger.debug("Calling Prison Api for getting profile for offender id: $offenderId")
     val response = restTemplate.exchange(
       RequestEntity<Any>(
         headers,
@@ -36,6 +42,7 @@ class PrisonApiClient(
       object : ParameterizedTypeReference<PrisonerProfile>() {},
     )
     if (response.statusCode.is2xxSuccessful) {
+      logger.info("Profile received in response from Prison Api for offender id: $offenderId")
       return response.body!!
     } else {
       throw ApiException("Response code ${response.statusCode.value()} making request to Prison Api", HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), "Server Error" )

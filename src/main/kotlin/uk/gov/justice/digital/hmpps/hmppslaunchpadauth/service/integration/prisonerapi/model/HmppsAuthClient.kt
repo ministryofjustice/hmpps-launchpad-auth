@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
@@ -27,10 +28,15 @@ class HmppsAuthClient(@Qualifier("restTemplate")  private var restTemplate: Rest
 
   @Value("\${hmpps.auth.password}")
   private lateinit var hmppsAuthPassword: String
+
+  companion object {
+    private val logger = LoggerFactory.getLogger(HmppsAuthClient::class.java)
+  }
   fun getAccessToken(): String {
     val headers = LinkedMultiValueMap<String, String>()
     headers.add(HttpHeaders.AUTHORIZATION, getAuthHeader())
     headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+    logger.debug("Calling HMPPS Auth service for access token")
     val response = restTemplate.exchange(
       RequestEntity<Any>(headers, HttpMethod.POST, URI("$hmppsAuthBaseUrl/auth/oauth/token?grant_type=client_credentials")),
       object : ParameterizedTypeReference<HmppsAuthAccessToken>() {},
