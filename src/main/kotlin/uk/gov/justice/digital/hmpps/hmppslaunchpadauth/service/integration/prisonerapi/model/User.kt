@@ -7,5 +7,5 @@ data class User(
   @JsonProperty("given_name")
   val givenName: String,
   @JsonProperty("family_name")
-  val familyName: String
+  val familyName: String,
 )

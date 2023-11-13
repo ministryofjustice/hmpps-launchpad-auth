@@ -1,3 +1,0 @@
-insert into public.client  ("id","authorized_grant_types", "auto_approve",  "description", "enabled", "logo_uri", "name", "registered_redirect_uris", "scopes", "secret")
-values ('071ef628-6dcc-4a63-92d0-f77b1ad8e060','["AUTHORIZATION_CODE", "REFRESH_TOKEN"]',false,'Launchpad Auth service for dev testing.',true,'https://images.squarespace-cdn.com/content/v1/63cfa8f7c5cc7847e2d7c430/844e951d-ee55-4e42-a954-fecb63e48730/01_02_White%2Bout%2Bof%2Bdark%2Bpurple.jpeg?format=1500w','Launchpad Auth dev Test','["http://localhost:8080/test"]','["USER_BASIC_READ", "USER_BOOKING_READ", "USER_ESTABLISHMENT_READ", "USER_CLIENTS_READ", "USER_CLIENTS_DELETE"]','$2a$10$bSkUEq2h8pdL66AOEXcFW.ToNmTRz1.5sfELWwtHgGpQCeysktiBK'
-       );

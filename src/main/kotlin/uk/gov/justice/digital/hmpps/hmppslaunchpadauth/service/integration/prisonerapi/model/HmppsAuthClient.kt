@@ -18,7 +18,7 @@ import java.net.URI
 import java.util.*
 
 @Component
-class HmppsAuthClient(@Qualifier("restTemplate")  private var restTemplate: RestTemplate) {
+class HmppsAuthClient(@Qualifier("restTemplate") private var restTemplate: RestTemplate) {
 
   @Value("\${hmpps.auth.url}")
   private lateinit var hmppsAuthBaseUrl: String
@@ -44,12 +44,12 @@ class HmppsAuthClient(@Qualifier("restTemplate")  private var restTemplate: Rest
     if (response.statusCode.is2xxSuccessful) {
       return "Bearer ${response.body!!.accessToken}"
     } else {
-      throw ApiException("Response code ${response.statusCode.value()} making request to Prison Api", HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), "Server Error" )
+      throw ApiException("Response code ${response.statusCode.value()} making request to Prison Api", HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), "Server Error")
     }
     return "Bearer ${response.body.accessToken}"
   }
 
-  private fun getAuthHeader() : String {
+  private fun getAuthHeader(): String {
     val encoder = Base64.getEncoder()
     val authCode = String(encoder.encode("$hmppsAuthUsername:$hmppsAuthPassword".toByteArray(Charsets.UTF_8)))
     return "Basic $authCode"

@@ -17,7 +17,7 @@ import java.net.URI
 @Component
 class PrisonApiClient(
   private var hmppsAuthClient: HmppsAuthClient,
-  @Qualifier("restTemplate")  private var restTemplate: RestTemplate
+  @Qualifier("restTemplate") private var restTemplate: RestTemplate,
 ) {
 
   @Value("\${hmpps.prison.url}")
@@ -45,8 +45,7 @@ class PrisonApiClient(
       logger.info("Profile received in response from Prison Api for offender id: $offenderId")
       return response.body!!
     } else {
-      throw ApiException("Response code ${response.statusCode.value()} making request to Prison Api", HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), "Server Error" )
+      throw ApiException("Response code ${response.statusCode.value()} making request to Prison Api", HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), "Server Error")
     }
-
   }
 }

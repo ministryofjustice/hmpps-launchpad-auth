@@ -10,7 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.priso
 class AuthServiceConfig {
 
   @Bean
-  fun bCryptPasswordEncoder() : BCryptPasswordEncoder {
+  fun bCryptPasswordEncoder(): BCryptPasswordEncoder {
     return BCryptPasswordEncoder()
   }
 

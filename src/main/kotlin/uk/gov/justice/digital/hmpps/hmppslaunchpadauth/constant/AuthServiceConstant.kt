@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant
 
-
 class AuthServiceConstant {
   companion object {
     const val CODE = "code"

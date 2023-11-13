@@ -181,10 +181,7 @@ class SsoLogInService(
         )
       if (userApprovedClientIfExist.isPresent) {
         val userApprovedClient = userApprovedClientIfExist.get()
-        if (!((userApprovedClient.scopes.containsAll(ssoRequest.client.scopes) && ssoRequest.client.scopes.containsAll(
-            userApprovedClient.scopes,
-          )))
-        ) {
+        if (!((userApprovedClient.scopes.containsAll(ssoRequest.client.scopes) && ssoRequest.client.scopes.containsAll(userApprovedClient.scopes)))) {
           // if record exist approval require only when scope varies
           approvalRequired = true
           userApprovedClient.scopes = ssoRequest.client.scopes
