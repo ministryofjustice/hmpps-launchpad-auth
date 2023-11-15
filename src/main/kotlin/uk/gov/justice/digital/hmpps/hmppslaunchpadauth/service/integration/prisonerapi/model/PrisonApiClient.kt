@@ -12,6 +12,7 @@ import org.springframework.http.RequestEntity
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.RestTemplate
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INTERNAL_SERVER_ERROR_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import java.net.URI
@@ -46,7 +47,7 @@ class PrisonApiClient(
     if (response.statusCode.is2xxSuccessful) {
       return response.body!!
     } else {
-      throw ApiException("Response code ${response.statusCode.value()} making request to Prison Api", HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), "Server Error")
+      throw ApiException("Response code ${response.statusCode.value()} making request to Prison Api", HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), INTERNAL_SERVER_ERROR_MSG)
     }
   }
 }
