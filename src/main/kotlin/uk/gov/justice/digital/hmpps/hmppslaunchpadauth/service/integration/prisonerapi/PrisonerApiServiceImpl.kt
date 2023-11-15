@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Booking
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.OffenderBooking
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.PrisonApiClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.PrisonEstablishments
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.User
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.UserClaims
@@ -14,7 +14,7 @@ import java.util.*
 
 @Service
 class PrisonerApiServiceImpl(
-  private var offenderBooking: OffenderBooking,
+  private var offenderBooking: PrisonApiClient,
   @Qualifier("establishments")
   private var prisonEstablishments: PrisonEstablishments,
 ) : PrisonerApiService {
