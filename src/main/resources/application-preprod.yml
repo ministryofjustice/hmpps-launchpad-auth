@@ -3,3 +3,8 @@ azure:
 launchpad:
   auth:
     iss-url: https://launchpad-auth-preprod.hmpps.service.justice.gov.uk
+hmpps:
+  auth:
+    url: https://sign-in-preprod.hmpps.service.justice.gov.uk
+  prison-api:
+    url: https://api-preprod.prison.service.justice.gov.uk

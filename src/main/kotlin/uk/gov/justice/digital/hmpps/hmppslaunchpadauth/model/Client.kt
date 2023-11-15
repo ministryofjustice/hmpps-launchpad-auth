@@ -39,7 +39,7 @@ data class Client(
   val name: String,
 
   @Column(name = "logo_uri")
-  val logoUri: String,
+  val logoUri: String?,
 
   @Column(name = "description")
   val description: String,

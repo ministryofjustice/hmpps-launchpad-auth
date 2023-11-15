@@ -32,11 +32,11 @@ class HmppsAuthClient(@Qualifier("restTemplate") private var restTemplate: RestT
   companion object {
     private val logger = LoggerFactory.getLogger(HmppsAuthClient::class.java)
   }
-  fun getAccessToken(): String {
+  fun getBearerToken(): String {
     val headers = LinkedMultiValueMap<String, String>()
-    headers.add(HttpHeaders.AUTHORIZATION, getAuthHeader())
+    headers.add(HttpHeaders.AUTHORIZATION, getBasicAuthHeader())
     headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-    logger.debug("Calling HMPPS Auth service for access token")
+    logger.info("Calling HMPPS Auth service for access token")
     val response = restTemplate.exchange(
       RequestEntity<Any>(headers, HttpMethod.POST, URI("$hmppsAuthBaseUrl/auth/oauth/token?grant_type=client_credentials")),
       object : ParameterizedTypeReference<HmppsAuthAccessToken>() {},
@@ -46,10 +46,9 @@ class HmppsAuthClient(@Qualifier("restTemplate") private var restTemplate: RestT
     } else {
       throw ApiException("Response code ${response.statusCode.value()} making request to Prison Api", HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), "Server Error")
     }
-    return "Bearer ${response.body.accessToken}"
   }
 
-  private fun getAuthHeader(): String {
+  private fun getBasicAuthHeader(): String {
     val encoder = Base64.getEncoder()
     val authCode = String(encoder.encode("$hmppsAuthUsername:$hmppsAuthPassword".toByteArray(Charsets.UTF_8)))
     return "Basic $authCode"

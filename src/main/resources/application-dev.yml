@@ -6,7 +6,5 @@ launchpad:
 hmpps:
   auth:
     url: https://sign-in-dev.hmpps.service.justice.gov.uk
-    username: ${HMPPS_AUTH_CLIENT_ID}
-    password: ${HMPPS_AUTH_CLIENT_SECRET}
-  prison:
+  prison-api:
     url: https://prison-api-dev.prison.service.justice.gov.uk

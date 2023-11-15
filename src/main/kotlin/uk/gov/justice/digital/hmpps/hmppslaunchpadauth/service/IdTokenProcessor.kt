@@ -30,8 +30,9 @@ class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProc
       if (!userIdValidator.isValid(userId)) {
         logger.warn("Potentially invalid user id: {}", userId)
       }
-      val username = userId.substringBefore("@")
+      var username = userId.substringBefore("@")
       logger.info("Logged user id : {}", username)
+      username = username.trim()
       return username
     } else {
       val message = "User id not found in payload"

@@ -4,7 +4,7 @@ create table public.client (
                                auto_approve boolean,
                                description character varying(255) not null,
                                enabled boolean,
-                               logo_uri character varying(255) not null,
+                               logo_uri character varying(255),
                                name character varying(255) not null,
                                registered_redirect_uris jsonb not null,
                                scopes jsonb not null,

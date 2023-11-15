@@ -65,6 +65,10 @@ management:
     info:
       cache:
         time-to-live: 2000ms
+hmpps:
+  auth:
+    username: ${HMPPS_AUTH_CLIENT_ID}
+    password: ${HMPPS_AUTH_CLIENT_SECRET}
 launchpad:
   auth:
     allowlisted-scopes: openid,email,profile
@@ -148,7 +152,6 @@ launchpad:
      WYI:
       agencyId: WYI
       name: wetherby
-      formattedName: Wetherby
       displayName: HMYOI Wetherby
       youth: true
 azure:
