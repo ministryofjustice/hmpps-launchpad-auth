@@ -33,7 +33,7 @@ class OffenderBooking(
     val accessToken = hmppsAuthClient.getBearerToken()
     val headers = LinkedMultiValueMap<String, String>()
     headers.add(HttpHeaders.AUTHORIZATION, accessToken)
-    headers.add("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+    headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
     logger.info("Calling Prison Api for getting profile for offender id: $offenderId")
     val response = restTemplate.exchange(
       RequestEntity<Any>(
