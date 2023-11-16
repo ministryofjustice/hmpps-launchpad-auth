@@ -105,7 +105,8 @@ class UserApprovedClientControllerTest(@Autowired private var userApprovedClient
     Mockito.`when`(tokenAuthentication.authenticate("Bearer x.y.z")).thenReturn(
       AuthenticationUserInfo(
         UUID.randomUUID(),
-        USER_ID, setOf(Scope.USER_CLIENTS_READ),
+        USER_ID,
+        setOf(Scope.USER_CLIENTS_READ),
       ),
     )
     assertThrows(ApiException::class.java) {
@@ -123,7 +124,8 @@ class UserApprovedClientControllerTest(@Autowired private var userApprovedClient
     Mockito.`when`(tokenAuthentication.authenticate("Bearer x.y.z")).thenReturn(
       AuthenticationUserInfo(
         UUID.randomUUID(),
-        "${USER_ID}@gmail.com", setOf(Scope.USER_CLIENTS_READ),
+        "$USER_ID@gmail.com",
+        setOf(Scope.USER_CLIENTS_READ),
       ),
     )
     assertThrows(ApiException::class.java) {

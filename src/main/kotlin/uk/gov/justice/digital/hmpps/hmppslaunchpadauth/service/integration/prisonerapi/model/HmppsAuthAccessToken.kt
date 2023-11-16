@@ -2,10 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.pris
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class User(
-  val id: String,
-  @JsonProperty("given_name")
-  val givenName: String,
-  @JsonProperty("family_name")
-  val familyName: String,
+data class HmppsAuthAccessToken(
+  @JsonProperty("access_token")
+  val accessToken: String,
 )

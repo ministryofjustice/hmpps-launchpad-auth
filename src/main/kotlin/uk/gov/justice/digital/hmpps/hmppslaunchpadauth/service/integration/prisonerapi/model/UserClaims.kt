@@ -3,5 +3,5 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.pris
 data class UserClaims(
   val booking: Booking,
   val establishment: Establishment,
-  val user: User
+  val user: User,
 )

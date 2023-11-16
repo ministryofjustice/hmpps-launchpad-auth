@@ -20,9 +20,11 @@ class IdTokenPayload {
     issuerUrl: String,
   ): LinkedHashMap<String, Any> {
     var claims = LinkedHashMap<String, Any>()
-    claims["name"] = "${user.givenName} ${user.familyName}"
-    claims["given_name"] = user.givenName
-    claims["family_name"] = user.familyName
+    if (scopes.contains(Scope.USER_BASIC_READ)) {
+      claims["name"] = "${user.givenName} ${user.familyName}"
+      claims["given_name"] = user.givenName
+      claims["family_name"] = user.familyName
+    }
     if (nonce != null) {
       claims["nonce"] = nonce
     }

@@ -73,9 +73,9 @@ class SsoLogInService(
       clientId,
     )
     return UriComponentsBuilder.fromHttpUrl(builtAzureOauth2Url())
-      .queryParam("response_type", "id_token email")
+      .queryParam("response_type", "id_token")
       .queryParam("client_id", launchpadClientId)
-      .queryParam("scope", "openid")
+      .queryParam("scope", "openid email")
       .queryParam("state", ssoRequest.id)
       .queryParam("nonce", ssoRequest.nonce)
       .queryParam("response_mode", "form_post")
@@ -181,10 +181,7 @@ class SsoLogInService(
         )
       if (userApprovedClientIfExist.isPresent) {
         val userApprovedClient = userApprovedClientIfExist.get()
-        if (!((userApprovedClient.scopes.containsAll(ssoRequest.client.scopes) && ssoRequest.client.scopes.containsAll(
-            userApprovedClient.scopes,
-          )))
-        ) {
+        if (!((userApprovedClient.scopes.containsAll(ssoRequest.client.scopes) && ssoRequest.client.scopes.containsAll(userApprovedClient.scopes)))) {
           // if record exist approval require only when scope varies
           approvalRequired = true
           userApprovedClient.scopes = ssoRequest.client.scopes

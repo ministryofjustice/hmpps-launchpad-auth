@@ -16,5 +16,5 @@ data class Token(
   val tokenType: String,
 
   @JsonProperty("expires_in")
-  val expiresIn: Long
+  val expiresIn: Long,
 )

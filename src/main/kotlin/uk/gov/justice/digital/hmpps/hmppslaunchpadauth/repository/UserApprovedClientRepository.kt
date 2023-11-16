@@ -13,7 +13,7 @@ interface UserApprovedClientRepository : JpaRepository<UserApprovedClient, UUID>
   @Query(
     value = "SELECT * FROM user_approved_client WHERE user_id = ?1 AND client_id IS NOT NULL",
     countQuery = "SELECT count(*) FROM user_approved_client WHERE user_id = ?1 AND client_id IS NOT NULL",
-    nativeQuery = true
+    nativeQuery = true,
   )
   fun findUserApprovedClientsByUserIdAndClientIdsIsNotNull(userId: String, pageable: Pageable): Page<UserApprovedClient>
 

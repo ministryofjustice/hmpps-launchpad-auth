@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class ApiError(
   val error: String,
-
   @JsonProperty("error_description")
-  val errorDescription: String
+  val errorDescription: String,
 )

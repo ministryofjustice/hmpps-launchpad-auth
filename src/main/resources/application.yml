@@ -65,10 +65,95 @@ management:
     info:
       cache:
         time-to-live: 2000ms
+hmpps:
+  auth:
+    username: ${HMPPS_AUTH_CLIENT_ID}
+    password: ${HMPPS_AUTH_CLIENT_SECRET}
 launchpad:
   auth:
     allowlisted-scopes: openid,email,profile
     secret: ${LAUNCHPAD_AUTH_SECRET}
+    agencies:
+     BWI:
+      agencyId: BWI
+      name: berwyn
+      displayName: HMP Berwyn
+      youth: false
+     WLI:
+      agencyId: WLI
+      name: wayland
+      displayName: HMP Wayland
+      youth: false
+     CKI:
+      agencyId: CKI
+      name: cookhamwood
+      displayName: HMYOI Cookham Wood
+      youth: true
+     EEI:
+      agencyId: EEI
+      name: erlestoke
+      displayName: HMP Erlestoke
+      youth: false
+     GHI:
+      agencyId: GHI
+      name: garth
+      displayName: HMP Garth
+      youth: false
+     LHI:
+      agencyId: LHI
+      name: lindholme
+      displayName: HMP Lindholme
+      youth: false
+     NHI:
+      agencyId: NHI
+      name: newhall
+      displayName: HMPYOI New Hall
+      youth: false
+     RNI:
+      agencyId: RNI
+      name: ranby
+      displayName: HMP Ranby
+      youth: false
+     SHI:
+      agencyId: SHI
+      name: stokeheath
+      displayName: HMPYOI Stoke Heath
+      youth: false
+     STI:
+      agencyId: STI
+      name: styal
+      displayName: HMPYOI Styal
+      youth: false
+     SLI:
+      agencyId: SLI
+      name: swaleside
+      displayName: HMP Swaleside
+      youth: false
+     MTI:
+      agencyId: MTI
+      name: themount
+      displayName: HMP The Mount
+      youth: false
+     FYI:
+      agencyId: FYI
+      name: felthama
+      displayName: HMYOI Feltham A
+      youth: true
+     FMI:
+      agencyId: FMI
+      name: felthamb
+      displayName: HMYOI Feltham B
+      youth: true
+     WNI:
+      agencyId: WNI
+      name: werrington
+      displayName: HMYOI Werrington
+      youth: false
+     WYI:
+      agencyId: WYI
+      name: wetherby
+      displayName: HMYOI Wetherby
+      youth: true
 azure:
   oauth2-base-url: https://login.microsoftonline.com
   oauth2-api-path: oauth2/v2.0/authorize

@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant
 
-
 class AuthServiceConstant {
   companion object {
     const val CODE = "code"
@@ -15,6 +14,5 @@ class AuthServiceConstant {
     const val INVALID_REDIRECT_URI_MSG = "The requested redirect uri is invalid or not found"
     const val EXPIRE_TOKEN_MSG = "Token has expired"
     const val INVALID_TOKEN_MSG = "Invalid token"
-    const val REDIRECTION_CODE = 302
   }
 }

@@ -11,7 +11,13 @@ launchpad:
     allowlisted-scopes: openid,email,profile
     secret: random_secret_random_secret_random_secret
     iss-url: https://launchpad-auth-dev.hmpps.service.justice.gov.uk
-
+hmpps:
+  auth:
+    url: https://sign-in-dev.hmpps.service.justice.gov.uk
+    username: anything
+    password: secret
+  prison-api:
+    url: https://prison-api-dev.prison.service.justice.gov.uk
 management.endpoint:
   health.cache.time-to-live: 0
   info.cache.time-to-live: 0
