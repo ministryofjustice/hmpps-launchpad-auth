@@ -8,7 +8,7 @@
 
 
 The Auth service application needs some kubernetes secrets which can be accessed from hmpps-launchpad-auth-dev namespace.
-Use kubectl command to get namespace secrets
+Use kubectl command to get namespace secrets.
 ```
 Kubectl -n hmpps-launchpad-auth-dev get secrets.
 ```
