@@ -18,5 +18,5 @@ spec:
               args:
                 - /bin/sh
                 - -c
-                - curl -XPOST --connect-timeout 5 --max-time 10 --retry 5 --retry-delay 0 --retry-max-time 40 http://hmpps-launchpad-auth-dev/admin/v1/purge-inactive-users
+                - curl -XPOST --connect-timeout 5 --max-time 10 --retry 5 --retry-delay 0 --retry-max-time 40 http://hmpps-launchpad-auth-dev/v1/admin/purge-inactive-users
           restartPolicy: Never
