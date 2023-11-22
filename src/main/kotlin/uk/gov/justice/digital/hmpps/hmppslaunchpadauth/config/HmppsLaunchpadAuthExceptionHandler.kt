@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.bind.MissingRequestHeaderException
+import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
@@ -82,7 +83,20 @@ class HmppsLaunchpadAuthExceptionHandler {
           ),
         )
     }
+    if (e is MissingServletRequestParameterException) {
+      log.error("MissingServletRequestParameterException due to invalid request param {}", e.message)
+      return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST.value())
+        .body(
+          ApiError(
+            error = ApiErrorTypes.INVALID_REQUEST.toString(),
+            errorDescription = "Invalid value passed in ${e.parameterName} for ${e.parameterType}",
+          ),
+        )
+    }
+
     log.error("Unexpected exception {}", e.message)
+    println(e.stackTrace)
     return ResponseEntity
       .status(HttpStatus.INTERNAL_SERVER_ERROR)
       .body(
