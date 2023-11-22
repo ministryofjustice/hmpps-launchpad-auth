@@ -15,6 +15,6 @@ interface SsoRequestRepository : JpaRepository<SsoRequest, UUID> {
 
   @Transactional
   @Modifying
-  @Query(value =  "delete from sso_request  where created_date < ?1", nativeQuery = true)
+  @Query(value = "delete from sso_request  where created_date < ?1", nativeQuery = true)
   fun deleteSsoRequestByCreatedDateBefore(date: LocalDateTime)
 }

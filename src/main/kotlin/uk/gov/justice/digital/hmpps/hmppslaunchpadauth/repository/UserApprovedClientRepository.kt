@@ -24,6 +24,6 @@ interface UserApprovedClientRepository : JpaRepository<UserApprovedClient, UUID>
 
   @Transactional
   @Modifying
-  @Query(value =  "delete from user_approved_client  where last_modified_date < ?1", nativeQuery = true)
+  @Query(value = "delete from user_approved_client  where last_modified_date < ?1", nativeQuery = true)
   fun deleteInactiveUsersApprovedClient(date: LocalDateTime)
 }

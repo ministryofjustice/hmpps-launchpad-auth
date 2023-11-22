@@ -10,9 +10,9 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.UserApprovedClien
 
 @RestController
 @RequestMapping("/v1/admin")
-class AuthJobsEndpoints (
-  private  var userApprovedClientService: UserApprovedClientService,
-  private  var ssoRequestService: SsoRequestService,
+class AuthJobsEndpoints(
+  private var userApprovedClientService: UserApprovedClientService,
+  private var ssoRequestService: SsoRequestService,
 ) {
 
   @GetMapping("/purge-stale-sso-tokens")
