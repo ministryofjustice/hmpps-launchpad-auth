@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: purge-inactive-users-cronjob
+spec:
+  schedule: "0 0 * * *"
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 5
+  startingDeadlineSeconds: 600
+  successfulJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: housekeeping
+              image: ghcr.io/ministryofjustice/hmpps-devops-tools
+              args:
+                - /bin/sh
+                - -c
+                - curl -XPOST --connect-timeout 5 --max-time 10 --retry 5 --retry-delay 0 --retry-max-time 40 http://hmpps-launchpad-auth-dev/admin/v1/purge-inactive-users
+          restartPolicy: Never

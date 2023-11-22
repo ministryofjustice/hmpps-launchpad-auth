@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_REQUEST_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
@@ -14,6 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedClientRepository
+import java.time.LocalDateTime
 import java.util.*
 
 @Service
@@ -88,6 +90,13 @@ class UserApprovedClientService(
         )
       }
     userApprovedClientRepository.deleteById(userApprovedClient.id)
+  }
+
+  @Async
+  fun deleteInActiveUserApprovedClient() {
+    val date = LocalDateTime.now().minusYears(7L)
+    userApprovedClientRepository.deleteInactiveUsersApprovedClient(date)
+    logger.info("User approved clients older than 7years deleted")
   }
 
   private fun getUserApprovedClientsDto(
