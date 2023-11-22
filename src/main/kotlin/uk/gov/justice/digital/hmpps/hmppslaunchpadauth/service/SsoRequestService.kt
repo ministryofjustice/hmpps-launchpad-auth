@@ -95,7 +95,7 @@ class SsoRequestService(
 
   @Async
   fun deleteOldSsoRequests() {
-    val date = LocalDateTime.now().minusMinutes(10L)
+    val date = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(10L)
     ssoRequestRepository.deleteSsoRequestByCreatedDateBefore(date)
     logger.info("Sso requests older than 10 minutes deleted")
   }

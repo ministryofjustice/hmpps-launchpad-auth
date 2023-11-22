@@ -16,6 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedClientRepository
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 
 @Service
@@ -94,7 +95,7 @@ class UserApprovedClientService(
 
   @Async
   fun deleteInActiveUserApprovedClient() {
-    val date = LocalDateTime.now().minusYears(7L)
+    val date = LocalDateTime.now(ZoneOffset.UTC).minusYears(7L)
     userApprovedClientRepository.deleteInactiveUsersApprovedClient(date)
     logger.info("User approved clients older than 7years deleted")
   }
