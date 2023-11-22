@@ -97,7 +97,7 @@ class UserApprovedClientService(
   fun deleteInActiveUserApprovedClient() {
     val date = LocalDateTime.now(ZoneOffset.UTC).minusYears(7L)
     userApprovedClientRepository.deleteInactiveUsersApprovedClient(date)
-    logger.info("User approved clients older than 7years deleted")
+    logger.info("User approved clients older than 7 years deleted")
   }
 
   private fun getUserApprovedClientsDto(
