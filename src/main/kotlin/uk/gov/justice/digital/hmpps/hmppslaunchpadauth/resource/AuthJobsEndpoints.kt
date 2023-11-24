@@ -18,12 +18,12 @@ class AuthJobsEndpoints(
   @GetMapping("/purge-stale-sso-tokens")
   fun deleteOldSsoRequest(): ResponseEntity<Void> {
     ssoRequestService.deleteOldSsoRequests()
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+    return ResponseEntity.status(HttpStatus.ACCEPTED).build()
   }
 
   @GetMapping("/purge-inactive-users")
   fun deleteInactiveUserApproveClient(): ResponseEntity<Void> {
     userApprovedClientService.deleteInActiveUserApprovedClient()
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+    return ResponseEntity.status(HttpStatus.ACCEPTED).build()
   }
 }
