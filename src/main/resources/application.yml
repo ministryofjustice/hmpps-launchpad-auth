@@ -71,6 +71,7 @@ hmpps:
     password: ${HMPPS_AUTH_CLIENT_SECRET}
 launchpad:
   auth:
+    inactive-users-per-page: 50
     allowlisted-scopes: openid,email,profile
     secret: ${LAUNCHPAD_AUTH_SECRET}
     agencies:

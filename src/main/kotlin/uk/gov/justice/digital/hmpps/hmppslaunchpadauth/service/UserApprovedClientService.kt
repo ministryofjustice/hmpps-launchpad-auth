@@ -1,11 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_REQUEST_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
@@ -18,6 +18,8 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedCl
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
 
 @Service
 class UserApprovedClientService(
@@ -27,6 +29,9 @@ class UserApprovedClientService(
   companion object {
     private val logger = LoggerFactory.getLogger(UserApprovedClientService::class.java)
   }
+
+  @Value("\${launchpad.auth.inactive-users-per-page}")
+  private lateinit var inactiveUsersSizePerPage: String
 
   fun upsertUserApprovedClient(userApprovedClient: UserApprovedClient): UserApprovedClient {
     logger.info(
@@ -93,11 +98,35 @@ class UserApprovedClientService(
     userApprovedClientRepository.deleteById(userApprovedClient.id)
   }
 
-  @Async
   fun deleteInActiveUserApprovedClient() {
+    logger.info("Delete User approved clients older than 7 years")
+    var pageNumber = 0
+    val sizePerPage = inactiveUsersSizePerPage.toInt()
+    var remaining = true
     val date = LocalDateTime.now(ZoneOffset.UTC).minusYears(7L)
-    userApprovedClientRepository.deleteInactiveUsersApprovedClient(date)
-    logger.info("User approved clients older than 7 years deleted")
+    val idsToBeDeleted = HashSet<UUID>()
+    while (remaining) {
+      val pageRequest = PageRequest.of(pageNumber, sizePerPage).withSort(Sort.Direction.DESC, "last_modified_date")
+      val pageResult = userApprovedClientRepository.findAllUserApprovedClientsByLastModifiedDate(date, pageRequest)
+      pageResult.content.forEach { x ->
+        var inactive = true
+        val usersApprovedClients = userApprovedClientRepository.findUserApprovedClientsByUserId(x.userId)
+        usersApprovedClients.forEach { y ->
+          if (y.lastModifiedDate.isAfter(date)) {
+            inactive = false
+          }
+        }
+        if (inactive) {
+          idsToBeDeleted.add(x.id)
+        }
+      }
+      if (pageResult.totalElements <= ((pageNumber + 1) * sizePerPage)) {
+        remaining = false
+      } else {
+        pageNumber += 1
+      }
+    }
+    userApprovedClientRepository.deleteAllById(idsToBeDeleted)
   }
 
   private fun getUserApprovedClientsDto(

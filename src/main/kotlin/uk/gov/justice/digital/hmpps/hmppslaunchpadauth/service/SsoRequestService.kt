@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INTERNAL_SERVER_ERROR_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
@@ -93,10 +92,9 @@ class SsoRequestService(
     return ssoRequestRepository.findSsoRequestByAuthorizationCode(code)
   }
 
-  @Async
   fun deleteOldSsoRequests() {
-    val date = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(10L)
+    logger.info("Delete SSO requests older than 10 minutes")
+    val date = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(5L)
     ssoRequestRepository.deleteSsoRequestByCreatedDateBefore(date)
-    logger.info("Sso requests older than 10 minutes deleted")
   }
 }

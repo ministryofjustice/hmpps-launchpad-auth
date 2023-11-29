@@ -27,12 +27,12 @@ class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProc
     // The claim containing user id will be checked again after integrating with prison api
     val userId = getClaimFromPayload(payload, "email")
     if (userId != null) {
-      if (!userIdValidator.isValid(userId)) {
-        logger.warn("Potentially invalid user id: {}", userId)
-      }
       var username = userId.substringBefore("@")
       logger.info("Logged user id : {}", username)
       username = username.trim()
+      if (!userIdValidator.isValid(userId)) {
+        logger.warn("Potentially invalid user id: {}", userId)
+      }
       return username
     } else {
       val message = "User id not found in payload"
