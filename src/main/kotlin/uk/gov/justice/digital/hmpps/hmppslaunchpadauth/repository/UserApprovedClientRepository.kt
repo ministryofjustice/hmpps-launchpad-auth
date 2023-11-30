@@ -21,11 +21,11 @@ interface UserApprovedClientRepository : JpaRepository<UserApprovedClient, UUID>
   fun findUserApprovedClientByUserIdAndClientId(userId: String, clientId: UUID): Optional<UserApprovedClient>
 
   @Query(
-    value = "SELECT * FROM user_approved_client WHERE last_modified_date < ?1",
-    countQuery = "SELECT count(*) FROM user_approved_client WHERE last_modified_date < ?1",
+    value = "SELECT DISTINCT user_id  FROM user_approved_client WHERE last_modified_date < ?1",
+    countQuery = "SELECT DISTINCT  count(user_id ) FROM user_approved_client WHERE last_modified_date < ?1",
     nativeQuery = true,
   )
-  fun findAllUserApprovedClientsByLastModifiedDate(date: LocalDateTime, pageable: Pageable): Page<UserApprovedClient>
+  fun findUserApprovedClientByDistinctUserIdAndLastModifiedDateIsLesserThan(date: LocalDateTime, pageable: Pageable): Page<String>
 
   fun findUserApprovedClientsByUserId(userId: String): List<UserApprovedClient>
 }

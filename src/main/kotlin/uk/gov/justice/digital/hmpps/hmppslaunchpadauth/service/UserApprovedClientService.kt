@@ -101,32 +101,33 @@ class UserApprovedClientService(
   fun deleteInActiveUserApprovedClient() {
     logger.info("Delete User approved clients older than 7 years")
     var pageNumber = 0
-    val sizePerPage = inactiveUsersSizePerPage.toInt()
     var remaining = true
     val date = LocalDateTime.now(ZoneOffset.UTC).minusYears(7L)
-    val idsToBeDeleted = HashSet<UUID>()
+    val userApprovedClientsToBeDeleted = HashSet<UUID>()
+    val usersToBeDeleted = HashSet<String>()
     while (remaining) {
-      val pageRequest = PageRequest.of(pageNumber, sizePerPage).withSort(Sort.Direction.DESC, "last_modified_date")
-      val pageResult = userApprovedClientRepository.findAllUserApprovedClientsByLastModifiedDate(date, pageRequest)
+      val pageRequest = PageRequest.of(pageNumber, inactiveUsersSizePerPage.toInt())
+      val pageResult = userApprovedClientRepository
+        .findUserApprovedClientByDistinctUserIdAndLastModifiedDateIsLesserThan(date, pageRequest)
       pageResult.content.forEach { x ->
-        var inactive = true
-        val usersApprovedClients = userApprovedClientRepository.findUserApprovedClientsByUserId(x.userId)
-        usersApprovedClients.forEach { y ->
-          if (y.lastModifiedDate.isAfter(date)) {
-            inactive = false
+        if (!usersToBeDeleted.contains(x)) {
+          val usersApprovedClients = userApprovedClientRepository.findUserApprovedClientsByUserId(x)
+          val filtered = usersApprovedClients.filter { userApprovedClient -> userApprovedClient.lastModifiedDate.isBefore(date) }
+          if (usersApprovedClients.size == filtered.size) {
+            usersToBeDeleted.add(usersApprovedClients[0].userId)
+            usersApprovedClients.forEach { userApprovedClient -> userApprovedClientsToBeDeleted.add(userApprovedClient.id) }
           }
         }
-        if (inactive) {
-          idsToBeDeleted.add(x.id)
-        }
       }
-      if (pageResult.totalElements <= ((pageNumber + 1) * sizePerPage)) {
-        remaining = false
-      } else {
-        pageNumber += 1
-      }
+      remaining = !pageResult.isLast
+      pageNumber += 1
     }
-    userApprovedClientRepository.deleteAllById(idsToBeDeleted)
+    logger.info(
+      "Number of user approved clients to be deleted: '{}' and number of users to be deleted: '{}'",
+      userApprovedClientsToBeDeleted.size,
+      usersToBeDeleted.size,
+    )
+    userApprovedClientRepository.deleteAllById(userApprovedClientsToBeDeleted)
   }
 
   private fun getUserApprovedClientsDto(

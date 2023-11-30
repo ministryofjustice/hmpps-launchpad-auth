@@ -1,0 +1,1 @@
+create index ix_user_id_last_modified_date on user_approved_client using btree (user_id, last_modified_date);

@@ -366,4 +366,64 @@ class AdminEndpointIntegrationTest(
     Assertions.assertEquals(HttpStatus.ACCEPTED.value(), response.statusCode.value())
     Assertions.assertEquals(3, userApprovedClientRepository.findAll().size)
   }
+
+  @Test
+  fun `test purge inactive users when for a single user has one active and other inactive users approved clients`() {
+    userApprovedClientRepository.deleteAll()
+    val uacFirst = UserApprovedClient(
+      UUID.randomUUID(),
+      userIDFirst,
+      clientIdOne,
+      setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
+      dateTimeInUTCBefore7Years,
+      dateTimeInUTCBefore7Years,
+    )
+    val uacSecond = UserApprovedClient(
+      UUID.randomUUID(),
+      userIDFirst,
+      clientIdSecond,
+      setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
+      dateTimeInUTCBefore3Years,
+      dateTimeInUTCBefore3Years,
+    )
+    userApprovedClientRepository.saveAll(Arrays.asList(uacFirst, uacSecond))
+    Assertions.assertEquals(2, userApprovedClientRepository.findAll().size)
+    var url = URI("$baseUrl:$port/v1/admin/purge-inactive-users")
+    var response = restTemplate.exchange(
+      RequestEntity<Any>(null, HttpMethod.POST, url),
+      String.javaClass,
+    )
+    Assertions.assertEquals(HttpStatus.ACCEPTED.value(), response.statusCode.value())
+    Assertions.assertEquals(2, userApprovedClientRepository.findAll().size)
+  }
+
+  @Test
+  fun `test purge inactive users when for a single user has all inactive users approved clients`() {
+    userApprovedClientRepository.deleteAll()
+    val uacFirst = UserApprovedClient(
+      UUID.randomUUID(),
+      userIDFirst,
+      clientIdOne,
+      setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
+      dateTimeInUTCBefore7Years,
+      dateTimeInUTCBefore7Years,
+    )
+    val uacSecond = UserApprovedClient(
+      UUID.randomUUID(),
+      userIDFirst,
+      clientIdSecond,
+      setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
+      dateTimeInUTCBefore7Years,
+      dateTimeInUTCBefore7Years,
+    )
+    userApprovedClientRepository.saveAll(Arrays.asList(uacFirst, uacSecond))
+    Assertions.assertEquals(2, userApprovedClientRepository.findAll().size)
+    var url = URI("$baseUrl:$port/v1/admin/purge-inactive-users")
+    var response = restTemplate.exchange(
+      RequestEntity<Any>(null, HttpMethod.POST, url),
+      String.javaClass,
+    )
+    Assertions.assertEquals(HttpStatus.ACCEPTED.value(), response.statusCode.value())
+    Assertions.assertEquals(0, userApprovedClientRepository.findAll().size)
+  }
 }
