@@ -13,12 +13,12 @@ generic-service:
     host: app-hostname.local # override per environment
     tlsSecretName: hmpps-launchpad-auth-cert
     annotations:
-        nginx.ingress.kubernetes.io/configuration-snippet: |
-          server_tokens off;
-          location /v1/admin/** {
-            deny all;
-            return 401;
-          }
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        server_tokens off;
+        location /v1/admin/** {
+          deny all;
+          return 401;
+        }
 
 
   # Environment variables to load into the deployment
