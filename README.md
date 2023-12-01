@@ -10,7 +10,7 @@
 The Auth service application needs some kubernetes secrets which can be accessed from hmpps-launchpad-auth-dev namespace.
 Use kubectl command to get namespace secrets.
 ```
-Kubectl -n hmpps-launchpad-auth-dev get secrets.
+Kubectl -n hmpps-launchpad-auth-dev get secrets
 ```
 
 These secrets can be passed as env variables when running the application from either command line or intellij.
