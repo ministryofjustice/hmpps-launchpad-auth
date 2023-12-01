@@ -94,7 +94,7 @@ class SsoRequestService(
 
   fun deleteOldSsoRequests() {
     logger.info("Delete SSO requests older than 10 minutes")
-    val date = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(5L)
-    ssoRequestRepository.deleteSsoRequestByCreatedDateBefore(date)
+    val date = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(10L)
+    ssoRequestRepository.deleteSsoRequestByCreatedDateIsLessThan(date)
   }
 }

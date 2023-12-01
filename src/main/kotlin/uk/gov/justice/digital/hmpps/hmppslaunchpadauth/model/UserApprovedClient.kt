@@ -15,7 +15,7 @@ import java.util.*
   name = "user_approved_client",
   indexes = [
     Index(name = "ix_user_id_client_id_created_date", columnList = "user_id,client_id,created_date", unique = true),
-    Index(name = "ix_user_id_last_modified_date", columnList = "user_id,last_modified_date", unique = false),
+    Index(name = "ix_last_modified_date", columnList = "last_modified_date", unique = false),
   ],
 )
 data class UserApprovedClient(

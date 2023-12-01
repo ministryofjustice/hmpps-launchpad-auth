@@ -61,7 +61,7 @@ class AdminEndpointIntegrationTest(
   private val userIDSeventh = "userIDSeventh"
   private val dateTimeInUTCBefore7Years = LocalDateTime.now(ZoneOffset.UTC).minusYears(7).minusMinutes(1)
   private val dateTimeInUTCBefore3Years = LocalDateTime.now(ZoneOffset.UTC).minusYears(3)
-  private val dateTimeInUTCBefore5Minutes = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(6)
+  private val dateTimeInUTCBefore5Minutes = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(11)
   private val dateTimeInUTCBefore2Minutes = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(2)
   private lateinit var clientDBOne: Client
   private lateinit var clientDBSecond: Client

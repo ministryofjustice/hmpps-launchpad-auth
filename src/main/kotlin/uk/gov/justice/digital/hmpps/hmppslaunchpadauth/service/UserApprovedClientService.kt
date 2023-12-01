@@ -108,10 +108,10 @@ class UserApprovedClientService(
     while (remaining) {
       val pageRequest = PageRequest.of(pageNumber, inactiveUsersSizePerPage.toInt())
       val pageResult = userApprovedClientRepository
-        .findUserApprovedClientByDistinctUserIdAndLastModifiedDateIsLesserThan(date, pageRequest)
+        .findUserApprovedClientsByLastModifiedDateIsLessThan(date, pageRequest)
       pageResult.content.forEach { x ->
-        if (!usersToBeDeleted.contains(x)) {
-          val usersApprovedClients = userApprovedClientRepository.findUserApprovedClientsByUserId(x)
+        if (!usersToBeDeleted.contains(x.userId)) {
+          val usersApprovedClients = userApprovedClientRepository.findUserApprovedClientsByUserId(x.userId)
           val filtered = usersApprovedClients.filter { userApprovedClient -> userApprovedClient.lastModifiedDate.isBefore(date) }
           if (usersApprovedClients.size == filtered.size) {
             usersToBeDeleted.add(usersApprovedClients[0].userId)

@@ -62,7 +62,6 @@ class TokenGenerationAndValidation {
         val message = "Invalid $token"
         throw ApiException(message, HttpStatus.BAD_REQUEST, ApiErrorTypes.INVALID_TOKEN.toString(), "Invalid refresh token")
       }
-      return Jwts.parserBuilder().setSigningKey(secret.toByteArray(Charsets.UTF_8)).build().parseClaimsJws(token)
     }
 
     fun validateExpireTime(expireAt: Int) {
