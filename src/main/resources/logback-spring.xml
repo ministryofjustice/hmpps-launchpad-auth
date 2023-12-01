@@ -13,11 +13,11 @@
   </appender>
 
   <logger name="uk.gov.justice.digital.hmpps.hmppslaunchpadauth.HmppsLaunchpadAuthKt" additivity="false"
-          level="DEBUG">
+          level="INFO">
     <appender-ref ref="consoleAppender"/>
   </logger>
 
-  <logger name="uk.gov.justice.digital.hmpps" additivity="false" level="DEBUG">
+  <logger name="uk.gov.justice.digital.hmpps" additivity="false" level="INFO">
     <appender-ref ref="consoleAppender"/>
   </logger>
 

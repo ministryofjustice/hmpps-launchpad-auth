@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
+import java.time.LocalDateTime
 import java.util.*
 
 @Repository
@@ -18,4 +19,8 @@ interface UserApprovedClientRepository : JpaRepository<UserApprovedClient, UUID>
   fun findUserApprovedClientsByUserIdAndClientIdsIsNotNull(userId: String, pageable: Pageable): Page<UserApprovedClient>
 
   fun findUserApprovedClientByUserIdAndClientId(userId: String, clientId: UUID): Optional<UserApprovedClient>
+
+  fun findUserApprovedClientsByLastModifiedDateIsLessThan(date: LocalDateTime, pageable: Pageable): Page<UserApprovedClient>
+
+  fun findUserApprovedClientsByUserId(userId: String): List<UserApprovedClient>
 }

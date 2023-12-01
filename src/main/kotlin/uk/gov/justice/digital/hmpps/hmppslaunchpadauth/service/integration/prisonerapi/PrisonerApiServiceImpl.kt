@@ -21,7 +21,7 @@ class PrisonerApiServiceImpl(
 ) : PrisonerApiService {
   override fun getPrisonerData(prisonerId: String): UserClaims {
     val profile = offenderBooking.getOffenderBooking(prisonerId)
-    val user = User(prisonerId, profile.lastName, profile.firstName)
+    val user = User(prisonerId, profile.firstName, profile.lastName)
     val establishment = prisonEstablishments.agencies.get(profile.agencyId)
     if (establishment == null) {
       val message = "Establishment not yet implemented for agency id ${profile.agencyId}"

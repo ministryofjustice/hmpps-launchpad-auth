@@ -1,10 +1,13 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.config
 
+import jakarta.servlet.ServletException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.HttpMediaTypeNotSupportedException
+import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MissingRequestHeaderException
+import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
@@ -69,6 +72,32 @@ class HmppsLaunchpadAuthExceptionHandler {
       )
   }
 
+  @ExceptionHandler(MissingServletRequestParameterException::class)
+  fun handleQueryParamValidationException(e: MissingServletRequestParameterException): ResponseEntity<ApiError> {
+    log.error("MissingServletRequestParameterException due to invalid request param {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.BAD_REQUEST.value())
+      .body(
+        ApiError(
+          error = ApiErrorTypes.INVALID_REQUEST.toString(),
+          errorDescription = "Invalid value passed in ${e.parameterName} for ${e.parameterType}",
+        ),
+      )
+  }
+
+  @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
+  fun handleHttpMethodNotSupported(e: HttpRequestMethodNotSupportedException): ResponseEntity<ApiError> {
+    log.error("HttpRequestMethodNotSupportedException due to invalid HTTP method {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.BAD_REQUEST.value())
+      .body(
+        ApiError(
+          error = ApiErrorTypes.INVALID_REQUEST.toString(),
+          errorDescription = "${e.message}",
+        ),
+      )
+  }
+
   @ExceptionHandler(java.lang.Exception::class)
   fun handleException(e: java.lang.Exception): ResponseEntity<ApiError?>? {
     if (e is MethodArgumentTypeMismatchException) {
@@ -79,6 +108,17 @@ class HmppsLaunchpadAuthExceptionHandler {
           ApiError(
             error = ApiErrorTypes.INVALID_REQUEST.toString(),
             errorDescription = "Invalid value passed in  ${e.name}, ${e.rootCause?.message}",
+          ),
+        )
+    }
+    if (e is ServletException) {
+      log.error("ServletException due to invalid request {}", e.message)
+      return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST.value())
+        .body(
+          ApiError(
+            error = ApiErrorTypes.INVALID_REQUEST.toString(),
+            errorDescription = "${e.message}",
           ),
         )
     }

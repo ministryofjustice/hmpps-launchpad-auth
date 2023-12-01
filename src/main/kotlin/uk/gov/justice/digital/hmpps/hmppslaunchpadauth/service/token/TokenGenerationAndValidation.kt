@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token
 
 import io.jsonwebtoken.Claims
+import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
@@ -55,7 +56,12 @@ class TokenGenerationAndValidation {
     }
 
     fun parseClaims(token: String, secret: String): Jws<Claims> {
-      return Jwts.parserBuilder().setSigningKey(secret.toByteArray(Charsets.UTF_8)).build().parseClaimsJws(token)
+      try {
+        return Jwts.parserBuilder().setSigningKey(secret.toByteArray(Charsets.UTF_8)).build().parseClaimsJws(token)
+      } catch (e: ExpiredJwtException) {
+        val message = "Invalid $token"
+        throw ApiException(message, HttpStatus.BAD_REQUEST, ApiErrorTypes.INVALID_TOKEN.toString(), "Invalid refresh token")
+      }
     }
 
     fun validateExpireTime(expireAt: Int) {

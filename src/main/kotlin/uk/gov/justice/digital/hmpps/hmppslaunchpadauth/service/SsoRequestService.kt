@@ -91,4 +91,10 @@ class SsoRequestService(
   fun getSsoRequestByAuthorizationCode(code: UUID): Optional<SsoRequest> {
     return ssoRequestRepository.findSsoRequestByAuthorizationCode(code)
   }
+
+  fun deleteOldSsoRequests() {
+    logger.info("Delete SSO requests older than 10 minutes")
+    val date = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(10L)
+    ssoRequestRepository.deleteSsoRequestByCreatedDateIsLessThan(date)
+  }
 }

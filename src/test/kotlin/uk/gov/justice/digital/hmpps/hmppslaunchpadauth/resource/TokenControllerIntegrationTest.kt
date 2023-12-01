@@ -1,13 +1,13 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
@@ -80,8 +80,46 @@ class TokenControllerIntegrationTest(
   private val clientNonce: String = "client_nonce"
   private val code = UUID.randomUUID()
 
+  private val wiremock = WireMockServer(8085)
+
   @BeforeEach
   fun beforeEach() {
+    wiremock.start()
+    WireMock.configureFor("localhost", wiremock.port())
+    WireMock.stubFor(
+      WireMock.post(WireMock.urlEqualTo("/auth/oauth/token?grant_type=client_credentials")).willReturn(
+        WireMock.aResponse()
+          .withStatus(HttpStatus.OK.value())
+          .withHeader("Content-Type", "application/json")
+          .withBody(
+            "{   \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}",
+          ),
+      ),
+    )
+    WireMock.stubFor(
+      WireMock.get(WireMock.urlEqualTo("/api/bookings/offenderNo/G2320VD?fullInfo=false&extraInfo=false&csraSummary=false"))
+        .willReturn(
+          WireMock.aResponse()
+            .withStatus(HttpStatus.OK.value())
+            .withHeader("Content-Type", "application/json")
+            .withBody(
+              "{\n" +
+                "    \"offenderNo\": \"G2320VD\",\n" +
+                "    \"bookingId\": 99999,\n" +
+                "    \"bookingNo\": \"88888\",\n" +
+                "    \"offenderId\": 66666,\n" +
+                "    \"rootOffenderId\": 55555,\n" +
+                "    \"firstName\": \"Test\",\n" +
+                "    \"middleName\": \"x\",\n" +
+                "    \"lastName\": \"User\",\n" +
+                "    \"dateOfBirth\": \"2005-11-28\",\n" +
+                "    \"activeFlag\": true,\n" +
+                "    \"agencyId\": \"WLI\",\n" +
+                "    \"assignedLivingUnitId\": 5555\n" +
+                "}",
+            ),
+        ),
+    )
     clientRepository.deleteAll()
     userApprovedClientRepository.deleteAll()
     clientDBOne = Client(
@@ -112,7 +150,7 @@ class TokenControllerIntegrationTest(
         clientId,
         clientState,
         clientNonce,
-        setOf(Scope.USER_CLIENTS_READ, Scope.USER_CLIENTS_DELETE),
+        setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
         REDIRECT_URI,
       ),
       USER_ID,
@@ -122,7 +160,7 @@ class TokenControllerIntegrationTest(
       id,
       userID,
       clientId,
-      setOf(Scope.USER_CLIENTS_READ, Scope.USER_CLIENTS_DELETE),
+      setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
       dateTimeInUTC,
       dateTimeInUTC,
     )
@@ -135,12 +173,13 @@ class TokenControllerIntegrationTest(
   fun tearOff() {
     clientRepository.deleteAll()
     userApprovedClientRepository.deleteAll()
+    wiremock.stop()
   }
 
-  // @Test
+  @Test
   fun `get token and use token for api call`() {
     // confirm sso request record exist before token request
-    assertEquals(true, ssoRequestRepository.findById(ssoRequest.id).isPresent)
+    Assertions.assertEquals(true, ssoRequestRepository.findById(ssoRequest.id).isPresent)
     var headers = LinkedMultiValueMap<String, String>()
     headers.add("Authorization", authorizationHeader)
     var url = URI("$baseUrl:$port/v1/oauth2/token?code=$code&grant_type=authorization_code&redirect_uri=$REDIRECT_URI")
@@ -149,13 +188,13 @@ class TokenControllerIntegrationTest(
       object : ParameterizedTypeReference<Token>() {},
     )
     var token: Token = response.body
-    assertNotNull(token?.idToken)
-    assertNotNull(token?.accessToken)
-    assertNotNull(token?.refreshToken)
-    assertEquals("Bearer", token?.tokenType)
-    assertEquals(3600L, token?.expiresIn)
+    Assertions.assertNotNull(token?.idToken)
+    Assertions.assertNotNull(token?.accessToken)
+    Assertions.assertNotNull(token?.refreshToken)
+    Assertions.assertEquals("Bearer", token?.tokenType)
+    Assertions.assertEquals(3600L, token?.expiresIn)
     // confirm ssorequest deleted
-    assertEquals(true, ssoRequestRepository.findById(ssoRequest.id).isEmpty)
+    Assertions.assertEquals(true, ssoRequestRepository.findById(ssoRequest.id).isEmpty)
     url =
       URI("$baseUrl:$port/v1/oauth2/token?grant_type=refresh_token&nonce=anything&refresh_token=${token.refreshToken}")
     response = restTemplate.exchange(
@@ -164,14 +203,14 @@ class TokenControllerIntegrationTest(
     )
     token = response.body
     assertResponseHeaders(response.headers)
-    assertNotNull(token.idToken)
-    assertNotNull(token.accessToken)
-    assertNotNull(token.refreshToken)
+    Assertions.assertNotNull(token.idToken)
+    Assertions.assertNotNull(token.accessToken)
+    Assertions.assertNotNull(token.refreshToken)
     assertIdTokenClaims(token.idToken)
     assertAccessTokenClaims(token.accessToken)
     assertRefreshTokenClaims(token.refreshToken)
-    assertEquals("Bearer", token?.tokenType)
-    assertEquals(3600L, token?.expiresIn)
+    Assertions.assertEquals("Bearer", token?.tokenType)
+    Assertions.assertEquals(3600L, token?.expiresIn)
 
     // use expire refreshToken
     var exception = Assertions.assertThrows(HttpClientErrorException::class.java) {
@@ -184,7 +223,7 @@ class TokenControllerIntegrationTest(
         object : ParameterizedTypeReference<Token>() {},
       )
     }
-    assertEquals(HttpStatus.BAD_REQUEST.value(), exception.statusCode.value())
+    Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), exception.statusCode.value())
     assertResponseHeaders(exception.responseHeaders)
 
     // using access token in auth header
@@ -197,8 +236,8 @@ class TokenControllerIntegrationTest(
     )
     var pagedResult = apiResponse.body as PagedResult<UserApprovedClientDto>
     assertResponseHeaders(apiResponse.headers)
-    assertEquals(HttpStatus.OK.value(), apiResponse.statusCode.value())
-    assertNotNull(pagedResult.content)
+    Assertions.assertEquals(HttpStatus.OK.value(), apiResponse.statusCode.value())
+    Assertions.assertNotNull(pagedResult.content)
 
     // Using id token in auth header expected response should be Http 401
     headers.remove("Authorization")
@@ -212,7 +251,7 @@ class TokenControllerIntegrationTest(
         ApiError::class.java,
       )
     }
-    assertEquals(HttpStatus.FORBIDDEN.value(), exception.statusCode.value())
+    Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), exception.statusCode.value())
     assertResponseHeaders(exception.responseHeaders)
     // Using refresh token in auth header expected response should be Http 401
     headers.remove("Authorization")
@@ -226,49 +265,49 @@ class TokenControllerIntegrationTest(
         ApiError::class.java,
       )
     }
-    assertEquals(HttpStatus.FORBIDDEN.value(), exception.statusCode.value())
+    Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), exception.statusCode.value())
     assertResponseHeaders(exception.responseHeaders)
   }
 
   private fun assertIdTokenClaims(idToken: String) {
-    assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(idToken, secret))
+    Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(idToken, secret))
     val claims = TokenGenerationAndValidation.parseClaims(idToken, secret).body
     val exp = claims["exp"] as Int
-    assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
-    assertEquals(clientId.toString(), claims["aud"])
-    assertEquals(userID.toString(), claims["sub"])
-    assertEquals("ALORES YKAESSUMAR", claims["name"])
-    assertEquals("ALORES", claims["given_name"])
-    assertEquals("YKAESSUMAR", claims["family_name"])
+    Assertions.assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
+    Assertions.assertEquals(clientId.toString(), claims["aud"])
+    Assertions.assertEquals(userID.toString(), claims["sub"])
+    Assertions.assertEquals("Test User", claims["name"])
+    Assertions.assertEquals("Test", claims["given_name"])
+    Assertions.assertEquals("User", claims["family_name"])
   }
 
   private fun assertAccessTokenClaims(accessToken: String) {
-    assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(accessToken, secret))
+    Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(accessToken, secret))
     val claims = TokenGenerationAndValidation.parseClaims(accessToken, secret).body
     val exp = claims["exp"] as Int
-    assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
-    assertEquals(clientId.toString(), claims["aud"])
-    assertEquals(userID, claims["sub"])
+    Assertions.assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
+    Assertions.assertEquals(clientId.toString(), claims["aud"])
+    Assertions.assertEquals(userID, claims["sub"])
     val scopes = claims["scopes"] as ArrayList<String>
     assertScopes(scopes, userApprovedClientOne.scopes)
   }
 
   private fun assertRefreshTokenClaims(refreshToken: String) {
-    assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(refreshToken, secret))
+    Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(refreshToken, secret))
     val claims = TokenGenerationAndValidation.parseClaims(refreshToken, secret).body
     val exp = claims["exp"] as Int
-    assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
-    assertEquals(clientId.toString(), claims["aud"])
-    assertEquals(userID, claims["sub"])
+    Assertions.assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
+    Assertions.assertEquals(clientId.toString(), claims["aud"])
+    Assertions.assertEquals(userID, claims["sub"])
     val scopes = claims["scopes"] as ArrayList<String>
     assertScopes(scopes, userApprovedClientOne.scopes)
   }
 
   private fun assertScopes(scopes: ArrayList<String>, scopesEnum: Set<Scope>) {
     scopesEnum.forEach { s ->
-      assertTrue(scopes.contains(s.toString()))
+      Assertions.assertTrue(scopes.contains(s.toString()))
     }
-    assertEquals(scopes.size, scopesEnum.size)
+    Assertions.assertEquals(scopes.size, scopesEnum.size)
   }
 
   private fun updateTokenExpireTime(token: String, exp: Long): String {
@@ -282,11 +321,14 @@ class TokenControllerIntegrationTest(
   }
 
   private fun assertResponseHeaders(httpHeaders: HttpHeaders) {
-    assertEquals(listOf(MediaType.APPLICATION_JSON_VALUE), httpHeaders[HttpHeaders.CONTENT_TYPE])
-    assertEquals(listOf("no-cache, no-store, max-age=0, must-revalidate"), httpHeaders[HttpHeaders.CACHE_CONTROL])
-    assertEquals(listOf("no-cache"), httpHeaders[HttpHeaders.PRAGMA])
-    assertEquals(listOf("0"), httpHeaders[HttpHeaders.EXPIRES])
-    assertEquals(listOf("DENY"), httpHeaders["X-Frame-Options"])
-    assertEquals(listOf("nosniff"), httpHeaders["X-Content-Type-Options"])
+    Assertions.assertEquals(listOf(MediaType.APPLICATION_JSON_VALUE), httpHeaders[HttpHeaders.CONTENT_TYPE])
+    Assertions.assertEquals(
+      listOf("no-cache, no-store, max-age=0, must-revalidate"),
+      httpHeaders[HttpHeaders.CACHE_CONTROL],
+    )
+    Assertions.assertEquals(listOf("no-cache"), httpHeaders[HttpHeaders.PRAGMA])
+    Assertions.assertEquals(listOf("0"), httpHeaders[HttpHeaders.EXPIRES])
+    Assertions.assertEquals(listOf("DENY"), httpHeaders["X-Frame-Options"])
+    Assertions.assertEquals(listOf("nosniff"), httpHeaders["X-Content-Type-Options"])
   }
 }
