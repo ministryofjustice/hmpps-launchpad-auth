@@ -12,6 +12,8 @@ generic-service:
     enabled: true
     host: app-hostname.local # override per environment
     tlsSecretName: hmpps-launchpad-auth-cert
+    modsecurity_enabled: true
+    modsecurity_github_team: "prisoner-content-hub-developers"
     annotations:
       nginx.ingress.kubernetes.io/configuration-snippet: |
         server_tokens off;
@@ -19,10 +21,6 @@ generic-service:
           deny all;
           return 401;
         }
-      nginx.ingress.kubernetes.io/enable-modsecurity: "true"
-      nginx.ingress.kubernetes.io/modsecurity-snippet: |
-        SecRuleEngine On
-        SecDefaultAction "phase:2,pass,log,tag:github_team=prisoner-content-hub-developers"
 
 
   # Environment variables to load into the deployment
