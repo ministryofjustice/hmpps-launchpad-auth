@@ -17,11 +17,10 @@ generic-service:
     annotations:
       nginx.ingress.kubernetes.io/configuration-snippet: |
         server_tokens off;
-        location /v1/admin/** {
+        location /v1/admin/ {
           deny all;
           return 401;
         }
-
 
   # Environment variables to load into the deployment
   env:
