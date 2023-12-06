@@ -14,8 +14,6 @@ generic-service:
     tlsSecretName: hmpps-launchpad-auth-cert
     modsecurity_enabled: true
     modsecurity_github_team: "prisoner-content-hub-developers"
-    modsecurity_snippet: |
-     SecRuleEngine On
     annotations:
       nginx.ingress.kubernetes.io/configuration-snippet: |
         server_tokens off;
