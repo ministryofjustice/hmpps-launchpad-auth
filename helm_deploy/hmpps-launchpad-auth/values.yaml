@@ -12,10 +12,10 @@ generic-service:
     enabled: true
     host: app-hostname.local # override per environment
     tlsSecretName: hmpps-launchpad-auth-cert
-    enable-modsecurity: "true"
-    modsecurity-snippet: |
-      SecRuleEngine On
-      SecDefaultAction "phase:2,pass,log,tag:github_team=prisoner-content-hub-developers"
+    modsecurity_enabled: true
+    modsecurity_github_team: "prisoner-content-hub-developers"
+    modsecurity_snippet: |
+     SecRuleEngine On
     annotations:
       nginx.ingress.kubernetes.io/configuration-snippet: |
         server_tokens off;
