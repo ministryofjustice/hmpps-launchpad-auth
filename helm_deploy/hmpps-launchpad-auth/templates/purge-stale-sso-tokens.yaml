@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: purge-sso-requests-cronjob
 spec:
-  schedule: "*/5 * * * *"
+  schedule: "05-55/5 06-21 * * 1-5"
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 5
   startingDeadlineSeconds: 150

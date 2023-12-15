@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: purge-inactive-users-cronjob
 spec:
-  schedule: "0 0 * * *"
+  schedule: "0 13 * * 1-5"
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 5
   startingDeadlineSeconds: 600
