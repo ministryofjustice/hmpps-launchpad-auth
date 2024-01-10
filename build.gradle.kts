@@ -21,6 +21,7 @@ dependencies {
   implementation("org.flywaydb:flyway-core:9.19.4")
   implementation("org.postgresql:postgresql:42.6.0")
   implementation("javax.xml.bind:jaxb-api:2.3.0")
+  implementation("io.micrometer:micrometer-registry-prometheus:1.12.1")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.boot:spring-boot-starter-webflux")
