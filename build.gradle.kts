@@ -13,6 +13,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+  implementation("org.springframework.boot:spring-boot-starter-cache")
   implementation("org.springframework.security:spring-security-crypto:6.1.2")
   implementation("io.jsonwebtoken:jjwt-api:0.11.5")
   implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
@@ -20,7 +21,12 @@ dependencies {
   implementation("org.json:json:20231013")
   implementation("org.flywaydb:flyway-core:9.19.4")
   implementation("org.postgresql:postgresql:42.6.0")
-  implementation("javax.xml.bind:jaxb-api:2.3.0")
+  implementation("org.ehcache:ehcache:3.10.8") {
+    capabilities {
+      requireCapability("org.ehcache:ehcache-jakarta")
+    }
+  }
+  implementation("javax.cache:cache-api:1.1.1")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.boot:spring-boot-starter-webflux")
