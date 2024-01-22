@@ -21,11 +21,7 @@ dependencies {
   implementation("org.json:json:20231013")
   implementation("org.flywaydb:flyway-core:9.19.4")
   implementation("org.postgresql:postgresql:42.6.0")
-  implementation("org.ehcache:ehcache:3.10.8") {
-    capabilities {
-      requireCapability("org.ehcache:ehcache-jakarta")
-    }
-  }
+  implementation("org.ehcache:ehcache:3.10.8")
   implementation("javax.cache:cache-api:1.1.1")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")

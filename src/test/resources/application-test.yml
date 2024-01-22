@@ -28,9 +28,6 @@ info.app:
   version: 1.0
 
 spring:
-  cache:
-    jcache:
-      config: classpath:ehcache.xml
   application:
     name: hmpps-launchpad-auth
   jpa:

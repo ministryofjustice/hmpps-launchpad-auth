@@ -1,19 +1,15 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model
 
-import org.ehcache.CacheManager
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
-
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.RequestEntity
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.RestTemplate
@@ -23,9 +19,7 @@ import java.net.URI
 import java.util.*
 
 @Component
-class HmppsAuthClient(
-  @Qualifier("restTemplate") private var restTemplate: RestTemplate
-  ) {
+class HmppsAuthClient(@Qualifier("restTemplate") private var restTemplate: RestTemplate) {
 
   @Value("\${hmpps.auth.url}")
   private lateinit var hmppsAuthBaseUrl: String
@@ -39,20 +33,30 @@ class HmppsAuthClient(
   companion object {
     private val logger = LoggerFactory.getLogger(HmppsAuthClient::class.java)
   }
-  @Cacheable("hmpps-auth-token")
+
+  @Cacheable("hmpps-auth-token", key = "#root.methodName")
   fun getBearerToken(): String {
     val headers = LinkedMultiValueMap<String, String>()
     headers.add(HttpHeaders.AUTHORIZATION, getBasicAuthHeader())
     headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
     logger.info("Calling HMPPS Auth service for access token")
     val response = restTemplate.exchange(
-      RequestEntity<Any>(headers, HttpMethod.POST, URI("$hmppsAuthBaseUrl/auth/oauth/token?grant_type=client_credentials")),
+      RequestEntity<Any>(
+        headers,
+        HttpMethod.POST,
+        URI("$hmppsAuthBaseUrl/auth/oauth/token?grant_type=client_credentials"),
+      ),
       object : ParameterizedTypeReference<HmppsAuthAccessToken>() {},
     )
     if (response.statusCode.is2xxSuccessful) {
       return "Bearer ${response.body!!.accessToken}"
     } else {
-      throw ApiException("Response code ${response.statusCode.value()} making request to Prison Api", HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), "Server Error")
+      throw ApiException(
+        "Response code ${response.statusCode.value()} making request to Prison Api",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        ApiErrorTypes.SERVER_ERROR.toString(),
+        "Server Error",
+      )
     }
   }
 
