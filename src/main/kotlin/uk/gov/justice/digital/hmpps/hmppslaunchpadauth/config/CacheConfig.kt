@@ -20,7 +20,7 @@ class CacheConfig {
     val cacheEventListenerConfiguration = CacheEventListenerConfigurationBuilder.newEventListenerConfiguration(
       HmppsAuthTokenCacheEventListener(),
       EventType.CREATED,
-      EventType.EXPIRED
+      EventType.EXPIRED,
     ).unordered().asynchronous()
     val cacheConfiguration = CacheConfigurationBuilder.newCacheConfigurationBuilder(
       String::class.java,
