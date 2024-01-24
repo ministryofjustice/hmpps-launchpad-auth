@@ -192,7 +192,7 @@ class TokenControllerIntegrationTest(
     Assertions.assertNotNull(token?.accessToken)
     Assertions.assertNotNull(token?.refreshToken)
     Assertions.assertEquals("Bearer", token?.tokenType)
-    Assertions.assertEquals(3600L, token?.expiresIn)
+    Assertions.assertEquals(3599L, token?.expiresIn)
     // confirm ssorequest deleted
     Assertions.assertEquals(true, ssoRequestRepository.findById(ssoRequest.id).isEmpty)
     url =
@@ -210,7 +210,7 @@ class TokenControllerIntegrationTest(
     assertAccessTokenClaims(token.accessToken)
     assertRefreshTokenClaims(token.refreshToken)
     Assertions.assertEquals("Bearer", token?.tokenType)
-    Assertions.assertEquals(3600L, token?.expiresIn)
+    Assertions.assertEquals(3599L, token?.expiresIn)
 
     // use expire refreshToken
     var exception = Assertions.assertThrows(HttpClientErrorException::class.java) {

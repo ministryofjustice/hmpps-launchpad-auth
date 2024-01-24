@@ -185,7 +185,7 @@ class TokenService(
         TokenCommonClaims.buildHeaderClaims(),
         secret,
       )
-    return Token(idToken, accessToken, refreshToken, TOKEN_TYPE, 3600L)
+    return Token(idToken, accessToken, refreshToken, TOKEN_TYPE, 3599L)
   }
 
   private fun validateGrant(grantType: String, authorizationGrantType: Set<AuthorizationGrantType>) {
