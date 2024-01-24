@@ -20,15 +20,13 @@ class CacheConfig {
     val cacheEventListenerConfiguration = CacheEventListenerConfigurationBuilder.newEventListenerConfiguration(
       HmppsAuthTokenCacheEventListener(),
       EventType.CREATED,
-      EventType.UPDATED,
-      EventType.EVICTED,
+      EventType.EXPIRED
     ).unordered().asynchronous()
     val cacheConfiguration = CacheConfigurationBuilder.newCacheConfigurationBuilder(
       String::class.java,
       String::class.java,
       ResourcePoolsBuilder.heap(1),
-    )
-      .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofSeconds(3500)))
+    ).withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofSeconds(3540)))
       .withService(cacheEventListenerConfiguration)
       .build()
     val cachingProvider = Caching.getCachingProvider()
