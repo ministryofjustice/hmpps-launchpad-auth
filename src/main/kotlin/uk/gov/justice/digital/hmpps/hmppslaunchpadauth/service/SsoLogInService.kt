@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.view.RedirectView
 import org.springframework.web.util.UriComponentsBuilder
+import org.springframework.web.util.UriUtils
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.ACCESS_DENIED_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_CLIENT_ID_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_SCOPE_MSG
@@ -17,6 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
+import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -142,16 +144,17 @@ class SsoLogInService(
   private fun buildClientRedirectUrl(ssoRequest: SsoRequest): String {
     return UriComponentsBuilder.fromHttpUrl(ssoRequest.client.redirectUri)
       .queryParam("code", ssoRequest.authorizationCode)
-      .queryParamIfPresent("state", Optional.ofNullable(ssoRequest.client.state))
-      .build().toUriString()
+      .queryParamIfPresent("state", Optional.ofNullable(UriUtils.encode(ssoRequest.client.state, StandardCharsets.UTF_8)))
+      .encode(Charsets.UTF_8)
+      .build(true).toUriString()
   }
 
   private fun buildClientRedirectUrlAccessForNotApproved(ssoRequest: SsoRequest): String {
     return UriComponentsBuilder.fromHttpUrl(ssoRequest.client.redirectUri)
       .queryParam("error", ApiErrorTypes.ACCESS_DENIED.toString())
       .queryParam("error_description", ACCESS_DENIED_MSG)
-      .queryParamIfPresent("state", Optional.ofNullable(ssoRequest.client.state))
-      .build().toUriString()
+      .queryParamIfPresent("state", Optional.ofNullable(UriUtils.encode(ssoRequest.client.state, StandardCharsets.UTF_8)))
+      .build(true).toUriString()
   }
 
   private fun updateSsoRequestWithUserId(token: String, ssoRequest: SsoRequest): SsoRequest {
