@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
+import org.springframework.util.StringUtils
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.view.RedirectView
 import org.springframework.web.util.UriComponentsBuilder
@@ -158,7 +159,7 @@ class SsoLogInService(
 
   private fun getEncodedValue(value: String?): String? {
     var encodedValue: String? = null
-    if (value != null) {
+    if (StringUtils.hasText(value)) {
       encodedValue = UriUtils.encode(value, StandardCharsets.UTF_8)
     }
     return encodedValue
