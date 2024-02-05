@@ -144,7 +144,7 @@ class SsoLogInService(
   private fun buildClientRedirectUrl(ssoRequest: SsoRequest): String {
     return UriComponentsBuilder.fromHttpUrl(ssoRequest.client.redirectUri)
       .queryParam("code", ssoRequest.authorizationCode)
-      .queryParamIfPresent("state", Optional.ofNullable(UriUtils.encode(ssoRequest.client.state, StandardCharsets.UTF_8)))
+      .queryParamIfPresent("state", Optional.ofNullable(getEncodedValue(ssoRequest.client.state)))
       .build(true).toUriString()
   }
 
@@ -152,8 +152,16 @@ class SsoLogInService(
     return UriComponentsBuilder.fromHttpUrl(ssoRequest.client.redirectUri)
       .queryParam("error", ApiErrorTypes.ACCESS_DENIED.toString())
       .queryParam("error_description", ACCESS_DENIED_MSG)
-      .queryParamIfPresent("state", Optional.ofNullable(UriUtils.encode(ssoRequest.client.state, StandardCharsets.UTF_8)))
+      .queryParamIfPresent("state", Optional.ofNullable(getEncodedValue(ssoRequest.client.state)))
       .build(true).toUriString()
+  }
+
+  private fun getEncodedValue(value: String?): String? {
+    var encodedValue: String? = null
+    if (value != null) {
+      encodedValue = UriUtils.encode(value, StandardCharsets.UTF_8)
+    }
+    return encodedValue
   }
 
   private fun updateSsoRequestWithUserId(token: String, ssoRequest: SsoRequest): SsoRequest {
