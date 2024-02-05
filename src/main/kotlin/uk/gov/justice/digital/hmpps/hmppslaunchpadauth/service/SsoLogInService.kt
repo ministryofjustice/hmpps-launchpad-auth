@@ -145,7 +145,6 @@ class SsoLogInService(
     return UriComponentsBuilder.fromHttpUrl(ssoRequest.client.redirectUri)
       .queryParam("code", ssoRequest.authorizationCode)
       .queryParamIfPresent("state", Optional.ofNullable(UriUtils.encode(ssoRequest.client.state, StandardCharsets.UTF_8)))
-      .encode(Charsets.UTF_8)
       .build(true).toUriString()
   }
 
