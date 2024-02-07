@@ -12,6 +12,7 @@ import org.springframework.web.util.UriUtils
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.ACCESS_DENIED_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_CLIENT_ID_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_SCOPE_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_TENANT_ID
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
@@ -171,11 +172,17 @@ class SsoLogInService(
       ssoRequest.userId = userId
       return ssoRequestService.updateSsoRequest(ssoRequest)
     } catch (e: IllegalArgumentException) {
+      var errorType: String
+      if (e.message == INVALID_TENANT_ID) {
+        errorType = ApiErrorTypes.ACCESS_DENIED.toString()
+      } else {
+        errorType = ApiErrorTypes.SERVER_ERROR.toString()
+      }
       throw SsoException(
         e.message!!,
         HttpStatus.FOUND,
-        ApiErrorTypes.SERVER_ERROR.toString(),
-        "Exception in token processing",
+        errorType,
+        e.message!!,
         ssoRequest.client.redirectUri,
         ssoRequest.client.state,
       )

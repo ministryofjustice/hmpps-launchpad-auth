@@ -70,6 +70,7 @@ class DataGenerator {
         .claim("scope", "openid")
         .claim("nonce", nonce)
         .claim("email", userId)
+        .claim("tid", "123456_random_value")
         .setIssuedAt(issueDate)
         .setExpiration(expDate)
         .signWith(

@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -23,6 +24,10 @@ class TokenController(
   @Qualifier("basicAuthentication") private var authentication: Authentication,
 ) {
 
+  companion object {
+    private val logger = LoggerFactory.getLogger(TokenController::class.java)
+  }
+
   @PostMapping("/token", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
   fun generateToken(
     @RequestParam(required = false) code: UUID?,
@@ -32,6 +37,7 @@ class TokenController(
     @RequestParam(required = false) nonce: String?,
     @RequestHeader(HttpHeaders.AUTHORIZATION, required = true) authorization: String,
   ): ResponseEntity<Token> {
+    logger.info("Request received for token")
     val authenticationInfo = authentication.authenticate(authorization)
     val clientId = authenticationInfo.clientId
     val token = tokenService

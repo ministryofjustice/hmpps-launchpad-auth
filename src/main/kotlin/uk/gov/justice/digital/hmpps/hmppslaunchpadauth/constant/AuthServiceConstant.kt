@@ -14,5 +14,7 @@ class AuthServiceConstant {
     const val INVALID_REDIRECT_URI_MSG = "The requested redirect uri is invalid or not found"
     const val EXPIRE_TOKEN_MSG = "Token has expired"
     const val INVALID_TOKEN_MSG = "Invalid token"
+    const val HMPPS_AUTH_ACCESS_TOKEN_CACHE = "hmpps-auth-token"
+    const val INVALID_TENANT_ID = "User is not permitted to sign in due to no record in directory"
   }
 }
