@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -19,6 +20,10 @@ class PrisonerApiServiceImpl(
   @Qualifier("establishments")
   private var prisonEstablishments: PrisonEstablishments,
 ) : PrisonerApiService {
+
+  companion object {
+    private val logger = LoggerFactory.getLogger(PrisonerApiService::class.java)
+  }
   override fun getPrisonerData(prisonerId: String): UserClaims {
     val profile = offenderBooking.getOffenderBooking(prisonerId)
     val user = User(prisonerId, profile.firstName, profile.lastName)
@@ -27,6 +32,7 @@ class PrisonerApiServiceImpl(
       val message = "Establishment not yet implemented for agency id ${profile.agencyId}"
       throw ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), INTERNAL_SERVER_ERROR_MSG)
     }
+    logger.info("User establishment: ${establishment.displayName}")
     val booking = Booking(profile.bookingId)
     return UserClaims(booking, establishment, user)
   }

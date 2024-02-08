@@ -88,6 +88,7 @@ class SsoLogInService(
   }
 
   fun updateSsoRequest(token: String?, state: UUID): Any {
+    logger.info("jwt token received from azure")
     var ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {
       val message = "State $state send on callback url do not exist"
       ApiException(message, HttpStatus.FORBIDDEN, ApiErrorTypes.ACCESS_DENIED.toString(), ACCESS_DENIED_MSG)

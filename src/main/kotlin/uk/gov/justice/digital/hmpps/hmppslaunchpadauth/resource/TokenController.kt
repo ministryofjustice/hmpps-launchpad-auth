@@ -37,7 +37,7 @@ class TokenController(
     @RequestParam(required = false) nonce: String?,
     @RequestHeader(HttpHeaders.AUTHORIZATION, required = true) authorization: String,
   ): ResponseEntity<Token> {
-    logger.info("Request received for token")
+    logger.info("Request received to generate token")
     val authenticationInfo = authentication.authenticate(authorization)
     val clientId = authenticationInfo.clientId
     val token = tokenService

@@ -81,7 +81,7 @@ class TokenService(
   }
 
   private fun generateTokenByCode(code: UUID, grantType: String, redirectUri: URI, client: Client): Token {
-    logger.info("Generating token for code $code for client id: ${client.id}, client name: ${client.name}")
+    logger.info("Generating token for code for client id: ${client.id}")
     validateGrant(grantType, client.authorizedGrantTypes)
     val ssoRequest = ssoRequestService.getSsoRequestByAuthorizationCode(code)
       .orElseThrow {
@@ -114,7 +114,7 @@ class TokenService(
     client: Client,
     nonce: String?,
   ): Token {
-    logger.info("Generating token for refresh token for client id: ${client.id}, client name: ${client.name}")
+    logger.info("Generating token for refresh token for client id: ${client.id}")
     validateGrant(grantType, client.authorizedGrantTypes)
     val refreshTokenPayloadOld = validateAndGetRefreshTokenPayloadClaims(refreshToken, client.id)
     val userId = refreshTokenPayloadOld.body["sub"] as String

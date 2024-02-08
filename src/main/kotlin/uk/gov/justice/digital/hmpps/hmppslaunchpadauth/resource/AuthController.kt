@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
@@ -21,6 +22,7 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
   companion object {
     const val MAX_STATE_OR_NONCE_SIZE = 128
     const val SSO_SUPPORTED_RESPONSE_TYPE = "code"
+    private val logger = LoggerFactory.getLogger(AuthController::class.java)
   }
 
   @Value("\${launchpad.auth.allowlisted-scopes}")
@@ -40,6 +42,7 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
     validateSize(nonce, "nonce", redirectUri, state)
     val scopes = Scope.removeAllowListScopesNotRequired(scope, allowListedScopes.split(","))
     val url = ssoLoginService.initiateSsoLogin(clientId, responseType, scopes, redirectUri, state, nonce)
+    logger.info("Sign in request sent to azure for client $clientId")
     return RedirectView(url)
   }
 
