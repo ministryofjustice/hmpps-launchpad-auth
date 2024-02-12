@@ -22,6 +22,8 @@ class CacheConfig {
       HmppsAuthTokenCacheEventListener(),
       EventType.CREATED,
       EventType.EXPIRED,
+      EventType.EVICTED,
+      EventType.REMOVED,
     ).unordered().asynchronous()
     val cacheConfiguration = CacheConfigurationBuilder.newCacheConfigurationBuilder(
       String::class.java,

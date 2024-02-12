@@ -41,16 +41,18 @@ class PrisonApiClient(
       val response = connectToPrisonApi(accessToken, offenderId)
       return handlePrisonApiResponse(offenderId, response)
     } catch (e: HttpClientErrorException) {
+      var message: String
       if (e.statusCode.value() == HttpStatus.UNAUTHORIZED.value()) {
         cacheManager.getCache(HMPPS_AUTH_ACCESS_TOKEN_CACHE).clear()
-        val accessToken = hmppsAuthClient.getBearerToken()
-        val response = connectToPrisonApi(accessToken, offenderId)
-        return handlePrisonApiResponse(offenderId, response)
+        message = "Invalid or Expired access token sent to Prison API"
       } else if (e.statusCode.value() == HttpStatus.NOT_FOUND.value()) {
-        val message = "Record for offender id: $offenderId  do not exist"
-        throw ApiException(message, HttpStatus.FORBIDDEN, ApiErrorTypes.ACCESS_DENIED.toString(), message)
+        message = "Record for offender id: $offenderId  do not exist"
+      } else if (e.message != null) {
+        message = e.message!!
+      } else {
+        message = "Unexpected exception when calling Prison Api"
       }
-      throw ApiException("${e.message} making request to Prison Api", HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), INTERNAL_SERVER_ERROR_MSG)
+      throw ApiException("$message", HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), INTERNAL_SERVER_ERROR_MSG)
     }
   }
 
@@ -59,7 +61,7 @@ class PrisonApiClient(
       return response.body
     } else if (response.statusCode.value() == HttpStatus.NOT_FOUND.value()) {
       val message = "Record for offender id: $offenderId  do not exist"
-      throw ApiException(message, HttpStatus.FORBIDDEN, ApiErrorTypes.ACCESS_DENIED.toString(), message)
+      throw ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), INTERNAL_SERVER_ERROR_MSG)
     } else {
       throw ApiException("Response code ${response.statusCode.value()} making request to Prison Api", HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), INTERNAL_SERVER_ERROR_MSG)
     }

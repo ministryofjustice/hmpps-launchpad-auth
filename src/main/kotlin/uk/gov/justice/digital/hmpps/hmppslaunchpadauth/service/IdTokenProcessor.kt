@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.util.StringUtils
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INTERNAL_SERVER_ERROR_MSG
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_TENANT_ID
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_AZURE_AD_TENANT
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_USER_ID
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.validator.UserIdValidator
@@ -40,6 +41,7 @@ class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProc
       userId = userId.trim()
       if (!userIdValidator.isValid(userId)) {
         logger.warn("Potentially invalid user id: {}", email)
+        throw IllegalArgumentException(INVALID_USER_ID)
       }
       return userId
     } else {
@@ -71,7 +73,7 @@ class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProc
       throw IllegalArgumentException(message)
     } else {
       if (value != tenantId) {
-        val message = INVALID_TENANT_ID
+        val message = INVALID_AZURE_AD_TENANT
         throw IllegalArgumentException(message)
       }
     }
