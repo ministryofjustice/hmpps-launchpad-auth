@@ -14,5 +14,8 @@ class AuthServiceConstant {
     const val INVALID_REDIRECT_URI_MSG = "The requested redirect uri is invalid or not found"
     const val EXPIRE_TOKEN_MSG = "Token has expired"
     const val INVALID_TOKEN_MSG = "Invalid token"
+    const val HMPPS_AUTH_ACCESS_TOKEN_CACHE = "hmpps-auth-token"
+    const val INVALID_AZURE_AD_TENANT = "Invalid Azure AD tenant"
+    const val INVALID_USER_ID = "Invalid user id"
   }
 }

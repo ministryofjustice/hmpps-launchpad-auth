@@ -10,8 +10,10 @@ import org.springframework.web.servlet.view.RedirectView
 import org.springframework.web.util.UriComponentsBuilder
 import org.springframework.web.util.UriUtils
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.ACCESS_DENIED_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_AZURE_AD_TENANT
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_CLIENT_ID_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_SCOPE_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_USER_ID
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
@@ -87,6 +89,7 @@ class SsoLogInService(
   }
 
   fun updateSsoRequest(token: String?, state: UUID): Any {
+    logger.info("jwt token received from azure")
     var ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {
       val message = "State $state send on callback url do not exist"
       ApiException(message, HttpStatus.FORBIDDEN, ApiErrorTypes.ACCESS_DENIED.toString(), ACCESS_DENIED_MSG)
@@ -171,11 +174,17 @@ class SsoLogInService(
       ssoRequest.userId = userId
       return ssoRequestService.updateSsoRequest(ssoRequest)
     } catch (e: IllegalArgumentException) {
+      var errorType: String
+      if (e.message == INVALID_AZURE_AD_TENANT || e.message == INVALID_USER_ID) {
+        errorType = ApiErrorTypes.ACCESS_DENIED.toString()
+      } else {
+        errorType = ApiErrorTypes.SERVER_ERROR.toString()
+      }
       throw SsoException(
         e.message!!,
         HttpStatus.FOUND,
-        ApiErrorTypes.SERVER_ERROR.toString(),
-        "Exception in token processing",
+        errorType,
+        e.message!!,
         ssoRequest.client.redirectUri,
         ssoRequest.client.state,
       )

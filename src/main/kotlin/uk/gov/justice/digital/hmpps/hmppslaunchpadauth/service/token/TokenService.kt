@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token
 
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jws
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
@@ -42,6 +43,10 @@ class TokenService(
   @Value("\${launchpad.auth.iss-url}")
   private lateinit var issuerUrl: String
 
+  companion object {
+    private val logger = LoggerFactory.getLogger(TokenService::class.java)
+  }
+
   fun validateRequestAndGenerateToken(
     code: UUID?,
     grantType: String?,
@@ -76,6 +81,7 @@ class TokenService(
   }
 
   private fun generateTokenByCode(code: UUID, grantType: String, redirectUri: URI, client: Client): Token {
+    logger.info("Generating token for code for client id: ${client.id}")
     validateGrant(grantType, client.authorizedGrantTypes)
     val ssoRequest = ssoRequestService.getSsoRequestByAuthorizationCode(code)
       .orElseThrow {
@@ -108,6 +114,7 @@ class TokenService(
     client: Client,
     nonce: String?,
   ): Token {
+    logger.info("Generating token for refresh token for client id: ${client.id}")
     validateGrant(grantType, client.authorizedGrantTypes)
     val refreshTokenPayloadOld = validateAndGetRefreshTokenPayloadClaims(refreshToken, client.id)
     val userId = refreshTokenPayloadOld.body["sub"] as String

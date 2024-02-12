@@ -9,6 +9,7 @@ import org.ehcache.jsr107.Eh107Configuration
 import org.springframework.cache.jcache.JCacheCacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.HMPPS_AUTH_ACCESS_TOKEN_CACHE
 import java.time.Duration
 import javax.cache.Caching
 
@@ -21,6 +22,8 @@ class CacheConfig {
       HmppsAuthTokenCacheEventListener(),
       EventType.CREATED,
       EventType.EXPIRED,
+      EventType.EVICTED,
+      EventType.REMOVED,
     ).unordered().asynchronous()
     val cacheConfiguration = CacheConfigurationBuilder.newCacheConfigurationBuilder(
       String::class.java,
@@ -32,7 +35,7 @@ class CacheConfig {
     val cachingProvider = Caching.getCachingProvider()
     val cacheManager = cachingProvider.cacheManager
     val configuration = Eh107Configuration.fromEhcacheCacheConfiguration(cacheConfiguration)
-    cacheManager.createCache("hmpps-auth-token", configuration)
+    cacheManager.createCache(HMPPS_AUTH_ACCESS_TOKEN_CACHE, configuration)
     return JCacheCacheManager(cacheManager)
   }
 }
