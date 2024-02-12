@@ -161,7 +161,9 @@ class TokenService(
     )
     val accessTokenPayload = AccessTokenPayload()
     val accessTokenPayloadClaims = accessTokenPayload.generatePayload(
-      prisonerData.user, clientId, scopes,
+      prisonerData.user,
+      clientId,
+      scopes,
       accessTokenValiditySeconds,
     )
     val accessTokenId = accessTokenPayloadClaims["jti"] as String
