@@ -74,6 +74,9 @@ launchpad:
     inactive-users-per-page: 200
     allowlisted-scopes: openid,email,profile
     secret: ${LAUNCHPAD_AUTH_SECRET}
+    id-token-validity-seconds: 43200
+    access-token-validity-seconds: 3600
+    refresh-token-validity-seconds: 604800
     agencies:
      BWI:
       agencyId: BWI

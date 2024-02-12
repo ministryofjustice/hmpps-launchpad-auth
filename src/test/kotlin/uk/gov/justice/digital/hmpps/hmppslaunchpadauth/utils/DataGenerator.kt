@@ -145,6 +145,7 @@ class DataGenerator {
       userApprovedClient: UserApprovedClient,
       nonce: String?,
       secret: String,
+      validityInSeconds: Long,
     ): String {
       val accessTokenPayload = AccessTokenPayload()
       val nonce = "random_nonce"
@@ -152,6 +153,7 @@ class DataGenerator {
         User(USER_ID, "John", "Smith"),
         client.id,
         userApprovedClient.scopes,
+        validityInSeconds,
       )
       return "Bearer " + TokenGenerationAndValidation.generateJwtToken(
         payload,

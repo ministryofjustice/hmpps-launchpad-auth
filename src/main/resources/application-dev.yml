@@ -3,6 +3,9 @@ azure:
 launchpad:
   auth:
     iss-url: https://launchpad-auth-dev.hmpps.service.justice.gov.uk
+    id-token-validity-seconds: 300
+    access-token-validity-seconds: 600
+    refresh-token-validity-seconds: 900
 hmpps:
   auth:
     url: https://sign-in-dev.hmpps.service.justice.gov.uk
