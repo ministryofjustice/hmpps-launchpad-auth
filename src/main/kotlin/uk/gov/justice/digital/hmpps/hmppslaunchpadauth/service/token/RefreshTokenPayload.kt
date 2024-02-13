@@ -12,12 +12,13 @@ class RefreshTokenPayload {
     user: User,
     clientId: UUID,
     scopes: Set<Scope>,
+    validityInSeconds: Long,
   ): LinkedHashMap<String, Any> {
     var claims = LinkedHashMap<String, Any>()
     claims["jti"] = UUID.randomUUID().toString()
     claims["ati"] = accessTokenId
     claims = TokenCommonClaims.buildCommonClaims(clientId.toString(), user.id, claims)
-    claims["exp"] = LocalDateTime.now().plusDays(7).toEpochSecond(ZoneOffset.UTC)
+    claims["exp"] = LocalDateTime.now().plusSeconds(validityInSeconds).toEpochSecond(ZoneOffset.UTC)
     claims["scopes"] = TokenCommonClaims.buildScopeTextsSet(scopes)
     return claims
   }
@@ -27,7 +28,8 @@ class RefreshTokenPayload {
     user: User,
     clientId: UUID,
     scopes: Set<Scope>,
+    validityInSeconds: Long,
   ): LinkedHashMap<String, Any> {
-    return buildClaims(accessTokenId, user, clientId, scopes)
+    return buildClaims(accessTokenId, user, clientId, scopes, validityInSeconds)
   }
 }

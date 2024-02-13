@@ -11,11 +11,12 @@ class AccessTokenPayload {
     user: User,
     clientId: UUID,
     scopes: Set<Scope>,
+    validityInSeconds: Long,
   ): LinkedHashMap<String, Any> {
     var claims = LinkedHashMap<String, Any>()
     claims["jti"] = UUID.randomUUID().toString()
     claims = TokenCommonClaims.buildCommonClaims(clientId.toString(), user.id, claims)
-    claims["exp"] = LocalDateTime.now().plusHours(1).toEpochSecond(ZoneOffset.UTC)
+    claims["exp"] = LocalDateTime.now().plusSeconds(validityInSeconds).toEpochSecond(ZoneOffset.UTC)
     claims["scopes"] = TokenCommonClaims.buildScopeTextsSet(scopes)
     return claims
   }
@@ -24,7 +25,8 @@ class AccessTokenPayload {
     user: User,
     clientId: UUID,
     scopes: Set<Scope>,
+    validityInSeconds: Long,
   ): LinkedHashMap<String, Any> {
-    return buildClaims(user, clientId, scopes)
+    return buildClaims(user, clientId, scopes, validityInSeconds)
   }
 }

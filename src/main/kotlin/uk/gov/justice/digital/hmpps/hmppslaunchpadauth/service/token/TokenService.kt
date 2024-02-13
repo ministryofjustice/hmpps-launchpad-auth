@@ -36,6 +36,12 @@ class TokenService(
   private var clientService: ClientService,
   private var ssoRequestService: SsoRequestService,
   private var userApprovedClientService: UserApprovedClientService,
+  @Value("\${launchpad.auth.id-token-validity-seconds}")
+  private var idTokenValiditySeconds: Long,
+  @Value("\${launchpad.auth.access-token-validity-seconds}")
+  private var accessTokenValiditySeconds: Long,
+  @Value("\${launchpad.auth.refresh-token-validity-seconds}")
+  private var refreshTokenValiditySeconds: Long,
 ) {
   @Value("\${launchpad.auth.secret}")
   private lateinit var secret: String
@@ -151,9 +157,15 @@ class TokenService(
       scopes,
       nonce,
       issuerUrl,
+      idTokenValiditySeconds,
     )
     val accessTokenPayload = AccessTokenPayload()
-    val accessTokenPayloadClaims = accessTokenPayload.generatePayload(prisonerData.user, clientId, scopes)
+    val accessTokenPayloadClaims = accessTokenPayload.generatePayload(
+      prisonerData.user,
+      clientId,
+      scopes,
+      accessTokenValiditySeconds,
+    )
     val accessTokenId = accessTokenPayloadClaims["jti"] as String
     var refreshTokenPayloadClaims = LinkedHashMap<String, Any>()
     if (refreshTokenPayloadOld != null) {
@@ -163,7 +175,6 @@ class TokenService(
         val v = value as String
         refreshTokenPayloadClaims[v] = refreshTokenPayloadOld[value] as Any
       }
-      refreshTokenPayloadClaims
     } else {
       val refreshTokenPayload = RefreshTokenPayload()
       val accessTokenId = accessTokenPayloadClaims["jti"] as String
@@ -172,6 +183,7 @@ class TokenService(
         prisonerData.user,
         clientId,
         scopes,
+        refreshTokenValiditySeconds,
       )
     }
     val idToken = TokenGenerationAndValidation
@@ -192,7 +204,7 @@ class TokenService(
         TokenCommonClaims.buildHeaderClaims(),
         secret,
       )
-    return Token(idToken, accessToken, refreshToken, TOKEN_TYPE, 3599L)
+    return Token(idToken, accessToken, refreshToken, TOKEN_TYPE, accessTokenValiditySeconds - 1)
   }
 
   private fun validateGrant(grantType: String, authorizationGrantType: Set<AuthorizationGrantType>) {

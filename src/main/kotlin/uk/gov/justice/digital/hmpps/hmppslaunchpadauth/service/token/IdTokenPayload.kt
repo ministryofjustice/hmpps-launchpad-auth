@@ -18,6 +18,7 @@ class IdTokenPayload {
     scopes: Set<Scope>,
     nonce: String?,
     issuerUrl: String,
+    validityInSeconds: Long,
   ): LinkedHashMap<String, Any> {
     var claims = LinkedHashMap<String, Any>()
     if (scopes.contains(Scope.USER_BASIC_READ)) {
@@ -29,7 +30,7 @@ class IdTokenPayload {
       claims["nonce"] = nonce
     }
     claims = TokenCommonClaims.buildCommonClaims(clientId.toString(), user.id, claims)
-    claims["exp"] = LocalDateTime.now().plusHours(12).toEpochSecond(ZoneOffset.UTC)
+    claims["exp"] = LocalDateTime.now().plusSeconds(validityInSeconds).toEpochSecond(ZoneOffset.UTC)
     claims["iss"] = issuerUrl
     if (scopes.contains(Scope.USER_BOOKING_READ)) {
       claims["booking"] = booking
@@ -48,7 +49,8 @@ class IdTokenPayload {
     scopes: Set<Scope>,
     nonce: String?,
     issuerUrl: String,
+    validityInSeconds: Long,
   ): LinkedHashMap<String, Any> {
-    return buildClaims(booking!!, establishment!!, user, clientId, scopes, nonce, issuerUrl)
+    return buildClaims(booking!!, establishment!!, user, clientId, scopes, nonce, issuerUrl, validityInSeconds)
   }
 }

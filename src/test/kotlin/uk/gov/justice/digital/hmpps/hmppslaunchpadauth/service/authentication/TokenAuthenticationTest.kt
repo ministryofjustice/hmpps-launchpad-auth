@@ -37,7 +37,11 @@ import java.util.*
 @EnableAutoConfiguration
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
-class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenAuthentication) {
+class TokenAuthenticationTest(
+  @Autowired private var tokenAuthentication: TokenAuthentication,
+  @Value("\${launchpad.auth.access-token-validity-seconds}")
+  private var accessTokenValiditySeconds: Long,
+) {
 
   @MockBean
   private lateinit var userIdValidator: UserIdValidator
@@ -71,6 +75,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
       User(USER_ID, "John", "Smith"),
       clientId,
       userApprovedScopes,
+      accessTokenValiditySeconds,
     )
     val authHeader = "Bearer " + TokenGenerationAndValidation.generateJwtToken(
       payload,
@@ -93,6 +98,7 @@ class TokenAuthenticationTest(@Autowired private var tokenAuthentication: TokenA
       User(USER_ID, "John", "Smith"),
       clientId,
       userApprovedScopes,
+      accessTokenValiditySeconds,
     )
     val authHeader = "Bearer " + TokenGenerationAndValidation.generateJwtToken(
       payload,

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
@@ -39,6 +40,8 @@ import java.util.*
 class UserApprovedClientIntegrationTest(
   @Autowired private var userApprovedClientRepository: UserApprovedClientRepository,
   @Autowired private var clientRepository: ClientRepository,
+  @Value("\${launchpad.auth.access-token-validity-seconds}")
+  private var accessTokenValiditySeconds: Long,
 ) {
   @LocalServerPort
   private val port = 0
@@ -94,6 +97,7 @@ class UserApprovedClientIntegrationTest(
       userApprovedClientOne,
       "test nonce",
       "random_secret_random_secret_random_secret",
+      accessTokenValiditySeconds,
     )
   }
 

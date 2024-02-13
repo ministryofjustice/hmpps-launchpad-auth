@@ -54,6 +54,8 @@ class TokenControllerIntegrationTest(
   @Autowired private var clientRepository: ClientRepository,
   @Autowired private var ssoRequestRepository: SsoRequestRepository,
   @Autowired private var encoder: BCryptPasswordEncoder,
+  @Value("\${launchpad.auth.access-token-validity-seconds}")
+  private var accessTokenValiditySeconds: Long,
 ) {
   @LocalServerPort
   private val port = 0
@@ -192,7 +194,7 @@ class TokenControllerIntegrationTest(
     Assertions.assertNotNull(token?.accessToken)
     Assertions.assertNotNull(token?.refreshToken)
     Assertions.assertEquals("Bearer", token?.tokenType)
-    Assertions.assertEquals(3599L, token?.expiresIn)
+    Assertions.assertEquals(accessTokenValiditySeconds - 1, token?.expiresIn)
     // confirm ssorequest deleted
     Assertions.assertEquals(true, ssoRequestRepository.findById(ssoRequest.id).isEmpty)
     url =
@@ -210,7 +212,7 @@ class TokenControllerIntegrationTest(
     assertAccessTokenClaims(token.accessToken)
     assertRefreshTokenClaims(token.refreshToken)
     Assertions.assertEquals("Bearer", token?.tokenType)
-    Assertions.assertEquals(3599L, token?.expiresIn)
+    Assertions.assertEquals(accessTokenValiditySeconds - 1, token?.expiresIn)
 
     // use expire refreshToken
     var exception = Assertions.assertThrows(HttpClientErrorException::class.java) {
