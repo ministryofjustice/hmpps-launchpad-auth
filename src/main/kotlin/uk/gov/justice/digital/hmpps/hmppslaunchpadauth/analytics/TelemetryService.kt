@@ -35,6 +35,5 @@ class TelemetryService(private var telemetryClient: TelemetryClient) {
     } catch (e: Exception) {
       logger.error("Issue sending telemetry data: ${e.message}")
     }
-
   }
 }
