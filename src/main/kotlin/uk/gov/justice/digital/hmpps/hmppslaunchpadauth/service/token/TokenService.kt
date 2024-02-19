@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.analytics.AppInsightEventType
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.analytics.SignedInUser
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.analytics.TelemetryService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.ACCESS_DENIED_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.EXPIRE_TOKEN_MSG
@@ -29,8 +28,6 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.UserApprovedClien
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication.AuthenticationInfo
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.PrisonerApiService
 import java.net.URI
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.util.*
 
 const val TOKEN_TYPE = "Bearer"
@@ -214,12 +211,7 @@ class TokenService(
       if (refreshTokenPayloadOld == null) AppInsightEventType.TOKEN_GENERATED_VIA_AUTHORIZATION_CODE else AppInsightEventType.TOKEN_GENERATED_VIA_REFRESH_TOKEN
     telemetryService.addTelemetryData(
       eventName.toString(),
-      SignedInUser(
-        prisonerId,
-        LocalDateTime.now(ZoneOffset.UTC),
-        clientId.toString(),
-        prisonerData.establishment.displayName,
-      ),
+      idTokenPayloadClaims,
     )
     return Token(idToken, accessToken, refreshToken, TOKEN_TYPE, accessTokenValiditySeconds - 1)
   }
