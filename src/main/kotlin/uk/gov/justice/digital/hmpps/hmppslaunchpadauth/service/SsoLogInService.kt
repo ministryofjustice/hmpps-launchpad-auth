@@ -80,12 +80,12 @@ class SsoLogInService(
     return UriComponentsBuilder.fromHttpUrl(builtAzureOauth2Url())
       .queryParam("response_type", "id_token")
       .queryParam("client_id", launchpadClientId)
-      .queryParam("scope", "openid email")
+      .queryParam("scope", UriUtils.encode("openid email", StandardCharsets.UTF_8))
       .queryParam("state", ssoRequest.id)
       .queryParam("nonce", ssoRequest.nonce)
       .queryParam("response_mode", "form_post")
-      .queryParam("redirect_uri", launchpadRedirectUrl)
-      .build().toUriString()
+      .queryParam("redirect_uri", UriUtils.encode(launchpadRedirectUrl, StandardCharsets.UTF_8))
+      .build(true).toUriString()
   }
 
   fun updateSsoRequest(token: String?, state: UUID): Any {
