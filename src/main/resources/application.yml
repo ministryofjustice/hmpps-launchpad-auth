@@ -20,7 +20,6 @@ spring:
     url: jdbc:postgresql://${DB_ENDPOINT}/${DB_NAME}
     user: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    locations: classpath:db/migration
     baseline-on-migrate: true
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"

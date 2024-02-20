@@ -8,3 +8,8 @@ hmpps:
     url: https://sign-in.hmpps.service.justice.gov.uk
   prison-api:
     url: https://api.prison.service.justice.gov.uk
+
+
+spring:
+  flyway:
+    locations: classpath:db/migration/preprodandprod
