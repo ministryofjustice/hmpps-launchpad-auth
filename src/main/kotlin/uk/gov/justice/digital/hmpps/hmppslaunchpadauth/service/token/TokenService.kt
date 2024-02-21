@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.analytics.AppInsightEventType
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.analytics.TelemetryService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.ACCESS_DENIED_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.EXPIRE_TOKEN_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_CODE_MSG
@@ -36,6 +38,7 @@ class TokenService(
   private var clientService: ClientService,
   private var ssoRequestService: SsoRequestService,
   private var userApprovedClientService: UserApprovedClientService,
+  private var telemetryService: TelemetryService,
   @Value("\${launchpad.auth.id-token-validity-seconds}")
   private var idTokenValiditySeconds: Long,
   @Value("\${launchpad.auth.access-token-validity-seconds}")
@@ -204,6 +207,12 @@ class TokenService(
         TokenCommonClaims.buildHeaderClaims(),
         secret,
       )
+    val eventType =
+      if (refreshTokenPayloadOld == null) AppInsightEventType.TOKEN_GENERATED_VIA_AUTHORIZATION_CODE else AppInsightEventType.TOKEN_GENERATED_VIA_REFRESH_TOKEN
+    telemetryService.addTelemetryData(
+      eventType,
+      idTokenPayloadClaims,
+    )
     return Token(idToken, accessToken, refreshToken, TOKEN_TYPE, accessTokenValiditySeconds - 1)
   }
 
@@ -213,11 +222,21 @@ class TokenService(
       grantEnum = AuthorizationGrantType.getAuthorizationGrantTypeByStringValue(grantType)
     } catch (e: IllegalArgumentException) {
       val message = "$grantType is invalid grant type"
-      throw ApiException(message, HttpStatus.BAD_REQUEST, ApiErrorTypes.INVALID_GRANT.toString(), INVALID_GRANT_TYPE_MSG)
+      throw ApiException(
+        message,
+        HttpStatus.BAD_REQUEST,
+        ApiErrorTypes.INVALID_GRANT.toString(),
+        INVALID_GRANT_TYPE_MSG,
+      )
     }
     if (!authorizationGrantType.contains(grantEnum)) {
       val message = "Invalid grant type: $grantType sent in get token request"
-      throw ApiException(message, HttpStatus.BAD_REQUEST, ApiErrorTypes.INVALID_GRANT.toString(), INVALID_GRANT_TYPE_MSG)
+      throw ApiException(
+        message,
+        HttpStatus.BAD_REQUEST,
+        ApiErrorTypes.INVALID_GRANT.toString(),
+        INVALID_GRANT_TYPE_MSG,
+      )
     }
   }
 
