@@ -207,10 +207,10 @@ class TokenService(
         TokenCommonClaims.buildHeaderClaims(),
         secret,
       )
-    val eventName =
+    val eventType =
       if (refreshTokenPayloadOld == null) AppInsightEventType.TOKEN_GENERATED_VIA_AUTHORIZATION_CODE else AppInsightEventType.TOKEN_GENERATED_VIA_REFRESH_TOKEN
     telemetryService.addTelemetryData(
-      eventName.toString(),
+      eventType,
       idTokenPayloadClaims,
     )
     return Token(idToken, accessToken, refreshToken, TOKEN_TYPE, accessTokenValiditySeconds - 1)
