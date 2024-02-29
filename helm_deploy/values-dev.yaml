@@ -12,8 +12,9 @@ generic-service:
     SPRING_PROFILES_ACTIVE: "dev"
 
   allowlist:
+    bsi-1: 54.37.241.156/30
+    bsi-2: 167.71.136.237/32
     groups:
-      - cymulate
       - internal
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
