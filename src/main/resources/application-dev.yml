@@ -11,3 +11,7 @@ hmpps:
     url: https://sign-in-dev.hmpps.service.justice.gov.uk
   prison-api:
     url: https://prison-api-dev.prison.service.justice.gov.uk
+
+spring:
+  flyway:
+    locations: classpath:db/migration/dev
