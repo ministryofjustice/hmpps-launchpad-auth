@@ -2,7 +2,8 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.security.Keys
+import org.springframework.http.HttpStatus
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
@@ -13,6 +14,13 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.priso
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.AccessTokenPayload
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenCommonClaims
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
+import java.security.KeyFactory
+import java.security.KeyPair
+import java.security.KeyPairGenerator
+import java.security.PrivateKey
+import java.security.PublicKey
+import java.security.spec.PKCS8EncodedKeySpec
+import java.security.spec.X509EncodedKeySpec
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -59,6 +67,7 @@ class DataGenerator {
     }
 
     fun jwtBuilder(issue: Instant, exp: Instant, nonce: UUID, userId: String?, secret: String): String {
+      val privateKey = getPrivateKey(secret)
       val issueDate = Date.from(issue)
       val expDate = Date.from(exp)
       return Jwts.builder()
@@ -74,8 +83,8 @@ class DataGenerator {
         .setIssuedAt(issueDate)
         .setExpiration(expDate)
         .signWith(
-          Keys.hmacShaKeyFor(secret.toByteArray(Charsets.UTF_8)),
-          SignatureAlgorithm.HS256,
+          privateKey,
+          SignatureAlgorithm.RS256,
         )
         .compact()
     }
@@ -145,6 +154,7 @@ class DataGenerator {
       userApprovedClient: UserApprovedClient,
       nonce: String?,
       secret: String,
+      kid: String,
       validityInSeconds: Long,
     ): String {
       val accessTokenPayload = AccessTokenPayload()
@@ -157,9 +167,47 @@ class DataGenerator {
       )
       return "Bearer " + TokenGenerationAndValidation.generateJwtToken(
         payload,
-        TokenCommonClaims.buildHeaderClaims(),
+        TokenCommonClaims.buildHeaderClaims(kid),
         secret,
       )
+    }
+
+    fun getPrivateKey(secret: String) : PrivateKey {
+      try {
+        val privateKeyFormatted = secret
+          .trimIndent()
+          .replace("-----BEGIN PRIVATE KEY-----", "")
+          .replace("-----END PRIVATE KEY-----", "")
+          .replace("\\s".toRegex(), "")
+        val privateKeyInBytes = Base64.getDecoder().decode(privateKeyFormatted)
+        return  KeyFactory.getInstance("RSA").generatePrivate(
+          PKCS8EncodedKeySpec(privateKeyInBytes),
+        )
+      } catch (e: Exception) {
+        throw ApiException("", HttpStatus.INTERNAL_SERVER_ERROR, "", "")
+      }
+    }
+
+    fun generateRandomRSAKey(): KeyPair {
+      val rsaGenerator = KeyPairGenerator.getInstance("RSA")
+      rsaGenerator.initialize(2048)
+      return rsaGenerator.genKeyPair()
+    }
+
+    fun getPublicKey(secret: String): PublicKey {
+      try {
+        val publiceyFormatted = secret
+          .trimIndent()
+          .replace("-----BEGIN PUBLIC KEY-----", "")
+          .replace("-----END PUBLIC KEY-----", "")
+          .replace("\\s".toRegex(), "")
+        val ppublicKeyInBytes = Base64.getDecoder().decode(publiceyFormatted)
+        return  KeyFactory.getInstance("RSA").generatePublic(
+          X509EncodedKeySpec(ppublicKeyInBytes),
+        )
+      } catch (e: Exception) {
+        throw ApiException("", HttpStatus.INTERNAL_SERVER_ERROR, "", "")
+      }
     }
   }
 }
