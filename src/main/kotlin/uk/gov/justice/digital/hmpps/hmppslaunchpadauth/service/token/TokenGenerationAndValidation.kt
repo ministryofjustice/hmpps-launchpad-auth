@@ -8,18 +8,14 @@ import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.jackson.io.JacksonSerializer
+import io.jsonwebtoken.security.Keys
 import org.springframework.http.HttpStatus
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
-import java.security.KeyFactory
-import java.security.PrivateKey
-import java.security.PublicKey
-import java.security.spec.PKCS8EncodedKeySpec
-import java.security.spec.X509EncodedKeySpec
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.*
+import javax.crypto.spec.SecretKeySpec
 
 class TokenGenerationAndValidation {
 
@@ -32,12 +28,11 @@ class TokenGenerationAndValidation {
       secret: String,
     ): String {
       try {
-        val privateKey = getPrivateKey(secret)
         return Jwts.builder()
           .serializeToJsonWith(JacksonSerializer(mapper.build()))
           .addClaims(payloadMap)
           .setHeader(headerMap)
-          .signWith(privateKey, SignatureAlgorithm.RS256)
+          .signWith(Keys.hmacShaKeyFor(secret.toByteArray(Charsets.UTF_8)), SignatureAlgorithm.HS256)
           .compact()
       } catch (e: Exception) {
         val message = "Exception during token creation ${e.message}"
@@ -46,31 +41,23 @@ class TokenGenerationAndValidation {
     }
 
     fun validateJwtTokenSignature(token: String, secret: String): Boolean {
-      try {
-        if (!token.contains(".")) {
-          invalidTokenFormat(token)
-        }
-        val chunks = token.split(".")
-        if (chunks.size != 3) {
-          invalidTokenFormat(token)
-        }
-        val publicKey = getPublicKey(secret)
-        //val secretKeySpec = SecretKeySpec(secret.toByteArray(Charsets.UTF_8), SignatureAlgorithm.HS256.value)
-        return DefaultJwtSignatureValidator(SignatureAlgorithm.RS256, publicKey, Decoders.BASE64URL).isValid(
-          chunks[0] + "." + chunks[1],
-          chunks[2],
-        )
-      } catch (e: Exception) {
-        val message = "Exception during token verification ${e.message}"
-        throw ApiException(message, HttpStatus.FORBIDDEN, ApiErrorTypes.INVALID_TOKEN.toString(), "Exception during token verification")
+      if (!token.contains(".")) {
+        invalidTokenFormat(token)
       }
-
+      val chunks = token.split(".")
+      if (chunks.size != 3) {
+        invalidTokenFormat(token)
+      }
+      val secretKeySpec = SecretKeySpec(secret.toByteArray(Charsets.UTF_8), SignatureAlgorithm.HS256.value)
+      return DefaultJwtSignatureValidator(SignatureAlgorithm.HS256, secretKeySpec, Decoders.BASE64URL).isValid(
+        chunks[0] + "." + chunks[1],
+        chunks[2],
+      )
     }
 
     fun parseClaims(token: String, secret: String): Jws<Claims> {
       try {
-        val publicKey = getPublicKey(secret)
-        return Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(token)
+        return Jwts.parserBuilder().setSigningKey(secret.toByteArray(Charsets.UTF_8)).build().parseClaimsJws(token)
       } catch (e: ExpiredJwtException) {
         val message = "Invalid $token"
         throw ApiException(message, HttpStatus.BAD_REQUEST, ApiErrorTypes.INVALID_TOKEN.toString(), "Invalid refresh token")
@@ -87,40 +74,6 @@ class TokenGenerationAndValidation {
     private fun invalidTokenFormat(token: String) {
       val message = "Invalid bearer token format $token"
       throw ApiException(message, HttpStatus.FORBIDDEN, ApiErrorTypes.INVALID_TOKEN.toString(), "Invalid token")
-    }
-
-    private fun getPrivateKey(secret: String) : PrivateKey {
-      try {
-        val privateKeyFormatted = secret
-          .trimIndent()
-          .replace("-----BEGIN PRIVATE KEY-----", "")
-          .replace("-----END PRIVATE KEY-----", "")
-          .replace("\\s".toRegex(), "")
-        val privateKeyInBytes = Base64.getDecoder().decode(privateKeyFormatted)
-        return  KeyFactory.getInstance("RSA").generatePrivate(
-          PKCS8EncodedKeySpec(privateKeyInBytes),
-        )
-      } catch (e: Exception) {
-        val message = "Exception in creating private key  ${e.message}"
-        throw ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR, "", "")
-      }
-    }
-
-    private fun getPublicKey(secret: String): PublicKey {
-      try {
-        val publiceyFormatted = secret
-          .trimIndent()
-          .replace("-----BEGIN PUBLIC KEY-----", "")
-          .replace("-----END PUBLIC KEY-----", "")
-          .replace("\\s".toRegex(), "")
-        val ppublicKeyInBytes = Base64.getDecoder().decode(publiceyFormatted)
-        return  KeyFactory.getInstance("RSA").generatePublic(
-          X509EncodedKeySpec(ppublicKeyInBytes),
-        )
-      } catch (e: Exception) {
-        throw ApiException("", HttpStatus.INTERNAL_SERVER_ERROR, "", "")
-      }
-
     }
   }
 }

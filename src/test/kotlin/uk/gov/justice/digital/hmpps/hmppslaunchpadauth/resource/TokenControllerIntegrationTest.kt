@@ -38,7 +38,6 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.ClientReposito
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.SsoRequestRepository
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedClientRepository
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator.Companion.getPrivateKey
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.USER_ID
@@ -61,11 +60,8 @@ class TokenControllerIntegrationTest(
   @LocalServerPort
   private val port = 0
 
-  @Value("\${launchpad.auth.private-key}")
-  private lateinit var signingKey: String
-
-  @Value("\${launchpad.auth.public-key}")
-  private lateinit var verifyingKey: String
+  @Value("\${launchpad.auth.secret}")
+  private lateinit var secret: String
 
   private val baseUrl = "http://localhost"
 
@@ -276,8 +272,8 @@ class TokenControllerIntegrationTest(
   }
 
   private fun assertIdTokenClaims(idToken: String) {
-    Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(idToken, verifyingKey))
-    val claims = TokenGenerationAndValidation.parseClaims(idToken, verifyingKey).body
+    Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(idToken, secret))
+    val claims = TokenGenerationAndValidation.parseClaims(idToken, secret).body
     val exp = claims["exp"] as Int
     Assertions.assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
     Assertions.assertEquals(clientId.toString(), claims["aud"])
@@ -288,8 +284,8 @@ class TokenControllerIntegrationTest(
   }
 
   private fun assertAccessTokenClaims(accessToken: String) {
-    Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(accessToken, verifyingKey))
-    val claims = TokenGenerationAndValidation.parseClaims(accessToken, verifyingKey).body
+    Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(accessToken, secret))
+    val claims = TokenGenerationAndValidation.parseClaims(accessToken, secret).body
     val exp = claims["exp"] as Int
     Assertions.assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
     Assertions.assertEquals(clientId.toString(), claims["aud"])
@@ -299,8 +295,8 @@ class TokenControllerIntegrationTest(
   }
 
   private fun assertRefreshTokenClaims(refreshToken: String) {
-    Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(refreshToken, verifyingKey))
-    val claims = TokenGenerationAndValidation.parseClaims(refreshToken, verifyingKey).body
+    Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(refreshToken, secret))
+    val claims = TokenGenerationAndValidation.parseClaims(refreshToken, secret).body
     val exp = claims["exp"] as Int
     Assertions.assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
     Assertions.assertEquals(clientId.toString(), claims["aud"])
@@ -317,12 +313,12 @@ class TokenControllerIntegrationTest(
   }
 
   private fun updateTokenExpireTime(token: String, exp: Long): String {
-    val claims = TokenGenerationAndValidation.parseClaims(token, verifyingKey)
+    val claims = TokenGenerationAndValidation.parseClaims(token, secret)
     claims.body["exp"] = exp
     return Jwts.builder()
       .addClaims(claims.body)
       .setHeader(claims.header)
-      .signWith(SignatureAlgorithm.RS256, getPrivateKey(signingKey))
+      .signWith(SignatureAlgorithm.HS256, secret.toByteArray(Charsets.UTF_8))
       .compact()
   }
 

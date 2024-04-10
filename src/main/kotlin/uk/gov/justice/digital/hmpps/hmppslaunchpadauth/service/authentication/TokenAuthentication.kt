@@ -20,7 +20,7 @@ import java.util.*
 class TokenAuthentication(
   private var userIdValidator: UserIdValidator,
 ) : Authentication {
-  @Value("\${launchpad.auth.public-key}")
+  @Value("\${launchpad.auth.secret}")
   private lateinit var secret: String
 
   companion object {

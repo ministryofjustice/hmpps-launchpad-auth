@@ -59,10 +59,6 @@ class UserApprovedClientIntegrationTest(
   private lateinit var userApprovedClientOne: UserApprovedClient
   private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
   private lateinit var authorizationHeader: String
-  @Value("\${launchpad.auth.private-key}")
-  private lateinit var secret: String
-  @Value("\${launchpad.auth.kid}")
-  private lateinit var kid: String
 
   @BeforeEach
   fun beforeEach() {
@@ -100,8 +96,7 @@ class UserApprovedClientIntegrationTest(
       clientDBOne,
       userApprovedClientOne,
       "test nonce",
-      secret,
-      kid,
+      "random_secret_random_secret_random_secret",
       accessTokenValiditySeconds,
     )
   }
