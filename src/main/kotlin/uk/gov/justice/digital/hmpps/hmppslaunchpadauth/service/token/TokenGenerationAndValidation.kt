@@ -101,24 +101,25 @@ class TokenGenerationAndValidation {
           PKCS8EncodedKeySpec(privateKeyInBytes),
         )
       } catch (e: Exception) {
-        val message = "Exception in creating private key  ${e.message}"
-        throw ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR, "", "")
+        val message = "Error converting private key string to private key object ${e.message}"
+        throw ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), "Error in signature")
       }
     }
 
     private fun getPublicKey(secret: String): PublicKey {
       try {
-        val publiceyFormatted = secret
+        val publicKeyFormatted = secret
           .trimIndent()
           .replace("-----BEGIN PUBLIC KEY-----", "")
           .replace("-----END PUBLIC KEY-----", "")
           .replace("\\s".toRegex(), "")
-        val ppublicKeyInBytes = Base64.getDecoder().decode(publiceyFormatted)
+        val publicKeyInBytes = Base64.getDecoder().decode(publicKeyFormatted)
         return  KeyFactory.getInstance("RSA").generatePublic(
-          X509EncodedKeySpec(ppublicKeyInBytes),
+          X509EncodedKeySpec(publicKeyInBytes),
         )
       } catch (e: Exception) {
-        throw ApiException("", HttpStatus.INTERNAL_SERVER_ERROR, "", "")
+        val message = "Error converting public key string to public key object ${e.message}"
+        throw ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), "Error in verification")
       }
 
     }
