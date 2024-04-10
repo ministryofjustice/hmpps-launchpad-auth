@@ -50,7 +50,7 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
   @MockBean
   private lateinit var userApprovedClientService: UserApprovedClientService
 
-  @Value("\${launchpad.auth.secret}")
+  @Value("\${launchpad.auth.private-key}")
   private lateinit var secret: String
 
   private lateinit var ssoRequest: SsoRequest

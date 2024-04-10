@@ -77,6 +77,9 @@ launchpad:
     id-token-validity-seconds: 43200
     access-token-validity-seconds: 3600
     refresh-token-validity-seconds: 604800
+    private-key: ${SIGNING_KEY}
+    public-key: ${VERIFYING_KEY}
+    kid: ${KID}
     agencies:
      BWI:
       agencyId: BWI
