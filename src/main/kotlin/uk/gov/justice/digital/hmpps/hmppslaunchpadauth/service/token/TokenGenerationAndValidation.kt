@@ -41,7 +41,12 @@ class TokenGenerationAndValidation {
           .compact()
       } catch (e: Exception) {
         val message = "Exception during token creation ${e.message}"
-        throw ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), "Exception during token creation")
+        throw ApiException(
+          message,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          ApiErrorTypes.SERVER_ERROR.toString(),
+          "Exception during token creation",
+        )
       }
     }
 
@@ -55,16 +60,19 @@ class TokenGenerationAndValidation {
           invalidTokenFormat(token)
         }
         val publicKey = getPublicKey(secret)
-        //val secretKeySpec = SecretKeySpec(secret.toByteArray(Charsets.UTF_8), SignatureAlgorithm.HS256.value)
         return DefaultJwtSignatureValidator(SignatureAlgorithm.RS256, publicKey, Decoders.BASE64URL).isValid(
           chunks[0] + "." + chunks[1],
           chunks[2],
         )
       } catch (e: Exception) {
         val message = "Exception during token verification ${e.message}"
-        throw ApiException(message, HttpStatus.FORBIDDEN, ApiErrorTypes.INVALID_TOKEN.toString(), "Exception during token verification")
+        throw ApiException(
+          message,
+          HttpStatus.FORBIDDEN,
+          ApiErrorTypes.INVALID_TOKEN.toString(),
+          "Exception during token verification",
+        )
       }
-
     }
 
     fun parseClaims(token: String, secret: String): Jws<Claims> {
@@ -73,7 +81,12 @@ class TokenGenerationAndValidation {
         return Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(token)
       } catch (e: ExpiredJwtException) {
         val message = "Invalid $token"
-        throw ApiException(message, HttpStatus.BAD_REQUEST, ApiErrorTypes.INVALID_TOKEN.toString(), "Invalid refresh token")
+        throw ApiException(
+          message,
+          HttpStatus.BAD_REQUEST,
+          ApiErrorTypes.INVALID_TOKEN.toString(),
+          "Invalid refresh token",
+        )
       }
     }
 
@@ -89,7 +102,7 @@ class TokenGenerationAndValidation {
       throw ApiException(message, HttpStatus.FORBIDDEN, ApiErrorTypes.INVALID_TOKEN.toString(), "Invalid token")
     }
 
-    private fun getPrivateKey(secret: String) : PrivateKey {
+    private fun getPrivateKey(secret: String): PrivateKey {
       try {
         val privateKeyFormatted = secret
           .trimIndent()
@@ -97,12 +110,17 @@ class TokenGenerationAndValidation {
           .replace("-----END PRIVATE KEY-----", "")
           .replace("\\s".toRegex(), "")
         val privateKeyInBytes = Base64.getDecoder().decode(privateKeyFormatted)
-        return  KeyFactory.getInstance("RSA").generatePrivate(
+        return KeyFactory.getInstance("RSA").generatePrivate(
           PKCS8EncodedKeySpec(privateKeyInBytes),
         )
       } catch (e: Exception) {
         val message = "Error converting private key string to private key object ${e.message}"
-        throw ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), "Error in signature")
+        throw ApiException(
+          message,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          ApiErrorTypes.SERVER_ERROR.toString(),
+          "Error in signature",
+        )
       }
     }
 
@@ -114,14 +132,18 @@ class TokenGenerationAndValidation {
           .replace("-----END PUBLIC KEY-----", "")
           .replace("\\s".toRegex(), "")
         val publicKeyInBytes = Base64.getDecoder().decode(publicKeyFormatted)
-        return  KeyFactory.getInstance("RSA").generatePublic(
+        return KeyFactory.getInstance("RSA").generatePublic(
           X509EncodedKeySpec(publicKeyInBytes),
         )
       } catch (e: Exception) {
         val message = "Error converting public key string to public key object ${e.message}"
-        throw ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), "Error in verification")
+        throw ApiException(
+          message,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          ApiErrorTypes.SERVER_ERROR.toString(),
+          "Error in verification",
+        )
       }
-
     }
   }
 }

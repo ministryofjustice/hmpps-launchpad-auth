@@ -172,7 +172,7 @@ class DataGenerator {
       )
     }
 
-    fun getPrivateKey(secret: String) : PrivateKey {
+    fun getPrivateKey(secret: String): PrivateKey {
       try {
         val privateKeyFormatted = secret
           .trimIndent()
@@ -180,7 +180,7 @@ class DataGenerator {
           .replace("-----END PRIVATE KEY-----", "")
           .replace("\\s".toRegex(), "")
         val privateKeyInBytes = Base64.getDecoder().decode(privateKeyFormatted)
-        return  KeyFactory.getInstance("RSA").generatePrivate(
+        return KeyFactory.getInstance("RSA").generatePrivate(
           PKCS8EncodedKeySpec(privateKeyInBytes),
         )
       } catch (e: Exception) {
@@ -201,9 +201,9 @@ class DataGenerator {
           .replace("-----BEGIN PUBLIC KEY-----", "")
           .replace("-----END PUBLIC KEY-----", "")
           .replace("\\s".toRegex(), "")
-        val ppublicKeyInBytes = Base64.getDecoder().decode(publiceyFormatted)
-        return  KeyFactory.getInstance("RSA").generatePublic(
-          X509EncodedKeySpec(ppublicKeyInBytes),
+        val publicKeyInBytes = Base64.getDecoder().decode(publiceyFormatted)
+        return KeyFactory.getInstance("RSA").generatePublic(
+          X509EncodedKeySpec(publicKeyInBytes),
         )
       } catch (e: Exception) {
         throw ApiException("", HttpStatus.INTERNAL_SERVER_ERROR, "", "")
