@@ -85,7 +85,7 @@ class TokenGenerationAndValidation {
           message,
           HttpStatus.BAD_REQUEST,
           ApiErrorTypes.INVALID_TOKEN.toString(),
-          "Invalid refresh token",
+          "Invalid token",
         )
       }
     }

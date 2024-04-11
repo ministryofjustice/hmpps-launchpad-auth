@@ -34,7 +34,7 @@ class ClientService(private var clientRepository: ClientRepository) {
   ) {
     val client = clientRepository.findById(clientId).orElseThrow {
       val message = "Client with client_id $clientId does not exist"
-      ApiException(message, HttpStatus.FOUND, ApiErrorTypes.INVALID_REQUEST.toString(), INVALID_CLIENT_ID_MSG)
+      ApiException(message, HttpStatus.BAD_REQUEST, ApiErrorTypes.INVALID_REQUEST.toString(), INVALID_CLIENT_ID_MSG)
     }
     isEnabled(client.enabled, redirectUri, state)
     validateScopes(scopes, client.scopes, redirectUri, state)
@@ -63,7 +63,7 @@ class ClientService(private var clientRepository: ClientRepository) {
       val message = "Not a valid redirect uri: $redirectUri"
       throw ApiException(
         message,
-        HttpStatus.FOUND,
+        HttpStatus.BAD_REQUEST,
         ApiErrorTypes.INVALID_REQUEST.toString(),
         INVALID_REDIRECT_URI_MSG,
       )
@@ -110,13 +110,11 @@ class ClientService(private var clientRepository: ClientRepository) {
   private fun validateRedirectUri(redirectUri: String, redirectUris: Set<String>, state: String?) {
     if (!redirectUris.contains(redirectUri)) {
       val message = "Redirect uri not matching with client redirect uri: $redirectUri"
-      throw SsoException(
+      throw ApiException(
         message,
-        HttpStatus.FOUND,
+        HttpStatus.BAD_REQUEST,
         ApiErrorTypes.INVALID_REQUEST.toString(),
         INVALID_REDIRECT_URI_MSG,
-        redirectUri,
-        state,
       )
     }
   }

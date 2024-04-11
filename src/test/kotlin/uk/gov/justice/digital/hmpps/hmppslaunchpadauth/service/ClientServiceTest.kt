@@ -77,7 +77,7 @@ class ClientServiceTest {
         "test",
       )
     }
-    assertEquals(HttpStatus.FOUND, exception.code)
+    assertEquals(HttpStatus.BAD_REQUEST, exception.code)
   }
 
   @Test
@@ -93,7 +93,7 @@ class ClientServiceTest {
         "test",
       )
     }
-    assertEquals(HttpStatus.FOUND, exception.code)
+    assertEquals(HttpStatus.BAD_REQUEST, exception.code)
   }
 
   @Test
@@ -147,7 +147,7 @@ class ClientServiceTest {
   @Test
   fun `validate Params when redirect url not in registered url list`() {
     Mockito.`when`(clientRepository.findById(client.id)).thenReturn(Optional.of(client))
-    val exception = assertThrows(SsoException::class.java) {
+    val exception = assertThrows(ApiException::class.java) {
       clientService.validateParams(
         client.id,
         "code",
@@ -157,6 +157,6 @@ class ClientServiceTest {
         "test",
       )
     }
-    assertEquals(HttpStatus.FOUND, exception.code)
+    assertEquals(HttpStatus.BAD_REQUEST, exception.code)
   }
 }
