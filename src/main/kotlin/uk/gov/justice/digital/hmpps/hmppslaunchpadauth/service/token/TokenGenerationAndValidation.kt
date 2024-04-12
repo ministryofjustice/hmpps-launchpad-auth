@@ -119,7 +119,7 @@ class TokenGenerationAndValidation {
           message,
           HttpStatus.INTERNAL_SERVER_ERROR,
           ApiErrorTypes.SERVER_ERROR.toString(),
-          "Error in signature",
+          "Internal server error",
         )
       }
     }
@@ -141,7 +141,7 @@ class TokenGenerationAndValidation {
           message,
           HttpStatus.INTERNAL_SERVER_ERROR,
           ApiErrorTypes.SERVER_ERROR.toString(),
-          "Error in verification",
+          "Internal server error",
         )
       }
     }

@@ -46,14 +46,12 @@ class TokenService(
   @Value("\${launchpad.auth.refresh-token-validity-seconds}")
   private var refreshTokenValiditySeconds: Long,
 ) {
-  @Value("\${launchpad.auth.secret}")
-  private lateinit var secret: String
 
   @Value("\${launchpad.auth.private-key}")
-  private lateinit var signingSecret: String
+  private lateinit var privateKey: String
 
   @Value("\${launchpad.auth.public-key}")
-  private lateinit var verificationSecret: String
+  private lateinit var publicKey: String
 
   @Value("\${launchpad.auth.kid}")
   private lateinit var kid: String
@@ -202,19 +200,19 @@ class TokenService(
       .generateJwtToken(
         idTokenPayloadClaims,
         TokenCommonClaims.buildHeaderClaims(kid),
-        signingSecret,
+        privateKey,
       )
     val accessToken = TokenGenerationAndValidation
       .generateJwtToken(
         accessTokenPayloadClaims,
         TokenCommonClaims.buildHeaderClaims(kid),
-        signingSecret,
+        privateKey,
       )
     val refreshToken = TokenGenerationAndValidation
       .generateJwtToken(
         refreshTokenPayloadClaims,
         TokenCommonClaims.buildHeaderClaims(kid),
-        signingSecret,
+        privateKey,
       )
     val eventType =
       if (refreshTokenPayloadOld == null) AppInsightEventType.TOKEN_GENERATED_VIA_AUTHORIZATION_CODE else AppInsightEventType.TOKEN_GENERATED_VIA_REFRESH_TOKEN
@@ -289,8 +287,8 @@ class TokenService(
   }
 
   private fun validateAndGetRefreshTokenPayloadClaims(refreshToken: String, clientId: UUID): Jws<Claims> {
-    if (TokenGenerationAndValidation.validateJwtTokenSignature(refreshToken, verificationSecret)) {
-      val claims = TokenGenerationAndValidation.parseClaims(refreshToken, verificationSecret)
+    if (TokenGenerationAndValidation.validateJwtTokenSignature(refreshToken, publicKey)) {
+      val claims = TokenGenerationAndValidation.parseClaims(refreshToken, publicKey)
       checkIfAccessToken(claims.body)
       val exp = getClaim("exp", claims.body) as Int
       val jti = getClaim("jti", claims.body) as String

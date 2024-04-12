@@ -46,8 +46,8 @@ generic-service:
       AZURE_TENANT_ID: "AZURE_TENANT_ID"
       AZURE_CLIENT_ID: "AZURE_CLIENT_ID"
       LAUNCHPAD_AUTH_SECRET: "LAUNCHPAD_AUTH_SECRET"
-      SIGNING_KEY: "SIGNING_KEY"
-      VERIFYING_KEY: "VERIFYING_KEY"
+      PRIVATE_KEY: "PRIVATE_KEY"
+      PUBLIC_KEY: "PUBLIC_KEY"
       KID: "KID"
     rds-postgresql-instance-output:
       DB_NAME: "database_name"
