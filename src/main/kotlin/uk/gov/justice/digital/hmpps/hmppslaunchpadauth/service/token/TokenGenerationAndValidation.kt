@@ -45,7 +45,7 @@ class TokenGenerationAndValidation {
           message,
           HttpStatus.INTERNAL_SERVER_ERROR,
           ApiErrorTypes.SERVER_ERROR.toString(),
-          "Exception during token creation",
+          ApiErrorTypes.SERVER_ERROR.toString(),
         )
       }
     }
@@ -70,7 +70,7 @@ class TokenGenerationAndValidation {
           message,
           HttpStatus.FORBIDDEN,
           ApiErrorTypes.INVALID_TOKEN.toString(),
-          "Exception during token verification",
+          ApiErrorTypes.INVALID_TOKEN.toString(),
         )
       }
     }
@@ -85,7 +85,7 @@ class TokenGenerationAndValidation {
           message,
           HttpStatus.BAD_REQUEST,
           ApiErrorTypes.INVALID_TOKEN.toString(),
-          "Invalid token",
+          ApiErrorTypes.INVALID_TOKEN.toString(),
         )
       }
     }
@@ -119,7 +119,7 @@ class TokenGenerationAndValidation {
           message,
           HttpStatus.INTERNAL_SERVER_ERROR,
           ApiErrorTypes.SERVER_ERROR.toString(),
-          "Internal server error",
+          ApiErrorTypes.SERVER_ERROR.toString(),
         )
       }
     }
@@ -141,7 +141,7 @@ class TokenGenerationAndValidation {
           message,
           HttpStatus.INTERNAL_SERVER_ERROR,
           ApiErrorTypes.SERVER_ERROR.toString(),
-          "Internal server error",
+          ApiErrorTypes.SERVER_ERROR.toString(),
         )
       }
     }
