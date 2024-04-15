@@ -21,7 +21,7 @@ class TokenAuthentication(
   private var userIdValidator: UserIdValidator,
 ) : Authentication {
   @Value("\${launchpad.auth.public-key}")
-  private lateinit var secret: String
+  private lateinit var publicKey: String
 
   companion object {
     private const val BEARER = "Bearer "
@@ -31,7 +31,7 @@ class TokenAuthentication(
   override fun authenticate(credential: String): AuthenticationInfo {
     if (credential.startsWith(BEARER)) {
       val token = credential.replace(BEARER, "")
-      if (TokenGenerationAndValidation.validateJwtTokenSignature(token, secret)) {
+      if (TokenGenerationAndValidation.validateJwtTokenSignature(token, publicKey)) {
         val claims = getJwsClaims(token)
         checkIfRefreshToken(claims)
         val expireAt = getClaim("exp", claims) as Int
@@ -79,7 +79,7 @@ class TokenAuthentication(
 
   private fun getJwsClaims(token: String): Claims {
     try {
-      val jwsClaims = TokenGenerationAndValidation.parseClaims(token, secret)
+      val jwsClaims = TokenGenerationAndValidation.parseClaims(token, publicKey)
       return jwsClaims.body
     } catch (e: JwtException) {
       val message = "Exception during parsing claims in token authentication ${e.message}"

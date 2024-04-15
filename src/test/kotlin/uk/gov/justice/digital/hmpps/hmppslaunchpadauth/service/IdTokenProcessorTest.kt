@@ -24,13 +24,13 @@ import java.util.*
 class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProcessor) {
 
   @Value("\${launchpad.auth.private-key}")
-  private lateinit var secret: String
+  private lateinit var privateKey: String
 
   @Test
   fun `test get user id when nonce match`() {
     val nonce = UUID.randomUUID()
     val userUniqueId = "G2320VD"
-    var userId = idTokenProcessor.getUserId(DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userUniqueId, secret), nonce.toString())
+    var userId = idTokenProcessor.getUserId(DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userUniqueId, privateKey), nonce.toString())
     assertEquals(userId, userId)
   }
 
@@ -39,7 +39,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
     val nonce = UUID.randomUUID()
     val exception = assertThrows(ApiException::class.java) {
       idTokenProcessor.getUserId(
-        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, null, secret),
+        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, null, privateKey),
         nonce.toString(),
       )
     }
@@ -52,7 +52,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
     val nonce = UUID.randomUUID()
     assertThrows(IllegalArgumentException::class.java) {
       idTokenProcessor.getUserId(
-        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "test@moj.com", secret),
+        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "test@moj.com", privateKey),
         UUID.randomUUID().toString(),
       )
     }

@@ -48,10 +48,10 @@ class TokenAuthenticationTest(
   private lateinit var userIdValidator: UserIdValidator
 
   @Value("\${launchpad.auth.private-key}")
-  private lateinit var signingKey: String
+  private lateinit var privateKey: String
 
   @Value("\${launchpad.auth.private-key}")
-  private lateinit var verifyingSign: String
+  private lateinit var publicKey: String
 
   @Value("\${launchpad.auth.kid}")
   private lateinit var kid: String
@@ -87,7 +87,7 @@ class TokenAuthenticationTest(
     val authHeader = "Bearer " + TokenGenerationAndValidation.generateJwtToken(
       payload,
       TokenCommonClaims.buildHeaderClaims(kid),
-      signingKey,
+      privateKey,
     )
     Mockito.`when`(userIdValidator.isValid(userId)).thenReturn(true)
     val authenticationUserInfo = tokenAuthentication.authenticate(authHeader) as AuthenticationUserInfo
@@ -101,7 +101,7 @@ class TokenAuthenticationTest(
     val randomSecret = "random_secret_xxx_random_secret_xxx"
     val keyPair = generateRandomRSAKey()
     val verifyingSignature = String(keyPair.public.encoded)
-    verifyingSign = verifyingSignature
+    publicKey = verifyingSignature
     val accessTokenPayload = AccessTokenPayload()
     val nonce = "random_nonce"
     val payload = accessTokenPayload.generatePayload(

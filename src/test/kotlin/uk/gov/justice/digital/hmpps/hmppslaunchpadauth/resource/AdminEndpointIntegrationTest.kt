@@ -41,9 +41,6 @@ class AdminEndpointIntegrationTest(
   @LocalServerPort
   private val port = 0
 
-  // @Value("\${launchpad.auth.secret}")
-  // private lateinit var secret: String
-
   private val baseUrl = "http://localhost"
 
   private val restTemplate: RestTemplate = RestTemplate()

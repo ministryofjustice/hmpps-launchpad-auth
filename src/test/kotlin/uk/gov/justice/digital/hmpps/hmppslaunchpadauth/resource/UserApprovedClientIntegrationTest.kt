@@ -61,7 +61,7 @@ class UserApprovedClientIntegrationTest(
   private lateinit var authorizationHeader: String
 
   @Value("\${launchpad.auth.private-key}")
-  private lateinit var secret: String
+  private lateinit var privateKey: String
 
   @Value("\${launchpad.auth.kid}")
   private lateinit var kid: String
@@ -102,7 +102,7 @@ class UserApprovedClientIntegrationTest(
       clientDBOne,
       userApprovedClientOne,
       "test nonce",
-      secret,
+      privateKey,
       kid,
       accessTokenValiditySeconds,
     )

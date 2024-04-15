@@ -102,9 +102,9 @@ class TokenGenerationAndValidation {
       throw ApiException(message, HttpStatus.FORBIDDEN, ApiErrorTypes.INVALID_TOKEN.toString(), "Invalid token")
     }
 
-    private fun getPrivateKey(secret: String): PrivateKey {
+    private fun getPrivateKey(privateKey: String): PrivateKey {
       try {
-        val privateKeyFormatted = secret
+        val privateKeyFormatted = privateKey
           .trimIndent()
           .replace("-----BEGIN PRIVATE KEY-----", "")
           .replace("-----END PRIVATE KEY-----", "")
@@ -124,9 +124,9 @@ class TokenGenerationAndValidation {
       }
     }
 
-    private fun getPublicKey(secret: String): PublicKey {
+    private fun getPublicKey(publicKey: String): PublicKey {
       try {
-        val publicKeyFormatted = secret
+        val publicKeyFormatted = publicKey
           .trimIndent()
           .replace("-----BEGIN PUBLIC KEY-----", "")
           .replace("-----END PUBLIC KEY-----", "")

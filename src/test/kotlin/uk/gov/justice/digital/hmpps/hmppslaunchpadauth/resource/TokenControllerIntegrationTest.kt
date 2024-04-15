@@ -62,10 +62,10 @@ class TokenControllerIntegrationTest(
   private val port = 0
 
   @Value("\${launchpad.auth.private-key}")
-  private lateinit var signingKey: String
+  private lateinit var privateKey: String
 
   @Value("\${launchpad.auth.public-key}")
-  private lateinit var verifyingKey: String
+  private lateinit var publicKey: String
 
   private val baseUrl = "http://localhost"
 
@@ -276,8 +276,8 @@ class TokenControllerIntegrationTest(
   }
 
   private fun assertIdTokenClaims(idToken: String) {
-    Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(idToken, verifyingKey))
-    val claims = TokenGenerationAndValidation.parseClaims(idToken, verifyingKey).body
+    Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(idToken, publicKey))
+    val claims = TokenGenerationAndValidation.parseClaims(idToken, publicKey).body
     val exp = claims["exp"] as Int
     Assertions.assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
     Assertions.assertEquals(clientId.toString(), claims["aud"])
@@ -288,8 +288,8 @@ class TokenControllerIntegrationTest(
   }
 
   private fun assertAccessTokenClaims(accessToken: String) {
-    Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(accessToken, verifyingKey))
-    val claims = TokenGenerationAndValidation.parseClaims(accessToken, verifyingKey).body
+    Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(accessToken, publicKey))
+    val claims = TokenGenerationAndValidation.parseClaims(accessToken, publicKey).body
     val exp = claims["exp"] as Int
     Assertions.assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
     Assertions.assertEquals(clientId.toString(), claims["aud"])
@@ -299,8 +299,8 @@ class TokenControllerIntegrationTest(
   }
 
   private fun assertRefreshTokenClaims(refreshToken: String) {
-    Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(refreshToken, verifyingKey))
-    val claims = TokenGenerationAndValidation.parseClaims(refreshToken, verifyingKey).body
+    Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(refreshToken, publicKey))
+    val claims = TokenGenerationAndValidation.parseClaims(refreshToken, publicKey).body
     val exp = claims["exp"] as Int
     Assertions.assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
     Assertions.assertEquals(clientId.toString(), claims["aud"])
@@ -317,12 +317,12 @@ class TokenControllerIntegrationTest(
   }
 
   private fun updateTokenExpireTime(token: String, exp: Long): String {
-    val claims = TokenGenerationAndValidation.parseClaims(token, verifyingKey)
+    val claims = TokenGenerationAndValidation.parseClaims(token, publicKey)
     claims.body["exp"] = exp
     return Jwts.builder()
       .addClaims(claims.body)
       .setHeader(claims.header)
-      .signWith(SignatureAlgorithm.RS256, getPrivateKey(signingKey))
+      .signWith(SignatureAlgorithm.RS256, getPrivateKey(privateKey))
       .compact()
   }
 
