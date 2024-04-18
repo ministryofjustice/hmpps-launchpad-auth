@@ -29,10 +29,10 @@ class TokenGenerationAndValidation {
     fun generateJwtToken(
       payloadMap: HashMap<String, Any>,
       headerMap: HashMap<String, Any>,
-      secret: String,
+      privateKeyInString: String,
     ): String {
       try {
-        val privateKey = getPrivateKey(secret)
+        val privateKey = getPrivateKey(privateKeyInString)
         return Jwts.builder()
           .serializeToJsonWith(JacksonSerializer(mapper.build()))
           .addClaims(payloadMap)
@@ -50,7 +50,7 @@ class TokenGenerationAndValidation {
       }
     }
 
-    fun validateJwtTokenSignature(token: String, secret: String): Boolean {
+    fun validateJwtTokenSignature(token: String, publicKeyInString: String): Boolean {
       try {
         if (!token.contains(".")) {
           invalidTokenFormat(token)
@@ -59,7 +59,7 @@ class TokenGenerationAndValidation {
         if (chunks.size != 3) {
           invalidTokenFormat(token)
         }
-        val publicKey = getPublicKey(secret)
+        val publicKey = getPublicKey(publicKeyInString)
         return DefaultJwtSignatureValidator(SignatureAlgorithm.RS256, publicKey, Decoders.BASE64URL).isValid(
           chunks[0] + "." + chunks[1],
           chunks[2],
@@ -75,9 +75,9 @@ class TokenGenerationAndValidation {
       }
     }
 
-    fun parseClaims(token: String, secret: String): Jws<Claims> {
+    fun parseClaims(token: String, publicKeyInString: String): Jws<Claims> {
       try {
-        val publicKey = getPublicKey(secret)
+        val publicKey = getPublicKey(publicKeyInString)
         return Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(token)
       } catch (e: ExpiredJwtException) {
         val message = "Invalid $token"

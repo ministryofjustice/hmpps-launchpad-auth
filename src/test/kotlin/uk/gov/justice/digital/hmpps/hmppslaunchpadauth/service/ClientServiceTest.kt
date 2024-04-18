@@ -77,7 +77,7 @@ class ClientServiceTest {
         "test",
       )
     }
-    assertEquals(HttpStatus.BAD_REQUEST, exception.code)
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
   }
 
   @Test
@@ -93,7 +93,7 @@ class ClientServiceTest {
         "test",
       )
     }
-    assertEquals(HttpStatus.BAD_REQUEST, exception.code)
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
   }
 
   @Test
@@ -157,6 +157,6 @@ class ClientServiceTest {
         "test",
       )
     }
-    assertEquals(HttpStatus.BAD_REQUEST, exception.code)
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
   }
 }
