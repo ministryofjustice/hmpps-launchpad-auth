@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.http.HttpStatus
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
@@ -184,29 +185,41 @@ class DataGenerator {
           PKCS8EncodedKeySpec(privateKeyInBytes),
         )
       } catch (e: Exception) {
-        throw ApiException("", HttpStatus.INTERNAL_SERVER_ERROR, "", "")
+        val message = "Error converting private key string to private key object ${e.message}"
+        throw ApiException(
+          message,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          ApiErrorTypes.SERVER_ERROR.toString(),
+          ApiErrorTypes.SERVER_ERROR.toString(),
+        )
       }
     }
 
     fun generateRandomRSAKey(): KeyPair {
       val rsaGenerator = KeyPairGenerator.getInstance("RSA")
-      rsaGenerator.initialize(2048)
+      rsaGenerator.initialize(4096)
       return rsaGenerator.genKeyPair()
     }
 
     fun getPublicKey(secret: String): PublicKey {
       try {
-        val publiceyFormatted = secret
+        val publicKeyFormatted = secret
           .trimIndent()
           .replace("-----BEGIN PUBLIC KEY-----", "")
           .replace("-----END PUBLIC KEY-----", "")
           .replace("\\s".toRegex(), "")
-        val publicKeyInBytes = Base64.getDecoder().decode(publiceyFormatted)
+        val publicKeyInBytes = Base64.getDecoder().decode(publicKeyFormatted)
         return KeyFactory.getInstance("RSA").generatePublic(
           X509EncodedKeySpec(publicKeyInBytes),
         )
       } catch (e: Exception) {
-        throw ApiException("", HttpStatus.INTERNAL_SERVER_ERROR, "", "")
+        val message = "Error converting public key string to public key object ${e.message}"
+        throw ApiException(
+          message,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          ApiErrorTypes.SERVER_ERROR.toString(),
+          ApiErrorTypes.SERVER_ERROR.toString(),
+        )
       }
     }
   }
