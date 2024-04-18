@@ -10,6 +10,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
 import org.springframework.http.HttpStatus
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
@@ -66,7 +67,7 @@ class ClientServiceTest {
   fun `validate params when client record do not exist`() {
     val clientId = UUID.randomUUID()
     Mockito.`when`(clientRepository.findById(clientId)).thenReturn(Optional.empty())
-    val exception = assertThrows(SsoException::class.java) {
+    val exception = assertThrows(ApiException::class.java) {
       clientService.validateParams(
         clientId,
         AuthorizationGrantType.AUTHORIZATION_CODE.toString(),
@@ -76,13 +77,13 @@ class ClientServiceTest {
         "test",
       )
     }
-    assertEquals(HttpStatus.FOUND, exception.code)
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
   }
 
   @Test
   fun `validate param invalid url value`() {
     Mockito.`when`(clientRepository.findById(client.id)).thenReturn(Optional.of(client))
-    val exception = assertThrows(SsoException::class.java) {
+    val exception = assertThrows(ApiException::class.java) {
       clientService.validateParams(
         client.id,
         "code",
@@ -92,7 +93,7 @@ class ClientServiceTest {
         "test",
       )
     }
-    assertEquals(HttpStatus.FOUND, exception.code)
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
   }
 
   @Test
@@ -146,7 +147,7 @@ class ClientServiceTest {
   @Test
   fun `validate Params when redirect url not in registered url list`() {
     Mockito.`when`(clientRepository.findById(client.id)).thenReturn(Optional.of(client))
-    val exception = assertThrows(SsoException::class.java) {
+    val exception = assertThrows(ApiException::class.java) {
       clientService.validateParams(
         client.id,
         "code",
@@ -156,6 +157,6 @@ class ClientServiceTest {
         "test",
       )
     }
-    assertEquals(HttpStatus.FOUND, exception.code)
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
   }
 }

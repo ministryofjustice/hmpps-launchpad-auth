@@ -25,6 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.priso
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.AccessTokenPayload
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenCommonClaims
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator.Companion.generateRandomRSAKey
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.USER_ID
@@ -46,8 +47,14 @@ class TokenAuthenticationTest(
   @MockBean
   private lateinit var userIdValidator: UserIdValidator
 
-  @Value("\${launchpad.auth.secret}")
-  private lateinit var secret: String
+  @Value("\${launchpad.auth.private-key}")
+  private lateinit var privateKey: String
+
+  @Value("\${launchpad.auth.private-key}")
+  private lateinit var publicKey: String
+
+  @Value("\${launchpad.auth.kid}")
+  private lateinit var kid: String
 
   private val encoder = BCryptPasswordEncoder()
   private val password = UUID.randomUUID().toString()
@@ -79,8 +86,8 @@ class TokenAuthenticationTest(
     )
     val authHeader = "Bearer " + TokenGenerationAndValidation.generateJwtToken(
       payload,
-      TokenCommonClaims.buildHeaderClaims(),
-      secret,
+      TokenCommonClaims.buildHeaderClaims(kid),
+      privateKey,
     )
     Mockito.`when`(userIdValidator.isValid(userId)).thenReturn(true)
     val authenticationUserInfo = tokenAuthentication.authenticate(authHeader) as AuthenticationUserInfo
@@ -92,6 +99,9 @@ class TokenAuthenticationTest(
   @Test
   fun `authenticate token created from other secret`() {
     val randomSecret = "random_secret_xxx_random_secret_xxx"
+    val keyPair = generateRandomRSAKey()
+    val verifyingSignature = String(keyPair.public.encoded)
+    publicKey = verifyingSignature
     val accessTokenPayload = AccessTokenPayload()
     val nonce = "random_nonce"
     val payload = accessTokenPayload.generatePayload(
@@ -102,8 +112,8 @@ class TokenAuthenticationTest(
     )
     val authHeader = "Bearer " + TokenGenerationAndValidation.generateJwtToken(
       payload,
-      TokenCommonClaims.buildHeaderClaims(),
-      randomSecret,
+      TokenCommonClaims.buildHeaderClaims(kid),
+      Base64.getEncoder().encodeToString(keyPair.private.encoded),
     )
     val exception = assertThrows(ApiException::class.java) {
       tokenAuthentication.authenticate(authHeader)

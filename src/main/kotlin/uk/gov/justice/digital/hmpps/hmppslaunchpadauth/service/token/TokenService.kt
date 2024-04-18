@@ -46,8 +46,15 @@ class TokenService(
   @Value("\${launchpad.auth.refresh-token-validity-seconds}")
   private var refreshTokenValiditySeconds: Long,
 ) {
-  @Value("\${launchpad.auth.secret}")
-  private lateinit var secret: String
+
+  @Value("\${launchpad.auth.private-key}")
+  private lateinit var privateKey: String
+
+  @Value("\${launchpad.auth.public-key}")
+  private lateinit var publicKey: String
+
+  @Value("\${launchpad.auth.kid}")
+  private lateinit var kid: String
 
   @Value("\${launchpad.auth.iss-url}")
   private lateinit var issuerUrl: String
@@ -192,20 +199,20 @@ class TokenService(
     val idToken = TokenGenerationAndValidation
       .generateJwtToken(
         idTokenPayloadClaims,
-        TokenCommonClaims.buildHeaderClaims(),
-        secret,
+        TokenCommonClaims.buildHeaderClaims(kid),
+        privateKey,
       )
     val accessToken = TokenGenerationAndValidation
       .generateJwtToken(
         accessTokenPayloadClaims,
-        TokenCommonClaims.buildHeaderClaims(),
-        secret,
+        TokenCommonClaims.buildHeaderClaims(kid),
+        privateKey,
       )
     val refreshToken = TokenGenerationAndValidation
       .generateJwtToken(
         refreshTokenPayloadClaims,
-        TokenCommonClaims.buildHeaderClaims(),
-        secret,
+        TokenCommonClaims.buildHeaderClaims(kid),
+        privateKey,
       )
     val eventType =
       if (refreshTokenPayloadOld == null) AppInsightEventType.TOKEN_GENERATED_VIA_AUTHORIZATION_CODE else AppInsightEventType.TOKEN_GENERATED_VIA_REFRESH_TOKEN
@@ -280,8 +287,8 @@ class TokenService(
   }
 
   private fun validateAndGetRefreshTokenPayloadClaims(refreshToken: String, clientId: UUID): Jws<Claims> {
-    if (TokenGenerationAndValidation.validateJwtTokenSignature(refreshToken, secret)) {
-      val claims = TokenGenerationAndValidation.parseClaims(refreshToken, secret)
+    if (TokenGenerationAndValidation.validateJwtTokenSignature(refreshToken, publicKey)) {
+      val claims = TokenGenerationAndValidation.parseClaims(refreshToken, publicKey)
       checkIfAccessToken(claims.body)
       val exp = getClaim("exp", claims.body) as Int
       val jti = getClaim("jti", claims.body) as String
