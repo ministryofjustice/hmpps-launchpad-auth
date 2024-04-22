@@ -16,8 +16,9 @@ generic-service:
     modsecurity_snippet: |
       SecRuleEngine On
       SecRuleUpdateTargetById 949110 "!ARGS:/redirect_uri/"
-      SecRule REQUEST_URI "@rx ^\/(?i)(etc|tmp|var|xampp|winnt|usr|proc|php)\/" \
-        "phase:2,block,log,msg:'Possible LFI Attack - Common Unix Paths',id:1001"
+      SecRule REQUEST_URI \ 
+        "@rx ^\/(?i)(etc|tmp|var|xampp|winnt|usr|proc|php)\/" \ 
+        "phase:2,block,nolog,id:1001"
     modsecurity_github_team: "prisoner-content-hub-developers"
     annotations:
       nginx.ingress.kubernetes.io/configuration-snippet: |
