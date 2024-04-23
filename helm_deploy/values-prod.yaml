@@ -12,6 +12,7 @@ generic-service:
   allowlist:
     groups:
       - internal
+      - prisons
       - prisoner_facing_services
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
