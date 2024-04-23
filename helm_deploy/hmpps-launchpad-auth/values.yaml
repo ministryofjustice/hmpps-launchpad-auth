@@ -16,9 +16,19 @@ generic-service:
     modsecurity_snippet: |
       SecRuleEngine On
       SecRuleUpdateTargetById 949110 "!ARGS:/redirect_uri/"
-      SecRule REQUEST_URI \ 
-        "@rx ^\/(?i)(etc|tmp|var|xampp|winnt|usr|proc|php)\/" \ 
-        "phase:2,block,nolog,id:1001"
+      SecRule REQUEST_URI \
+        "@rx /etc/host\.conf\
+        |/etc/apache2/mods-available/mem_cache\.conf\
+        |/etc/squirrelmail/config/config\.php\
+        |/etc/miredo/miredo\.conf\
+        |/usr/local/apache/logs/error\.log\
+        |/proc/interrupts\
+        |/WINNT/win\.ini\
+        |/php/php\.ini\
+        |/var/log/apache2/access_log\
+        |/etc/passwd\
+        |/xampp/apache/bin/php\.ini" \
+        "phase:2,block,nolog,id:1003"
     modsecurity_github_team: "prisoner-content-hub-developers"
     annotations:
       nginx.ingress.kubernetes.io/configuration-snippet: |
