@@ -4,7 +4,7 @@ metadata:
   name: purge-sso-requests-cronjob
 spec:
 #schedule: "05-55/5 06-21 * * 1-5"
-  schedule: "{{ .Values.purseStaleSsoTokensSchedule }}
+  schedule: {{ .Values.purseStaleSsoTokensSchedule }}
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 5
   startingDeadlineSeconds: 150
