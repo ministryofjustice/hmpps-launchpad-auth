@@ -12,7 +12,7 @@ generic-service:
     SPRING_PROFILES_ACTIVE: "preprod"
 
   purseInactiveUsersSchedule: "0 13 * * 1-5"
-  purseStaleSsoTokensSchedule: "05-55/5 06-21 * * 1-5"
+  purseStaleSsoTokensSchedule: "05-55/10 06-21 * * 1-5"
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 # See https://user-guide.cloud-platform.service.justice.gov.uk/documentation/monitoring-an-app/how-to-create-alarms.html#creating-your-own-custom-alerts
