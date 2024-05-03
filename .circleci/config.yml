@@ -7,10 +7,10 @@ orbs:
 parameters:
   alerts-slack-channel:
     type: string
-    default: dps_alerts_security
+    default: launchpad-alerts-nonprod
   releases-slack-channel:
     type: string
-    default: dps-releases
+    default: launchpad-alerts
 
 jobs:
   validate:
