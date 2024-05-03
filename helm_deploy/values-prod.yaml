@@ -1,6 +1,10 @@
 ---
 # Per environment values which override defaults in hmpps-launchpad-auth/values.yaml
 
+purge_inactive_users_schedule: "0 13 * * *"
+
+purge_stale_sso_tokens_schedule: "*/10 * * * *"
+
 generic-service:
   ingress:
     host: launchpad-auth.hmpps.service.justice.gov.uk
@@ -14,9 +18,6 @@ generic-service:
       - internal
       - prisons
       - prisoner_facing_services
-
-  purgeInactiveUsersSchedule: "0 13 * * *"
-  purgeStaleSsoTokensSchedule: "*/10 * * * *"
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 # See https://user-guide.cloud-platform.service.justice.gov.uk/documentation/monitoring-an-app/how-to-create-alarms.html#creating-your-own-custom-alerts

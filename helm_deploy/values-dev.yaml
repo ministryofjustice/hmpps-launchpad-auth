@@ -1,6 +1,10 @@
 ---
 # Per environment values which override defaults in hmpps-launchpad-auth/values.yaml
 
+purge_inactive_users_schedule: "0 13 * * 1-5"
+
+purge_stale_sso_tokens_schedule: "05-55/10 06-21 * * 1-5"
+
 generic-service:
   replicaCount: 2
 
@@ -14,8 +18,6 @@ generic-service:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     SPRING_PROFILES_ACTIVE: "dev"
 
-  purgeInactiveUsersSchedule: "0 13 * * 1-5"
-  purgeStaleSsoTokensSchedule: "05-55/10 06-21 * * 1-5"
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 # See https://user-guide.cloud-platform.service.justice.gov.uk/documentation/monitoring-an-app/how-to-create-alarms.html#creating-your-own-custom-alerts
 generic-prometheus-alerts:
