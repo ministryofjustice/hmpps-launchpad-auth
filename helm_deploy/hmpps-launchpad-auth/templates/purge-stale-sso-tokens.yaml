@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: purge-sso-requests-cronjob
 spec:
-  schedule: "{{ .Values.purgeStaleSsoTokensSchedule }}"
+  schedule: "{{ .Values.purge_stale_sso_tokens_schedule }}"
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 5
   startingDeadlineSeconds: 150
