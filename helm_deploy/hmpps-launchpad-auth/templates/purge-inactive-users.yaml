@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: purge-inactive-users-cronjob
 spec:
-  schedule: {{ .Values.purgeInactiveUsersSchedule }}
+  schedule: "{{ .Values.purgeInactiveUsersSchedule }}"
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 5
   startingDeadlineSeconds: 600
