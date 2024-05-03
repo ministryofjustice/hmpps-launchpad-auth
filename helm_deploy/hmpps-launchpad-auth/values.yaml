@@ -63,5 +63,8 @@ generic-service:
     groups:
       - internal
 
+  purgeInactiveUsersSchedule: "0 13 * * 1-5"
+  purgeStaleSsoTokensSchedule: "05-55/10 06-21 * * 1-5"
+
 generic-prometheus-alerts:
   targetApplication: hmpps-launchpad-auth
