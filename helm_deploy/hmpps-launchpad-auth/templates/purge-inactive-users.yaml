@@ -19,4 +19,12 @@ spec:
                 - /bin/sh
                 - -c
                 - curl -XPOST --connect-timeout 5 --max-time 10 --retry 5 --retry-delay 0 --retry-max-time 30 http://hmpps-launchpad-auth/v1/admin/purge-inactive-users
+              securityContext:
+                capabilities:
+                  drop:
+                    - ALL
+                runAsNonRoot: true
+                allowPrivilegeEscalation: false
+                seccompProfile:
+                  type: RuntimeDefault
           restartPolicy: Never
