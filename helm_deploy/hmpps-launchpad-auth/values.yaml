@@ -18,7 +18,7 @@ generic-service:
       SecRuleUpdateTargetById 949110 "!ARGS:/redirect_uri/"
     modsecurity_github_team: "prisoner-content-hub-developers"
     annotations:
-      nginx.ingress.kubernetes.io/configuration-snippet: |
+      nginx.ingress.kubernetes.io/server-snippet: |
         server_tokens off;
         location /v1/admin/ {
           deny all;
