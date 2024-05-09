@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.10.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.15.6"
   kotlin("plugin.spring") version "1.9.20"
   kotlin("plugin.jpa") version "1.9.20"
 }
@@ -14,13 +14,13 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
   implementation("org.springframework.boot:spring-boot-starter-cache")
-  implementation("org.springframework.security:spring-security-crypto:6.1.2")
+  implementation("org.springframework.security:spring-security-crypto:6.2.4")
   implementation("io.jsonwebtoken:jjwt-api:0.11.5")
   implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
   implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
   implementation("org.json:json:20231013")
   implementation("org.flywaydb:flyway-core:9.19.4")
-  implementation("org.postgresql:postgresql:42.6.0")
+  implementation("org.postgresql:postgresql:42.7.3")
   implementation("org.ehcache:ehcache:3.10.8")
   implementation("javax.cache:cache-api:1.1.1")
 

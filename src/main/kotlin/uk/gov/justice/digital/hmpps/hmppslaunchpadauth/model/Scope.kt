@@ -8,6 +8,7 @@ enum class Scope(val scope: String) {
   USER_BOOKING_READ("user.booking.read"),
   USER_CLIENTS_READ("user.clients.read"),
   USER_CLIENTS_DELETE("user.clients.delete"), ;
+
   override fun toString(): String {
     return scope
   }

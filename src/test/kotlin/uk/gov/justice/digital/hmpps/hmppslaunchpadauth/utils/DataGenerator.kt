@@ -32,7 +32,6 @@ const val LOGO_URI = "$REDIRECT_URI/logo"
 const val USER_ID = "G2320VD"
 
 class DataGenerator {
-  val CLIENT_ID = UUID.randomUUID()
 
   companion object {
     fun buildClient(enabled: Boolean, autoApprove: Boolean): Client {
