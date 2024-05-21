@@ -7,4 +7,4 @@ hmpps:
   auth:
     url: https://sign-in.hmpps.service.justice.gov.uk
   prison-api:
-    url: https://api.prison.service.justice.gov.uk
+    url: https://prison-api.prison.service.justice.gov.uk
