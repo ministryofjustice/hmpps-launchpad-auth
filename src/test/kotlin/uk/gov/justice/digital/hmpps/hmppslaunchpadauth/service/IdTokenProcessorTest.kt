@@ -37,13 +37,14 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
   @Test
   fun `test get user id when email is missing in payload`() {
     val nonce = UUID.randomUUID()
+    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, null, privateKey)
     val exception = assertThrows(ApiException::class.java) {
       idTokenProcessor.getUserId(
-        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, null, privateKey),
+        token,
         nonce.toString(),
       )
     }
-    assertEquals("Claim: email not found", exception.message)
+    assertEquals("Claim: email not found in token:$token", exception.message)
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.code)
   }
 

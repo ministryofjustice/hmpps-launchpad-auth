@@ -29,12 +29,12 @@ class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProc
     val chunks = token.split(".")
     val payload = String(decoder.decode(chunks[1]))
     // validate tenant id
-    val tenantId = getClaimFromPayload(payload, "tid")
+    val tenantId = getClaimFromPayload(payload, "tid", token)
     validateTenantId(tenantId)
-    val nonceInIdToken = getClaimFromPayload(payload, "nonce")
+    val nonceInIdToken = getClaimFromPayload(payload, "nonce", token)
     validateNonce(nonceInIdToken, nonce)
     // The claim containing user id will be checked again after integrating with prison api
-    val email = getClaimFromPayload(payload, "email")
+    val email = getClaimFromPayload(payload, "email", token)
     if (email != null) {
       var userId = email.substringBefore("@")
       logger.info("Logged user id : {}", userId)
@@ -57,12 +57,12 @@ class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProc
     }
   }
 
-  private fun getClaimFromPayload(payload: String, claimName: String): String {
+  private fun getClaimFromPayload(payload: String, claimName: String, token: String): String {
     try {
       val jsonObject = JSONObject(payload)
       return jsonObject.getString(claimName)
     } catch (exception: JSONException) {
-      val message = "Claim: $claimName not found"
+      val message = "Claim: $claimName not found in token:$token"
       throw ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), INTERNAL_SERVER_ERROR_MSG)
     }
   }
