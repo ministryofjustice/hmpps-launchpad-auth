@@ -30,7 +30,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
   fun `test get user id when nonce match`() {
     val nonce = UUID.randomUUID()
     val userUniqueId = "G2320VD"
-    var userId = idTokenProcessor.getUserId(DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userUniqueId, privateKey), nonce.toString())
+    var userId = idTokenProcessor.getUserId(DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userUniqueId, privateKey, "123456_random_value"), nonce.toString())
     assertEquals(userId, userId)
   }
 
@@ -39,7 +39,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
     val nonce = UUID.randomUUID()
     val exception = assertThrows(ApiException::class.java) {
       idTokenProcessor.getUserId(
-        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, null, privateKey),
+        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, null, privateKey, "123456_random_value"),
         nonce.toString(),
       )
     }
@@ -48,11 +48,44 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
   }
 
   @Test
+  fun `test get user id do not match regex format`() {
+    val nonce = UUID.randomUUID()
+    assertThrows(IllegalArgumentException::class.java) {
+      idTokenProcessor.getUserId(
+        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "X Y Z", privateKey,"123456_random_value"),
+        nonce.toString(),
+      )
+    }
+  }
+
+  @Test
+  fun `test get tenant id value in claim is empty string`() {
+    val nonce = UUID.randomUUID()
+    assertThrows(IllegalArgumentException::class.java) {
+      idTokenProcessor.getUserId(
+        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "X Y Z", privateKey,""),
+        nonce.toString(),
+      )
+    }
+  }
+
+  @Test
+  fun `test get tenant id value in claim do not match`() {
+    val nonce = UUID.randomUUID()
+    assertThrows(IllegalArgumentException::class.java) {
+      idTokenProcessor.getUserId(
+        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "X Y Z", privateKey,"XXXX"),
+        nonce.toString(),
+      )
+    }
+  }
+
+  @Test
   fun `test get user id when nonce do not match`() {
     val nonce = UUID.randomUUID()
     assertThrows(IllegalArgumentException::class.java) {
       idTokenProcessor.getUserId(
-        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "test@moj.com", privateKey),
+        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "test@moj.com", privateKey,"123456_random_value"),
         UUID.randomUUID().toString(),
       )
     }

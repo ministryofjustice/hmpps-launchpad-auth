@@ -121,26 +121,68 @@ class TokenAuthenticationTest(
     assertEquals(HttpStatus.FORBIDDEN, exception.code)
   }
 
-  /*@Test
-  fun `authenticate when client is disabled`() {
-    val client = buildClient(false)
+  @Test
+  fun `authenticate when scope in claim is not in scope list`() {
     val accessTokenPayload = AccessTokenPayload()
-    val nonce = "random_nonce"
     val payload = accessTokenPayload.generatePayload(
       User(USER_ID, "John Smith", "Smith"),
       clientId,
       userApprovedScopes,
+      accessTokenValiditySeconds
     )
-    val authHeader = "Bearer " + TokenGenerationAndValidation.generateToken(
+    payload["scopes"] = setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ, "RANDOM_SCOPE")
+    val authHeader = "Bearer " + TokenGenerationAndValidation.generateJwtToken(
       payload,
-      TokenCommonClaims.buildHeaderClaims(),
-      secret,
+      TokenCommonClaims.buildHeaderClaims(kid),
+      privateKey,
     )
     val exception = assertThrows(ApiException::class.java) {
       tokenAuthentication.authenticate(authHeader)
     }
-    assertEquals(HttpStatus.FORBIDDEN.value(), exception.code)
-  }*/
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
+  }
+
+  @Test
+  fun `authenticate when scope is missing in token claims`() {
+    val accessTokenPayload = AccessTokenPayload()
+    val payload = accessTokenPayload.generatePayload(
+      User(USER_ID, "John Smith", "Smith"),
+      clientId,
+      userApprovedScopes,
+      accessTokenValiditySeconds
+    )
+    payload.remove("scopes")
+    val authHeader = "Bearer " + TokenGenerationAndValidation.generateJwtToken(
+      payload,
+      TokenCommonClaims.buildHeaderClaims(kid),
+      privateKey,
+    )
+    val exception = assertThrows(ApiException::class.java) {
+      tokenAuthentication.authenticate(authHeader)
+    }
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
+  }
+
+  @Test
+  fun `authenticate when scope has null value`() {
+    val accessTokenPayload = AccessTokenPayload()
+    val payload = accessTokenPayload.generatePayload(
+      User(USER_ID, "John Smith", "Smith"),
+      clientId,
+      userApprovedScopes,
+      accessTokenValiditySeconds
+    )
+    payload["scopes"] = setOf(null)
+    val authHeader = "Bearer " + TokenGenerationAndValidation.generateJwtToken(
+      payload,
+      TokenCommonClaims.buildHeaderClaims(kid),
+      privateKey,
+    )
+    val exception = assertThrows(ApiException::class.java) {
+      tokenAuthentication.authenticate(authHeader)
+    }
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
+  }
 
   @Test
   fun `authenticate when auth header has invalid token format`() {
