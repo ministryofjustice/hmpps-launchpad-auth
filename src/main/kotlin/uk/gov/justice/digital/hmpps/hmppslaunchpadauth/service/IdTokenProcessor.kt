@@ -34,7 +34,7 @@ class IdTokenProcessor(private var userIdValidator: UserIdValidator) : TokenProc
     val nonceInIdToken = getClaimFromPayload(payload, "nonce", token)
     validateNonce(nonceInIdToken, nonce)
     // The claim containing user id will be checked again after integrating with prison api
-    val email = getClaimFromPayload(payload, "email", token)
+    val email = getClaimFromPayload(payload, "preferred_username", token)
     if (email != null) {
       var userId = email.substringBefore("@")
       logger.info("Logged user id : {}", userId)

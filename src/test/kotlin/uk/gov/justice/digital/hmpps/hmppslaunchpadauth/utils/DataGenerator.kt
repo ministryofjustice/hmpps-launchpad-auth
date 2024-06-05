@@ -78,7 +78,7 @@ class DataGenerator {
         .claim("name", "Test User")
         .claim("scope", "openid")
         .claim("nonce", nonce)
-        .claim("email", userId)
+        .claim("preferred_username", userId)
         .claim("tid", "123456_random_value")
         .setIssuedAt(issueDate)
         .setExpiration(expDate)
