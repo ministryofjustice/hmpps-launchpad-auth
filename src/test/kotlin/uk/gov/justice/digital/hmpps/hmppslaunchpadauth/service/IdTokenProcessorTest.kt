@@ -44,7 +44,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
         nonce.toString(),
       )
     }
-    assertEquals("Claim: email not found in token:$token", exception.message)
+    assertEquals("Claim: preferred_username not found in token:$token", exception.message)
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.code)
   }
 
