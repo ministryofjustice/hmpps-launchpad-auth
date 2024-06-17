@@ -17,8 +17,7 @@ import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.X509EncodedKeySpec
-import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.Instant
 import java.util.*
 
 class TokenGenerationAndValidation {
@@ -91,7 +90,7 @@ class TokenGenerationAndValidation {
     }
 
     fun validateExpireTime(expireAt: Int) {
-      val currentEpocTime = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+      val currentEpocTime = Instant.now().epochSecond
       if (currentEpocTime > expireAt) {
         throw IllegalArgumentException("Token has expired")
       }

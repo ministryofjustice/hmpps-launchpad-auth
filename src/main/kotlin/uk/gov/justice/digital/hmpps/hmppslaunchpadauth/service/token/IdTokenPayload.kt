@@ -4,8 +4,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Booking
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.Establishment
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.User
-import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.Instant
 import java.util.*
 
 class IdTokenPayload {
@@ -30,7 +29,7 @@ class IdTokenPayload {
       claims["nonce"] = nonce
     }
     claims = TokenCommonClaims.buildCommonClaims(clientId.toString(), user.id, claims)
-    claims["exp"] = LocalDateTime.now().plusSeconds(validityInSeconds).toEpochSecond(ZoneOffset.UTC)
+    claims["exp"] = Instant.now().plusSeconds(validityInSeconds).epochSecond
     claims["iss"] = issuerUrl
     if (scopes.contains(Scope.USER_BOOKING_READ)) {
       claims["booking"] = booking
