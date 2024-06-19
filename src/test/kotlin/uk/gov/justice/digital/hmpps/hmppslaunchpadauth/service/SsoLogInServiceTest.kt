@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.servlet.view.RedirectView
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
@@ -150,6 +151,66 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
   }
 
   @Test
+  fun `test update sso request with user id when auto approved is true and user id format is invalid`() {
+    val nonce = UUID.randomUUID()
+    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "XXX YYY", secret,"123456_random_value")
+    //ssoRequest.userId = "XXX YYY"
+    Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
+    Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
+    Mockito.`when`(tokenProcessor.getUserId(any(), any())).thenThrow(IllegalArgumentException(
+      AuthServiceConstant.INVALID_USER_ID
+    ))
+    Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
+    val exception = assertThrows(SsoException::class.java) {
+      ssoLoginService.updateSsoRequest(
+        token,
+        ssoRequest.id,
+      ) as RedirectView
+    }
+    assertNotNull(exception)
+  }
+
+  @Test
+  fun `test update sso request with user id when auto approved is true and tenant id do not match`() {
+    val nonce = UUID.randomUUID()
+    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "XXX YYY", secret,"123456_random_value")
+    //ssoRequest.userId = "XXX YYY"
+    Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
+    Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
+    Mockito.`when`(tokenProcessor.getUserId(any(), any())).thenThrow(IllegalArgumentException(
+      AuthServiceConstant.INVALID_AZURE_AD_TENANT
+    ))
+    Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
+    val exception = assertThrows(SsoException::class.java) {
+      ssoLoginService.updateSsoRequest(
+        token,
+        ssoRequest.id,
+      ) as RedirectView
+    }
+    assertNotNull(exception)
+  }
+
+  @Test
+  fun `test update sso request with user id when auto approved is true and exception thrown in token processing`() {
+    val nonce = UUID.randomUUID()
+    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "XXX YYY", secret,"123456_random_value")
+    //ssoRequest.userId = "XXX YYY"
+    Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
+    Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
+    Mockito.`when`(tokenProcessor.getUserId(any(), any())).thenThrow(IllegalArgumentException(
+      "claim not found"
+    ))
+    Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
+    val exception = assertThrows(SsoException::class.java) {
+      ssoLoginService.updateSsoRequest(
+        token,
+        ssoRequest.id,
+      ) as RedirectView
+    }
+    assertNotNull(exception)
+  }
+
+  @Test
   fun `test update sso request with user id when auto approved is false`() {
     val client = Client(
       UUID.randomUUID(),
@@ -202,6 +263,36 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
     Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
     Mockito.`when`(userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userID, ssoRequest.client.id)).thenReturn(
       Optional.of(userApprovedClient))
+    val redirectView = ssoLoginService.updateSsoRequest(
+      null,
+      ssoRequest.id,
+    ) as RedirectView
+    assertNotNull(redirectView)
+  }
+
+  @Test
+  fun `test update sso request with user id when auto approved is false and user approved client do not exist`() {
+    val client = Client(
+      UUID.randomUUID(),
+      UUID.randomUUID().toString(),
+      setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ, Scope.USER_ESTABLISHMENT_READ),
+      setOf(AuthorizationGrantType.AUTHORIZATION_CODE, AuthorizationGrantType.REFRESH_TOKEN),
+      setOf(REDIRECT_URI),
+      true,
+      false,
+      "Test App",
+      LOGO_URI,
+      "Test App for test environment",
+    )
+    val nonce = UUID.randomUUID()
+    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userID, secret,"123456_random_value")
+    //ssoRequest.userId = null
+    Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
+    Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
+    // Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn(userID)
+    Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
+    Mockito.`when`(userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userID, ssoRequest.client.id)).thenReturn(
+      Optional.empty())
     val redirectView = ssoLoginService.updateSsoRequest(
       null,
       ssoRequest.id,
@@ -286,5 +377,14 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
     //Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.empty())
     val redirect = ssoLoginService.cancelAccess(ssoRequest.id)
     assertNotNull(redirect)
+  }
+
+  @Test
+  fun `test cancel approval when sso request not found`() {
+    Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.empty())
+    val exception =assertThrows(ApiException::class.java) {
+      ssoLoginService.cancelAccess(ssoRequest.id)
+    }
+    assertNotNull(exception)
   }
 }
