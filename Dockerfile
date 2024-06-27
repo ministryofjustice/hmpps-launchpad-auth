@@ -28,6 +28,9 @@ COPY --from=builder --chown=appuser:appgroup /app/build/libs/hmpps-launchpad-aut
 COPY --from=builder --chown=appuser:appgroup /app/build/libs/applicationinsights-agent*.jar /app/agent.jar
 COPY --from=builder --chown=appuser:appgroup /app/applicationinsights.json /app
 COPY --from=builder --chown=appuser:appgroup /app/applicationinsights.dev.json /app
+# Install AWS RDS Root cert into Java truststore
+RUN mkdir /home/appuser/.postgresql
+ADD --chown=appuser:appgroup https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /home/appuser/.postgresql/root.crt
 
 USER 2000
 
