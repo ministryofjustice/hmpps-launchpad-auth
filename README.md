@@ -29,6 +29,7 @@ DB_NAME: "launchpad"
 DB_USERNAME: "postgres"
 DB_PASSWORD: "password"
 DB_ENDPOINT: "localhost:5432"
+DB_SSL_MODE: "prefer"
 ```
 
 

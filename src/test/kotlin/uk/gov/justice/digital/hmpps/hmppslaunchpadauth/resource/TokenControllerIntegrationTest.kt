@@ -43,6 +43,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.USER_ID
 import java.net.URI
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -221,7 +222,7 @@ class TokenControllerIntegrationTest(
     // use expire refreshToken
     var exception = Assertions.assertThrows(HttpClientErrorException::class.java) {
       val refreshToken =
-        updateTokenExpireTime(token.refreshToken, LocalDateTime.now().minusHours(1).toEpochSecond(ZoneOffset.UTC))
+        updateTokenExpireTime(token.refreshToken, Instant.now().minusSeconds(60).epochSecond)
       url =
         URI("$baseUrl:$port/v1/oauth2/token?grant_type=refresh_token&nonce=anything&refresh_token=$refreshToken")
       response = restTemplate.exchange(
@@ -279,7 +280,7 @@ class TokenControllerIntegrationTest(
     Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(idToken, publicKey))
     val claims = TokenGenerationAndValidation.parseClaims(idToken, publicKey).body
     val exp = claims["exp"] as Int
-    Assertions.assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
+    Assertions.assertTrue(exp > Instant.now().epochSecond)
     Assertions.assertEquals(clientId.toString(), claims["aud"])
     Assertions.assertEquals(userID.toString(), claims["sub"])
     Assertions.assertEquals("Test User", claims["name"])
@@ -291,7 +292,7 @@ class TokenControllerIntegrationTest(
     Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(accessToken, publicKey))
     val claims = TokenGenerationAndValidation.parseClaims(accessToken, publicKey).body
     val exp = claims["exp"] as Int
-    Assertions.assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
+    Assertions.assertTrue(exp > Instant.now().epochSecond)
     Assertions.assertEquals(clientId.toString(), claims["aud"])
     Assertions.assertEquals(userID, claims["sub"])
     val scopes = claims["scopes"] as ArrayList<String>
@@ -302,7 +303,7 @@ class TokenControllerIntegrationTest(
     Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(refreshToken, publicKey))
     val claims = TokenGenerationAndValidation.parseClaims(refreshToken, publicKey).body
     val exp = claims["exp"] as Int
-    Assertions.assertTrue(exp > LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
+    Assertions.assertTrue(exp > Instant.now().epochSecond)
     Assertions.assertEquals(clientId.toString(), claims["aud"])
     Assertions.assertEquals(userID, claims["sub"])
     val scopes = claims["scopes"] as ArrayList<String>
