@@ -155,7 +155,7 @@ class SsoLogInService(
   private fun buildClientRedirectUrlAccessForNotApproved(ssoRequest: SsoRequest): String {
     return UriComponentsBuilder.fromHttpUrl(ssoRequest.client.redirectUri)
       .queryParam("error", ApiErrorTypes.ACCESS_DENIED.toString())
-      .queryParam("error_description", ACCESS_DENIED_MSG)
+      .queryParam("error_description", ApiErrorTypes.ACCESS_DENIED.toString())
       .queryParamIfPresent("state", Optional.ofNullable(getEncodedValue(ssoRequest.client.state)))
       .build(true).toUriString()
   }

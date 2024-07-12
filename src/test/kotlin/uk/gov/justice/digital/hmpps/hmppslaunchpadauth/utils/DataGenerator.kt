@@ -66,7 +66,14 @@ class DataGenerator {
       )
     }
 
-    fun jwtBuilder(issue: Instant, exp: Instant, nonce: UUID, userId: String?, secret: String): String {
+    fun jwtBuilder(
+      issue: Instant,
+      exp: Instant,
+      nonce: UUID,
+      userId: String?,
+      secret: String,
+      tenantId: String?,
+    ): String {
       val privateKey = getPrivateKey(secret)
       val issueDate = Date.from(issue)
       val expDate = Date.from(exp)
@@ -79,7 +86,7 @@ class DataGenerator {
         .claim("scope", "openid")
         .claim("nonce", nonce)
         .claim("preferred_username", userId)
-        .claim("tid", "123456_random_value")
+        .claim("tid", tenantId)
         .setIssuedAt(issueDate)
         .setExpiration(expDate)
         .signWith(

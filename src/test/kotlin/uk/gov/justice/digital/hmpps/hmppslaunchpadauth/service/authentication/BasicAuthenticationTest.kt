@@ -162,4 +162,22 @@ class BasicAuthenticationTest {
     }
     assertEquals(HttpStatus.FORBIDDEN, exception.code)
   }
+
+  @Test
+  fun `authenticate when auth header do contain Basic but invalid header`() {
+    val authHeader = Base64.getEncoder().encodeToString("xxx".toByteArray(Charsets.UTF_8))
+    val exception = assertThrows(ApiException::class.java) {
+      basicAuthentication.authenticate("Basic $authHeader")
+    }
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
+  }
+
+  @Test
+  fun `authenticate when auth header do contain Basic but more than 2 chunk size`() {
+    val authHeader = Base64.getEncoder().encodeToString("xxx:yyy:zzz".toByteArray(Charsets.UTF_8))
+    val exception = assertThrows(ApiException::class.java) {
+      basicAuthentication.authenticate("Basic $authHeader")
+    }
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
+  }
 }
