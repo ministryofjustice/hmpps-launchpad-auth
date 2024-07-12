@@ -33,7 +33,9 @@ spring:
     group:
       test:
         - "stdout"
-
+springdoc:
+  api-docs:
+    path: /api-docs
 server:
   port: 8080
   servlet:

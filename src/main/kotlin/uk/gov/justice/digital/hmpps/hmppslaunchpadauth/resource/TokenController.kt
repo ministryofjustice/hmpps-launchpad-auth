@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
@@ -28,6 +29,7 @@ class TokenController(
     private val logger = LoggerFactory.getLogger(TokenController::class.java)
   }
 
+  @Tag(name = "get token", description = "Get idtoken, access token and refresh token")
   @PostMapping("/token", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
   fun generateToken(
     @RequestParam(required = false) code: UUID?,
