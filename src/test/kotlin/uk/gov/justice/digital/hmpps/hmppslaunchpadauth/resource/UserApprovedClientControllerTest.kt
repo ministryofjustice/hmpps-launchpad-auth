@@ -12,8 +12,10 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.config.HmppsLaunchpadAuthExceptionHandler
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
@@ -24,7 +26,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.USER_ID
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.validator.UserIdValidator
 import java.util.*
 
-@SpringBootTest(classes = [UserApprovedClientController::class, UserIdValidator::class])
+@SpringBootTest(classes = [UserApprovedClientController::class, UserIdValidator::class, HmppsLaunchpadAuthExceptionHandler::class])
 @EnableAutoConfiguration
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
@@ -62,6 +64,21 @@ class UserApprovedClientControllerTest(@Autowired private var userApprovedClient
     val pagedResult = response.body
     assertEquals(1, pagedResult?.totalElements)
     assertEquals(0, pagedResult?.content?.size)
+  }
+
+  @Test
+  fun `get user approved clients when user id has invalid format`() {
+    Mockito.`when`(tokenAuthentication.authenticate("Bearer x.y.z")).thenReturn(
+      AuthenticationUserInfo(
+        UUID.randomUUID(),
+        USER_ID,
+        setOf(Scope.USER_CLIENTS_READ),
+      ),
+    )
+    val exception = assertThrows(ApiException::class.java) {
+      userApprovedClientController.getUserApprovedClients("xx yy zz", 1, 10, "Bearer x.y.z")
+    }
+    assertEquals(HttpStatus.BAD_REQUEST, exception.code)
   }
 
   @Test
@@ -140,8 +157,32 @@ class UserApprovedClientControllerTest(@Autowired private var userApprovedClient
 
   @Test
   fun `revoke client access by user id and client id`() {
-    Mockito.`when`(userApprovedClientService.getUserApprovedClientsByUserId(userId, 1, size = 10)).thenReturn(
-      PagedResult(1, true, 1, listOf()),
+    val clientId = UUID.randomUUID()
+    Mockito.`when`(tokenAuthentication.authenticate("Bearer x.y.z")).thenReturn(
+      AuthenticationUserInfo(
+        clientId,
+        USER_ID,
+        setOf(Scope.USER_CLIENTS_DELETE),
+      ),
     )
+    Mockito.doNothing().`when`(userApprovedClientService).revokeClientAccess(userId, clientId)
+    val response = userApprovedClientController.revokeClientAccess(userId, clientId, "Bearer x.y.z")
+    assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
+  }
+
+  @Test
+  fun `revoke client access by user id and client id when client id do not match in token`() {
+    val clientId = UUID.randomUUID()
+    Mockito.`when`(tokenAuthentication.authenticate("Bearer x.y.z")).thenReturn(
+      AuthenticationUserInfo(
+        UUID.randomUUID(),
+        USER_ID,
+        setOf(Scope.USER_CLIENTS_DELETE),
+      ),
+    )
+    val exception = assertThrows(ApiException::class.java) {
+      userApprovedClientController.revokeClientAccess(userId, clientId, "Bearer x.y.z")
+    }
+    assertEquals(HttpStatus.BAD_REQUEST, exception.code)
   }
 }

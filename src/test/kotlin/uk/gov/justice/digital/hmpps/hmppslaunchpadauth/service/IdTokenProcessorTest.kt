@@ -37,7 +37,14 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
   @Test
   fun `test get user id when email is missing in payload`() {
     val nonce = UUID.randomUUID()
-    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, null, privateKey, "123456_random_value")
+    val token = DataGenerator.jwtBuilder(
+      Instant.now(),
+      Instant.now().plusSeconds(3600),
+      nonce,
+      null,
+      privateKey,
+      "123456_random_value",
+    )
     val exception = assertThrows(ApiException::class.java) {
       idTokenProcessor.getUserId(
         token,
@@ -53,7 +60,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
     val nonce = UUID.randomUUID()
     assertThrows(IllegalArgumentException::class.java) {
       idTokenProcessor.getUserId(
-        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "X Y Z", privateKey,"123456_random_value"),
+        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "X Y Z", privateKey, "123456_random_value"),
         nonce.toString(),
       )
     }
@@ -64,7 +71,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
     val nonce = UUID.randomUUID()
     assertThrows(IllegalArgumentException::class.java) {
       idTokenProcessor.getUserId(
-        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "X Y Z", privateKey,""),
+        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "X Y Z", privateKey, ""),
         nonce.toString(),
       )
     }
@@ -75,7 +82,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
     val nonce = UUID.randomUUID()
     assertThrows(IllegalArgumentException::class.java) {
       idTokenProcessor.getUserId(
-        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "X Y Z", privateKey,"XXXX"),
+        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "X Y Z", privateKey, "XXXX"),
         nonce.toString(),
       )
     }
@@ -86,7 +93,7 @@ class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProce
     val nonce = UUID.randomUUID()
     assertThrows(IllegalArgumentException::class.java) {
       idTokenProcessor.getUserId(
-        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "test@moj.com", privateKey,"123456_random_value"),
+        DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "test@moj.com", privateKey, "123456_random_value"),
         UUID.randomUUID().toString(),
       )
     }

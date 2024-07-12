@@ -137,7 +137,14 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
   @Test
   fun `test update sso request with user id when auto approved is true`() {
     val nonce = UUID.randomUUID()
-    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userID, secret,"123456_random_value")
+    val token = DataGenerator.jwtBuilder(
+      Instant.now(),
+      Instant.now().plusSeconds(3600),
+      nonce,
+      userID,
+      secret,
+      "123456_random_value",
+    )
     ssoRequest.userId = null
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
@@ -153,13 +160,21 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
   @Test
   fun `test update sso request with user id when auto approved is true and user id format is invalid`() {
     val nonce = UUID.randomUUID()
-    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "XXX YYY", secret,"123456_random_value")
-    //ssoRequest.userId = "XXX YYY"
+    val token = DataGenerator.jwtBuilder(
+      Instant.now(),
+      Instant.now().plusSeconds(3600),
+      nonce,
+      "XXX YYY",
+      secret,
+      "123456_random_value",
+    )
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
-    Mockito.`when`(tokenProcessor.getUserId(any(), any())).thenThrow(IllegalArgumentException(
-      AuthServiceConstant.INVALID_USER_ID
-    ))
+    Mockito.`when`(tokenProcessor.getUserId(any(), any())).thenThrow(
+      IllegalArgumentException(
+        AuthServiceConstant.INVALID_USER_ID,
+      ),
+    )
     Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
     val exception = assertThrows(SsoException::class.java) {
       ssoLoginService.updateSsoRequest(
@@ -173,13 +188,21 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
   @Test
   fun `test update sso request with user id when auto approved is true and tenant id do not match`() {
     val nonce = UUID.randomUUID()
-    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "XXX YYY", secret,"123456_random_value")
-    //ssoRequest.userId = "XXX YYY"
+    val token = DataGenerator.jwtBuilder(
+      Instant.now(),
+      Instant.now().plusSeconds(3600),
+      nonce,
+      "XXX YYY",
+      secret,
+      "123456_random_value",
+    )
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
-    Mockito.`when`(tokenProcessor.getUserId(any(), any())).thenThrow(IllegalArgumentException(
-      AuthServiceConstant.INVALID_AZURE_AD_TENANT
-    ))
+    Mockito.`when`(tokenProcessor.getUserId(any(), any())).thenThrow(
+      IllegalArgumentException(
+        AuthServiceConstant.INVALID_AZURE_AD_TENANT,
+      ),
+    )
     Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
     val exception = assertThrows(SsoException::class.java) {
       ssoLoginService.updateSsoRequest(
@@ -193,13 +216,21 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
   @Test
   fun `test update sso request with user id when auto approved is true and exception thrown in token processing`() {
     val nonce = UUID.randomUUID()
-    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, "XXX YYY", secret,"123456_random_value")
-    //ssoRequest.userId = "XXX YYY"
+    val token = DataGenerator.jwtBuilder(
+      Instant.now(),
+      Instant.now().plusSeconds(3600),
+      nonce,
+      "XXX YYY",
+      secret,
+      "123456_random_value",
+    )
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
-    Mockito.`when`(tokenProcessor.getUserId(any(), any())).thenThrow(IllegalArgumentException(
-      "claim not found"
-    ))
+    Mockito.`when`(tokenProcessor.getUserId(any(), any())).thenThrow(
+      IllegalArgumentException(
+        "claim not found",
+      ),
+    )
     Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
     val exception = assertThrows(SsoException::class.java) {
       ssoLoginService.updateSsoRequest(
@@ -225,14 +256,28 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
       "Test App for test environment",
     )
     val nonce = UUID.randomUUID()
-    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userID, secret,"123456_random_value")
-    //ssoRequest.userId = null
+    val token = DataGenerator.jwtBuilder(
+      Instant.now(),
+      Instant.now().plusSeconds(3600),
+      nonce,
+      userID,
+      secret,
+      "123456_random_value",
+    )
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
     Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn(userID)
     Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
-    Mockito.`when`(ssoRequest.userId?.let { userApprovedClientService.getUserApprovedClientByUserIdAndClientId(it, ssoRequest.client.id) }).thenReturn(
-      Optional.of(userApprovedClient))
+    Mockito.`when`(
+      ssoRequest.userId?.let {
+        userApprovedClientService.getUserApprovedClientByUserIdAndClientId(
+          it,
+          ssoRequest.client.id,
+        )
+      },
+    ).thenReturn(
+      Optional.of(userApprovedClient),
+    )
     val redirectView = ssoLoginService.updateSsoRequest(
       token,
       ssoRequest.id,
@@ -255,14 +300,23 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
       "Test App for test environment",
     )
     val nonce = UUID.randomUUID()
-    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userID, secret,"123456_random_value")
+    val token = DataGenerator.jwtBuilder(
+      Instant.now(),
+      Instant.now().plusSeconds(3600),
+      nonce,
+      userID,
+      secret,
+      "123456_random_value",
+    )
     ssoRequest.userId = null
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
     // Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn(userID)
     Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
-    Mockito.`when`(userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userID, ssoRequest.client.id)).thenReturn(
-      Optional.of(userApprovedClient))
+    Mockito.`when`(userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userID, ssoRequest.client.id))
+      .thenReturn(
+        Optional.of(userApprovedClient),
+      )
     val redirectView = ssoLoginService.updateSsoRequest(
       null,
       ssoRequest.id,
@@ -285,14 +339,21 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
       "Test App for test environment",
     )
     val nonce = UUID.randomUUID()
-    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userID, secret,"123456_random_value")
-    //ssoRequest.userId = null
+    val token = DataGenerator.jwtBuilder(
+      Instant.now(),
+      Instant.now().plusSeconds(3600),
+      nonce,
+      userID,
+      secret,
+      "123456_random_value",
+    )
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
-    // Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn(userID)
     Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
-    Mockito.`when`(userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userID, ssoRequest.client.id)).thenReturn(
-      Optional.empty())
+    Mockito.`when`(userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userID, ssoRequest.client.id))
+      .thenReturn(
+        Optional.empty(),
+      )
     val redirectView = ssoLoginService.updateSsoRequest(
       null,
       ssoRequest.id,
@@ -314,16 +375,25 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
       LOGO_URI,
       "Test App for test environment",
     )
-   // ssoRequest.userId = null
+    // ssoRequest.userId = null
     val nonce = UUID.randomUUID()
-    val token = DataGenerator.jwtBuilder(Instant.now(), Instant.now().plusSeconds(3600), nonce, userID, secret,"123456_random_value")
+    val token = DataGenerator.jwtBuilder(
+      Instant.now(),
+      Instant.now().plusSeconds(3600),
+      nonce,
+      userID,
+      secret,
+      "123456_random_value",
+    )
     // ssoRequest.userId = null
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
     // Mockito.`when`(tokenProcessor.getUserId(token, nonce.toString())).thenReturn(userID)
     Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
-    Mockito.`when`(userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userID, ssoRequest.client.id)).thenReturn(
-      Optional.of(userApprovedClient))
+    Mockito.`when`(userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userID, ssoRequest.client.id))
+      .thenReturn(
+        Optional.of(userApprovedClient),
+      )
     val redirectView = ssoLoginService.updateSsoRequest(
       null,
       ssoRequest.id,
@@ -336,8 +406,10 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.`when`(ssoRequestService.updateSsoRequest(any())).thenReturn(ssoRequest)
     Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.of(client))
-    Mockito.`when`(userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userID, ssoRequest.client.id)).thenReturn(
-      Optional.of(userApprovedClient))
+    Mockito.`when`(userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userID, ssoRequest.client.id))
+      .thenReturn(
+        Optional.of(userApprovedClient),
+      )
     val redirectView = ssoLoginService.updateSsoRequest(
       null,
       ssoRequest.id,
@@ -374,7 +446,6 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
   fun `test cancel approval`() {
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.of(ssoRequest))
     Mockito.doNothing().`when`(ssoRequestService).deleteSsoRequestById(ssoRequest.id)
-    //Mockito.`when`(clientService.getClientById(ssoRequest.client.id)).thenReturn(Optional.empty())
     val redirect = ssoLoginService.cancelAccess(ssoRequest.id)
     assertNotNull(redirect)
   }
@@ -382,7 +453,7 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
   @Test
   fun `test cancel approval when sso request not found`() {
     Mockito.`when`(ssoRequestService.getSsoRequestById(ssoRequest.id)).thenReturn(Optional.empty())
-    val exception =assertThrows(ApiException::class.java) {
+    val exception = assertThrows(ApiException::class.java) {
       ssoLoginService.cancelAccess(ssoRequest.id)
     }
     assertNotNull(exception)

@@ -128,7 +128,7 @@ class TokenAuthenticationTest(
       User(USER_ID, "John Smith", "Smith"),
       clientId,
       userApprovedScopes,
-      accessTokenValiditySeconds
+      accessTokenValiditySeconds,
     )
     payload["scopes"] = setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ, "RANDOM_SCOPE")
     val authHeader = "Bearer " + TokenGenerationAndValidation.generateJwtToken(
@@ -149,7 +149,7 @@ class TokenAuthenticationTest(
       User(USER_ID, "John Smith", "Smith"),
       clientId,
       userApprovedScopes,
-      accessTokenValiditySeconds
+      accessTokenValiditySeconds,
     )
     payload.remove("scopes")
     val authHeader = "Bearer " + TokenGenerationAndValidation.generateJwtToken(
@@ -170,9 +170,30 @@ class TokenAuthenticationTest(
       User(USER_ID, "John Smith", "Smith"),
       clientId,
       userApprovedScopes,
-      accessTokenValiditySeconds
+      accessTokenValiditySeconds,
     )
-    payload["scopes"] = setOf(null)
+    payload["scopes"] = setOf("Scope Random")
+    val authHeader = "Bearer " + TokenGenerationAndValidation.generateJwtToken(
+      payload,
+      TokenCommonClaims.buildHeaderClaims(kid),
+      privateKey,
+    )
+    val exception = assertThrows(ApiException::class.java) {
+      tokenAuthentication.authenticate(authHeader)
+    }
+    assertEquals(HttpStatus.FORBIDDEN, exception.code)
+  }
+
+  @Test
+  fun `authenticate when access token do not contain scope`() {
+    val accessTokenPayload = AccessTokenPayload()
+    val payload = accessTokenPayload.generatePayload(
+      User(USER_ID, "John Smith", "Smith"),
+      clientId,
+      userApprovedScopes,
+      accessTokenValiditySeconds,
+    )
+    payload.remove("scopes")
     val authHeader = "Bearer " + TokenGenerationAndValidation.generateJwtToken(
       payload,
       TokenCommonClaims.buildHeaderClaims(kid),
