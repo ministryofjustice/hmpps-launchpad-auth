@@ -3,6 +3,8 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -37,6 +39,22 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
     summary = "Initiate sign in",
     description = "Initiate sign in process to get auth code for getting tokens," +
     " after successful authentication auth code is send to redirect uri provided")
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "302",
+        description = "Redirect to url provided in redirect uri",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Bad request",
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Access Denied",
+      ),
+    ]
+  )
   @GetMapping("/authorize")
   fun authorize(
     @Parameter(required = true, description = "client id")
