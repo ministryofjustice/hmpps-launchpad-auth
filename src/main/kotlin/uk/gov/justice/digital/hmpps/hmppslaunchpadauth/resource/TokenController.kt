@@ -45,6 +45,7 @@ class TokenController(
     @RequestParam("refresh_token", required = false) refreshToken: String?,
     @Parameter(required = false, description = "nonce")
     @RequestParam(required = false) nonce: String?,
+    @Parameter(required = true, description = "Basic authorization header with client id as username and client secret as password")
     @RequestHeader(HttpHeaders.AUTHORIZATION, required = true) authorization: String,
   ): ResponseEntity<Token> {
     logger.info("Request received to generate token")
