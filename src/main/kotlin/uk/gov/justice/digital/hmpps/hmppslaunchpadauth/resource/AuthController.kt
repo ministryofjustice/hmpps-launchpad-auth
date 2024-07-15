@@ -38,7 +38,8 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
   @Operation(
     summary = "Initiate sign in",
     description = "Initiate sign in process to get auth code for getting tokens," +
-    " after successful authentication auth code is send to redirect uri provided")
+      " after successful authentication auth code is send to redirect uri provided",
+  )
   @ApiResponses(
     value = [
       ApiResponse(
@@ -53,7 +54,7 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
         responseCode = "403",
         description = "Access Denied",
       ),
-    ]
+    ],
   )
   @GetMapping("/authorize")
   fun authorize(
