@@ -39,11 +39,10 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
 
     val contact = Contact()
     contact.setName("Launchpad Team")
-    contact.setEmail("xyz@gmail.com")
     val information: Info = Info()
       .title("Launchpad Auth API")
       .version(version)
-      .description("This API exposes endpoints to integrate with Launchpad Auth")
+      .description("API that provides Single Sign-On (SSO) capabilities to prisoner-facing clients that integrate with the Launchpad")
       .contact(contact)
     return OpenAPI().info(information).servers(List.of(development, preprod, prod))
   }

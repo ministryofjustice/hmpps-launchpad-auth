@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
 import io.swagger.v3.oas.annotations.Hidden
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -10,8 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.servlet.view.RedirectView
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_REQUEST_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.View
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
@@ -20,6 +22,7 @@ import java.util.*
 
 @RestController
 @RequestMapping("/v1/oauth2")
+@Tag(name = "sso")
 class AuthController(private var ssoLoginService: SsoLogInService) {
   companion object {
     const val MAX_STATE_OR_NONCE_SIZE = 128
@@ -30,23 +33,29 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
   @Value("\${launchpad.auth.allowlisted-scopes}")
   private lateinit var allowListedScopes: String
 
-  @Tag(name = "sso", description = "Initiate sign in process to get code for tokens")
+  @Operation(summary = "Initiate sign in", description = "Initiate sign in process to get auth code for getting tokens")
   @GetMapping("/authorize")
   fun authorize(
+    @Parameter(required = true, description = "client id")
     @RequestParam("client_id") clientId: UUID,
+    @Parameter(required = true, description = "to get auth code use value code")
     @RequestParam("response_type") responseType: String,
+    @Parameter(required = true, description = "list of scopes granted separated by comma")
     @RequestParam scope: String,
+    @Parameter(required = true, description = "redirect uri to which auth code will be sent")
     @RequestParam("redirect_uri") redirectUri: String,
+    @Parameter(required = false, description = "state to identify user")
     @RequestParam(required = false) state: String?,
+    @Parameter(required = false, description = "nonce")
     @RequestParam(required = false) nonce: String?,
-  ): RedirectView {
+  ): View {
     validateResponseType(responseType, redirectUri, state)
     validateSize(state, "state", redirectUri, state)
     validateSize(nonce, "nonce", redirectUri, state)
     val scopes = Scope.removeAllowListScopesNotRequired(scope, allowListedScopes.split(","))
     val url = ssoLoginService.initiateSsoLogin(clientId, responseType, scopes, redirectUri, state, nonce)
     logger.info("Sign in request sent to azure for client $clientId")
-    return RedirectView(url)
+    return View(url)
   }
 
   @Hidden

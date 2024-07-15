@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -20,6 +22,7 @@ import java.util.*
 
 @RestController
 @RequestMapping("/v1/oauth2")
+@Tag(name = "tokens")
 class TokenController(
   private var tokenService: TokenService,
   @Qualifier("basicAuthentication") private var authentication: Authentication,
@@ -29,13 +32,18 @@ class TokenController(
     private val logger = LoggerFactory.getLogger(TokenController::class.java)
   }
 
-  @Tag(name = "token", description = "Get id token, access token and refresh token by code return in sign in request")
+  @Operation(summary = "Get jwt tokens", description = "Get jwt tokens")
   @PostMapping("/token", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
   fun generateToken(
+    @Parameter(required = false, description = "code in uuid")
     @RequestParam(required = false) code: UUID?,
-    @RequestParam("grant_type", required = false) grant: String?,
+    @Parameter(required = true, description = "authorization_code or refresh_token")
+    @RequestParam("grant_type") grant: String,
+    @Parameter(required = false, description = "redirect uri")
     @RequestParam("redirect_uri", required = false) redirectUri: URI?,
+    @Parameter(required = false, description = "refresh token in jwt")
     @RequestParam("refresh_token", required = false) refreshToken: String?,
+    @Parameter(required = false, description = "nonce")
     @RequestParam(required = false) nonce: String?,
     @RequestHeader(HttpHeaders.AUTHORIZATION, required = true) authorization: String,
   ): ResponseEntity<Token> {
