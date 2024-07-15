@@ -33,7 +33,10 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
   @Value("\${launchpad.auth.allowlisted-scopes}")
   private lateinit var allowListedScopes: String
 
-  @Operation(summary = "Initiate sign in", description = "Initiate sign in process to get auth code for getting tokens")
+  @Operation(
+    summary = "Initiate sign in",
+    description = "Initiate sign in process to get auth code for getting tokens," +
+    " after successful authentication auth code is send to redirect uri provided")
   @GetMapping("/authorize")
   fun authorize(
     @Parameter(required = true, description = "client id")
