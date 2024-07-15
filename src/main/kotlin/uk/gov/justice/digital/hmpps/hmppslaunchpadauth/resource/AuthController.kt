@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
+import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -29,7 +30,7 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
   @Value("\${launchpad.auth.allowlisted-scopes}")
   private lateinit var allowListedScopes: String
 
-  @Tag(name = "initiate sign in", description = "Initiate sign in process to get code")
+  @Tag(name = "sso", description = "Initiate sign in process to get code for tokens")
   @GetMapping("/authorize")
   fun authorize(
     @RequestParam("client_id") clientId: UUID,
@@ -48,7 +49,7 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
     return RedirectView(url)
   }
 
-  @Tag(name = "get auth code", description = "Initiate sign in process to get code")
+  @Hidden
   @PostMapping("/callback", consumes = ["application/x-www-form-urlencoded"])
   fun getAuthCode(
     @RequestParam("id_token", required = false) token: String?,
@@ -57,6 +58,7 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
     return ssoLoginService.updateSsoRequest(token, state)
   }
 
+  @Hidden
   @PostMapping("/authorize-client", consumes = ["application/x-www-form-urlencoded"])
   fun authorizeClient(
     @RequestParam state: UUID,

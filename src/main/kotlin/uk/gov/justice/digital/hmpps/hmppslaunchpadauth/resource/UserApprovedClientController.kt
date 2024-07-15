@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.swagger.v3.oas.annotations.tags.Tags
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -36,7 +35,7 @@ class UserApprovedClientController(
   private var userIdValidator: UserIdValidator,
 ) {
 
-  @Tag(name = "get list of a user approved clients", description = "Give list of user approved clients by user id")
+  @Tag(name = "user approved clients", description = "Give list of approved clients by user id")
   @GetMapping("/users/{user-id}/clients", produces = [MediaType.APPLICATION_JSON_VALUE])
   fun getUserApprovedClients(
     @PathVariable("user-id") userId: String,
@@ -54,7 +53,7 @@ class UserApprovedClientController(
     return ResponseEntity.status(HttpStatus.OK).body(userApprovedClients)
   }
 
-  @Tag(name = "revoke client access", description = "Revoke a previously approved client by a user")
+  @Tag(name = "user approved clients", description = "Revoke a client permission approved by a user")
   @DeleteMapping("/users/{user-id}/clients/{client-id}")
   fun revokeClientAccess(
     @PathVariable("user-id") userId: String,

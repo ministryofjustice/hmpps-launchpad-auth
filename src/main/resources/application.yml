@@ -34,8 +34,12 @@ spring:
       test:
         - "stdout"
 springdoc:
-  api-docs:
-    path: /api-docs
+  #api-docs:
+    #path: /api-docs
+  packages-to-scan: uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto, uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
+  swagger-ui:
+    default-model-expand-depth: -1
+    tags-sorter: alpha
 server:
   port: 8080
   servlet:
@@ -73,6 +77,10 @@ hmpps:
     password: ${HMPPS_AUTH_CLIENT_SECRET}
 launchpad:
   auth:
+    api-docs:
+      development: https://launchpad-auth-dev.hmpps.service.justice.gov.uk
+      preprod: https://launchpad-auth-preprod.hmpps.service.justice.gov.uk
+      prod: https://launchpad-auth.hmpps.service.justice.gov.uk
     inactive-users-per-page: 200
     allowlisted-scopes: openid,email,profile
     id-token-validity-seconds: 3600

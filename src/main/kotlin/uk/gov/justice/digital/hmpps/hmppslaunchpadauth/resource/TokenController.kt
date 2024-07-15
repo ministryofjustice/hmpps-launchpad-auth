@@ -29,7 +29,7 @@ class TokenController(
     private val logger = LoggerFactory.getLogger(TokenController::class.java)
   }
 
-  @Tag(name = "get token", description = "Get idtoken, access token and refresh token")
+  @Tag(name = "token", description = "Get id token, access token and refresh token by code return in sign in request")
   @PostMapping("/token", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
   fun generateToken(
     @RequestParam(required = false) code: UUID?,
