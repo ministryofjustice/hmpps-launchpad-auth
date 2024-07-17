@@ -23,6 +23,9 @@ dependencies {
   implementation("org.postgresql:postgresql:42.7.3")
   implementation("org.ehcache:ehcache:3.10.8")
   implementation("javax.cache:cache-api:1.1.1")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0") {
+    exclude(group = "org.yaml", module = "snakeyaml")
+  }
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.boot:spring-boot-starter-webflux")

@@ -65,7 +65,7 @@ class TokenService(
 
   fun validateRequestAndGenerateToken(
     code: UUID?,
-    grantType: String?,
+    grantType: String,
     redirectUri: URI?,
     clientId: UUID,
     refreshToken: String?,
