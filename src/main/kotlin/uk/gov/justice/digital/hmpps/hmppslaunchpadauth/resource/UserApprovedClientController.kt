@@ -2,6 +2,10 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.ACCESS_DENIED_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_CLIENT_ID_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_SCOPE_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.ApiError
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
@@ -31,23 +36,46 @@ import java.util.*
 
 @RestController
 @RequestMapping("/v1")
-@Tag(name = "clients")
+@Tag(name = "client")
 class UserApprovedClientController(
   @Qualifier("tokenAuthentication") private var authentication: Authentication,
   private var userApprovedClientService: UserApprovedClientService,
   private var userIdValidator: UserIdValidator,
 ) {
 
-  @Operation(summary = "Get approved clients", description = "Get approved clients for a user")
+  @Operation(summary = "Get approved clients", description = "Clients that have been granted the user.clients.read scope can GET the list of clients that a user has approved")
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "OK",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Bad request.",
+        content = [Content(schema = Schema(implementation = ApiError::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized Request.",
+        content = [Content(schema = Schema(implementation = ApiError::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Access Denied.",
+        content = [Content(schema = Schema(implementation = ApiError::class))],
+      ),
+    ],
+  )
   @GetMapping("/users/{user-id}/clients", produces = [MediaType.APPLICATION_JSON_VALUE])
   fun getUserApprovedClients(
-    @Parameter(required = true, description = "user id")
+    @Parameter(required = true, description = "Case-sensitive user Id or prisoner Id.")
     @PathVariable("user-id") userId: String,
-    @Parameter(required = false, description = "page number, default value 1")
+    @Parameter(required = false, description = "Page number, default value 1.")
     @RequestParam("page", required = false) page: Long?,
-    @Parameter(required = false, description = "number of record in a page, max value is 20")
+    @Parameter(required = false, description = "Number of approved clients to return in the response, max value is 20.")
     @RequestParam("size", required = false) size: Long?,
-    @Parameter(required = true, description = "jwt access token")
+    @Parameter(required = true, description = "Bearer access_token.", example = "Bearer eyJhbGc...")
     @RequestHeader(HttpHeaders.AUTHORIZATION, required = true) authorization: String,
   ): ResponseEntity<PagedResult<UserApprovedClientDto>> {
     val authenticationInfo = authentication.authenticate(authorization) as AuthenticationUserInfo
@@ -60,14 +88,40 @@ class UserApprovedClientController(
     return ResponseEntity.status(HttpStatus.OK).body(userApprovedClients)
   }
 
-  @Operation(summary = "Delete user approved client", description = "Delete a user approved client by user id")
+  @Operation(
+    summary = "Delete user approved client.",
+    description = "Clients that have been granted the user.clients.delete scope can DELETE a client that a user has approved.",
+  )
   @DeleteMapping("/users/{user-id}/clients/{client-id}")
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "204",
+        description = "OK",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Bad request.",
+        content = [Content(schema = Schema(implementation = ApiError::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized Request.",
+        content = [Content(schema = Schema(implementation = ApiError::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Access Denied.",
+        content = [Content(schema = Schema(implementation = ApiError::class))],
+      ),
+    ],
+  )
   fun revokeClientAccess(
-    @Parameter(required = true, description = "user id")
+    @Parameter(required = true, description = "Case-sensitive user Id or prisoner Id.")
     @PathVariable("user-id") userId: String,
-    @Parameter(required = true, description = "client id")
+    @Parameter(required = true, description = "The client Id")
     @PathVariable("client-id") clientId: UUID,
-    @Parameter(required = true, description = "jwt access token")
+    @Parameter(required = true, description = "Bearer access_token.", example = "Bearer eyJhbGc...")
     @RequestHeader(HttpHeaders.AUTHORIZATION, required = true) authorization: String,
   ): ResponseEntity<Void> {
     val authenticationInfo = authentication.authenticate(authorization) as AuthenticationUserInfo

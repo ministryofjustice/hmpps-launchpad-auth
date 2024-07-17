@@ -14,20 +14,20 @@ import java.util.List
 class OpenApiConfiguration(buildProperties: BuildProperties) {
   private val version: String = buildProperties.version
 
-  @Value("\${launchpad.auth.api-docs.development}")
+  @Value("\${launchpad.auth.base-url.dev}")
   private lateinit var devUrl: String
 
-  @Value("\${launchpad.auth.api-docs.preprod}")
+  @Value("\${launchpad.auth.base-url.preprod}")
   private lateinit var preProdUrl: String
 
-  @Value("\${launchpad.auth.api-docs.prod}")
+  @Value("\${launchpad.auth.base-url.prod}")
   private lateinit var prodUrl: String
 
   @Bean
   fun defineOpenApi(): OpenAPI? {
-    val development = Server()
-    development.setUrl("https://launchpad-auth-dev.hmpps.service.justice.gov.uk")
-    development.setDescription("Development")
+    val dev = Server()
+    dev.setUrl("https://launchpad-auth-dev.hmpps.service.justice.gov.uk")
+    dev.setDescription("Dev")
 
     val preprod = Server()
     preprod.setUrl("https://launchpad-auth-preprod.hmpps.service.justice.gov.uk")
@@ -40,10 +40,10 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
     val contact = Contact()
     contact.setName("Launchpad Team")
     val information: Info = Info()
-      .title("Launchpad Auth API")
+      .title("Launchpad Auth")
       .version(version)
-      .description("API that provides Single Sign-On (SSO) capabilities to prisoner-facing clients that integrate with the Launchpad")
+      .description("Microservice that provides Single Sign-On (SSO) capabilities to prisoner-facing clients that integrate with the Launchpad")
       .contact(contact)
-    return OpenAPI().info(information).servers(List.of(development, preprod, prod))
+    return OpenAPI().info(information).servers(List.of(dev, preprod, prod))
   }
 }

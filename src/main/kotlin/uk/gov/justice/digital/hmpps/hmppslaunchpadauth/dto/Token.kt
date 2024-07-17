@@ -4,23 +4,23 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.media.Schema
 
 data class Token(
-  @Schema(required = true, description = "Id token", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
+  @Schema(required = true, description = "This is a JWT that contains claims that carry information about the user. Clients should use the id_token to cache user information server-side.", example = "eyJhbGc..")
   @JsonProperty("id_token")
   val idToken: String,
 
-  @Schema(required = true, description = "Access token", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
+  @Schema(required = true, description = "This is a JWT that contains claims that carry information about the authorised client.", example = "eyJhbGc..")
   @JsonProperty("access_token")
   val accessToken: String,
 
-  @Schema(required = true, description = "Refresh token", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
+  @Schema(required = true, description = "This is a JWT that's used to renew or obtain a new token.", example = "eyJhbGc..")
   @JsonProperty("refresh_token")
   val refreshToken: String,
 
-  @Schema(required = true, description = "Token type is always bearer", example = "Bearer")
+  @Schema(required = true, description = "Always set to Bearer to indicate that the token is a bearer token.", example = "Bearer")
   @JsonProperty("token_type")
   val tokenType: String,
 
-  @Schema(required = true, description = "Time for which access token is valid", example = "3600")
+  @Schema(required = true, description = "Seconds to indicate the duration of time the access_token is valid for. Clients should always use the expiry indicated in the JWTs through the exp claim.", example = "3599")
   @JsonProperty("expires_in")
   val expiresIn: Long,
 )
