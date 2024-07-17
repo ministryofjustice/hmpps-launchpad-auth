@@ -37,43 +37,39 @@ class TokenController(
     private val logger = LoggerFactory.getLogger(TokenController::class.java)
   }
 
-  @Operation(summary = "Get a token", description = "Exchange an authorization_code or refresh_token with a token.")
+  @Operation(summary = "Get a token.", description = "Exchange an `authorization_code` or `refresh_token` with a token.")
   @ApiResponses(
     value = [
       ApiResponse(
         responseCode = "200",
-        description = "OK",
       ),
       ApiResponse(
         responseCode = "400",
-        description = "Bad request.",
         content = [Content(schema = Schema(implementation = ApiError::class))],
       ),
       ApiResponse(
         responseCode = "401",
-        description = "Unauthorised request.",
         content = [Content(schema = Schema(implementation = ApiError::class))],
       ),
       ApiResponse(
         responseCode = "403",
-        description = "Access Denied.",
         content = [Content(schema = Schema(implementation = ApiError::class))],
       ),
     ],
   )
   @PostMapping("/token", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
   fun generateToken(
-    @Parameter(required = false, description = "Clients need to send the authorization_code if requesting a token through the authorization_code grant.")
+    @Parameter(required = false, description = "Clients need to send the `authorization_code` if requesting a token through the `authorization_code` grant.")
     @RequestParam(required = false) code: UUID?,
-    @Parameter(required = true, description = "Either authorization_code or refresh_token grant.")
+    @Parameter(required = true, description = "Either `authorization_code` or `refresh_token` grant.", example = "authorization_code")
     @RequestParam("grant_type") grant: String,
-    @Parameter(required = false, description = "This is the same URI used to obtain the authorization_code. Clients need to send the redirect_uri if requesting a token through the authorization_code grant.")
+    @Parameter(required = false, description = "This is the same URI used to obtain the `authorization_code`. Clients need to send the `redirect_uri` if requesting a token through the `authorization_code` grant.")
     @RequestParam("redirect_uri", required = false) redirectUri: URI?,
-    @Parameter(required = false, description = "Clients need to send the refresh_token if requesting a token through the refresh_token grant.")
+    @Parameter(required = false, description = "Clients need to send the `refresh_token` if requesting a token through the `refresh_token` grant.")
     @RequestParam("refresh_token", required = false) refreshToken: String?,
-    @Parameter(required = false, description = "Clients can send a nonce if requesting a token through the refresh_token grant.")
+    @Parameter(required = false, description = "Clients can send a `nonce` if requesting a token through the `refresh_token` grant.")
     @RequestParam(required = false) nonce: String?,
-    @Parameter(required = true, description = "HTTP Basic authentication header with the client_id as the username and client secret as the password.", example = "Basic MGRkM...")
+    @Parameter(required = true, description = "HTTP Basic authentication header with the client Id as the username and client secret as the password.", example = "Basic MGRkM...")
     @RequestHeader(HttpHeaders.AUTHORIZATION, required = true) authorization: String,
   ): ResponseEntity<Token> {
     logger.info("Request received to generate token")

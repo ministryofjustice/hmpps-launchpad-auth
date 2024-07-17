@@ -5,10 +5,10 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(name = "Error")
 data class ApiError(
-  @Schema(required = true, description = "Type of error.", example = "invalid_code")
+  @Schema(required = true, description = "Type of error.", example = "invalid_request")
   val error: String,
 
-  @Schema(required = true, description = "Error message, containing description.", example = "The client id is invalid.")
+  @Schema(required = true, description = "Error message, containing description.", example = "The client Id is invalid.")
   @JsonProperty("error_description")
   val errorDescription: String,
 )

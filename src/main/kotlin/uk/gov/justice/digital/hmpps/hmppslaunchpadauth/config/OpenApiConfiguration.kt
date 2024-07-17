@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.info.BuildProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import java.util.List
 
 @Configuration
 class OpenApiConfiguration(buildProperties: BuildProperties) {
@@ -26,24 +25,24 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
   @Bean
   fun defineOpenApi(): OpenAPI? {
     val dev = Server()
-    dev.setUrl("https://launchpad-auth-dev.hmpps.service.justice.gov.uk")
-    dev.setDescription("Dev")
+    dev.url(devUrl)
+    dev.description("Dev")
 
     val preprod = Server()
-    preprod.setUrl("https://launchpad-auth-preprod.hmpps.service.justice.gov.uk")
-    preprod.setDescription("Pre-prod")
+    preprod.url(preProdUrl)
+    preprod.description("Pre-prod")
 
     val prod = Server()
-    prod.setUrl("https://launchpad-auth.hmpps.service.justice.gov.uk")
-    prod.setDescription("Prod")
+    prod.url(prodUrl)
+    prod.description("Prod")
 
     val contact = Contact()
-    contact.setName("Launchpad Team")
+    contact.name("Launchpad Team")
     val information: Info = Info()
       .title("Launchpad Auth")
       .version(version)
-      .description("Microservice that provides Single Sign-On (SSO) capabilities to prisoner-facing clients that integrate with the Launchpad")
+      .description("Microservice that provides Single Sign-On (SSO) capabilities to prisoner-facing clients that integrate with the Launchpad.")
       .contact(contact)
-    return OpenAPI().info(information).servers(List.of(dev, preprod, prod))
+    return OpenAPI().info(information).servers(listOf(dev, preprod, prod))
   }
 }

@@ -43,26 +43,22 @@ class UserApprovedClientController(
   private var userIdValidator: UserIdValidator,
 ) {
 
-  @Operation(summary = "Get approved clients", description = "Clients that have been granted the user.clients.read scope can GET the list of clients that a user has approved")
+  @Operation(summary = "Get approved clients.", description = "Clients that have been granted the `user.clients.read` scope can `GET` the list of clients that a user has approved.")
   @ApiResponses(
     value = [
       ApiResponse(
         responseCode = "200",
-        description = "OK",
       ),
       ApiResponse(
         responseCode = "400",
-        description = "Bad request.",
         content = [Content(schema = Schema(implementation = ApiError::class))],
       ),
       ApiResponse(
         responseCode = "401",
-        description = "Unauthorized Request.",
         content = [Content(schema = Schema(implementation = ApiError::class))],
       ),
       ApiResponse(
         responseCode = "403",
-        description = "Access Denied.",
         content = [Content(schema = Schema(implementation = ApiError::class))],
       ),
     ],
@@ -71,11 +67,11 @@ class UserApprovedClientController(
   fun getUserApprovedClients(
     @Parameter(required = true, description = "Case-sensitive user Id or prisoner Id.")
     @PathVariable("user-id") userId: String,
-    @Parameter(required = false, description = "Page number, default value 1.")
+    @Parameter(required = false, description = "Page number. Default and min value is 1.")
     @RequestParam("page", required = false) page: Long?,
-    @Parameter(required = false, description = "Number of approved clients to return in the response, max value is 20.")
+    @Parameter(required = false, description = "Number of approved clients to return in the response. Default and max value is 20.")
     @RequestParam("size", required = false) size: Long?,
-    @Parameter(required = true, description = "Bearer access_token.", example = "Bearer eyJhbGc...")
+    @Parameter(required = true, description = "Bearer `access_token`.", example = "Bearer eyJhbGc...")
     @RequestHeader(HttpHeaders.AUTHORIZATION, required = true) authorization: String,
   ): ResponseEntity<PagedResult<UserApprovedClientDto>> {
     val authenticationInfo = authentication.authenticate(authorization) as AuthenticationUserInfo
@@ -90,28 +86,24 @@ class UserApprovedClientController(
 
   @Operation(
     summary = "Delete user approved client.",
-    description = "Clients that have been granted the user.clients.delete scope can DELETE a client that a user has approved.",
+    description = "Clients that have been granted the `user.clients.delete` scope can `DELETE` a client that a user has approved or uses.",
   )
   @DeleteMapping("/users/{user-id}/clients/{client-id}")
   @ApiResponses(
     value = [
       ApiResponse(
         responseCode = "204",
-        description = "OK",
       ),
       ApiResponse(
         responseCode = "400",
-        description = "Bad request.",
         content = [Content(schema = Schema(implementation = ApiError::class))],
       ),
       ApiResponse(
         responseCode = "401",
-        description = "Unauthorized Request.",
         content = [Content(schema = Schema(implementation = ApiError::class))],
       ),
       ApiResponse(
         responseCode = "403",
-        description = "Access Denied.",
         content = [Content(schema = Schema(implementation = ApiError::class))],
       ),
     ],
@@ -119,9 +111,9 @@ class UserApprovedClientController(
   fun revokeClientAccess(
     @Parameter(required = true, description = "Case-sensitive user Id or prisoner Id.")
     @PathVariable("user-id") userId: String,
-    @Parameter(required = true, description = "The client Id")
+    @Parameter(required = true, description = "The Id of the client to delete.")
     @PathVariable("client-id") clientId: UUID,
-    @Parameter(required = true, description = "Bearer access_token.", example = "Bearer eyJhbGc...")
+    @Parameter(required = true, description = "Bearer `access_token`.", example = "Bearer eyJhbGc...")
     @RequestHeader(HttpHeaders.AUTHORIZATION, required = true) authorization: String,
   ): ResponseEntity<Void> {
     val authenticationInfo = authentication.authenticate(authorization) as AuthenticationUserInfo
