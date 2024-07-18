@@ -80,15 +80,15 @@ launchpad:
     public-key: ${PUBLIC_KEY}
     kid: ${KID}
     agencies:
-     BWI:
-      agencyId: BWI
-      name: berwyn
-      displayName: HMP Berwyn
-      youth: false
      BNI:
       agencyId: BNI
       name: bullingdon
       displayName: HMP Bullingdon
+      youth: false
+     BWI:
+      agencyId: BWI
+      name: berwyn
+      displayName: HMP Berwyn
       youth: false
      CDI:
       agencyId: CDI
@@ -145,15 +145,15 @@ launchpad:
       name: stokeheath
       displayName: HMPYOI Stoke Heath
       youth: false
-     STI:
-      agencyId: STI
-      name: styal
-      displayName: HMPYOI Styal
-      youth: false
      SLI:
       agencyId: SLI
       name: swaleside
       displayName: HMP Swaleside
+      youth: false
+     STI:
+      agencyId: STI
+      name: styal
+      displayName: HMPYOI Styal
       youth: false
      WHI:
       agencyId: WHI
