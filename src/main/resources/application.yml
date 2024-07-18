@@ -90,31 +90,31 @@ launchpad:
       name: bullingdon
       displayName: HMP Bullingdon
       youth: false
-     CKI:
-      agencyId: CKI
-      name: cookhamwood
-      displayName: HMYOI Cookham Wood
-      youth: true
      CDI:
       agencyId: CDI
       name: chelmsford
       displayName: HMP Chelmsford
       youth: false
-     FYI:
-      agencyId: FYI
-      name: felthama
-      displayName: HMYOI Feltham A
-      youth: true
-     FMI:
-      agencyId: FMI
-      name: felthamb
-      displayName: HMYOI Feltham B
-      youth: true
+     CKI:
+      agencyId: CKI
+      name: cookhamwood
+      displayName: HMP Cookham Wood
+      youth: false
      EEI:
       agencyId: EEI
       name: erlestoke
       displayName: HMP Erlestoke
       youth: false
+     FMI:
+      agencyId: FMI
+      name: felthamb
+      displayName: HMYOI Feltham B
+      youth: true
+     FYI:
+      agencyId: FYI
+      name: felthama
+      displayName: HMYOI Feltham A
+      youth: true
      GHI:
       agencyId: GHI
       name: garth
@@ -159,7 +159,7 @@ launchpad:
       agencyId: WHI
       name: woodhill
       displayName: HMP Woodhill
-      youth: true
+      youth: false
      WLI:
       agencyId: WLI
       name: wayland
