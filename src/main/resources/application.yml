@@ -88,26 +88,41 @@ launchpad:
     public-key: ${PUBLIC_KEY}
     kid: ${KID}
     agencies:
+     BNI:
+      agencyId: BNI
+      name: bullingdon
+      displayName: HMP Bullingdon
+      youth: false
      BWI:
       agencyId: BWI
       name: berwyn
       displayName: HMP Berwyn
       youth: false
-     WLI:
-      agencyId: WLI
-      name: wayland
-      displayName: HMP Wayland
+     CDI:
+      agencyId: CDI
+      name: chelmsford
+      displayName: HMP Chelmsford
       youth: false
      CKI:
       agencyId: CKI
       name: cookhamwood
-      displayName: HMYOI Cookham Wood
-      youth: true
+      displayName: HMP Cookham Wood
+      youth: false
      EEI:
       agencyId: EEI
       name: erlestoke
       displayName: HMP Erlestoke
       youth: false
+     FMI:
+      agencyId: FMI
+      name: felthamb
+      displayName: HMYOI Feltham B
+      youth: true
+     FYI:
+      agencyId: FYI
+      name: felthama
+      displayName: HMYOI Feltham A
+      youth: true
      GHI:
       agencyId: GHI
       name: garth
@@ -117,6 +132,11 @@ launchpad:
       agencyId: LHI
       name: lindholme
       displayName: HMP Lindholme
+      youth: false
+     MTI:
+      agencyId: MTI
+      name: themount
+      displayName: HMP The Mount
       youth: false
      NHI:
       agencyId: NHI
@@ -133,31 +153,26 @@ launchpad:
       name: stokeheath
       displayName: HMPYOI Stoke Heath
       youth: false
-     STI:
-      agencyId: STI
-      name: styal
-      displayName: HMPYOI Styal
-      youth: false
      SLI:
       agencyId: SLI
       name: swaleside
       displayName: HMP Swaleside
       youth: false
-     MTI:
-      agencyId: MTI
-      name: themount
-      displayName: HMP The Mount
+     STI:
+      agencyId: STI
+      name: styal
+      displayName: HMPYOI Styal
       youth: false
-     FYI:
-      agencyId: FYI
-      name: felthama
-      displayName: HMYOI Feltham A
-      youth: true
-     FMI:
-      agencyId: FMI
-      name: felthamb
-      displayName: HMYOI Feltham B
-      youth: true
+     WHI:
+      agencyId: WHI
+      name: woodhill
+      displayName: HMP Woodhill
+      youth: false
+     WLI:
+      agencyId: WLI
+      name: wayland
+      displayName: HMP Wayland
+      youth: false
      WNI:
       agencyId: WNI
       name: werrington
