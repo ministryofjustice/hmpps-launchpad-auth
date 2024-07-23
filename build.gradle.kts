@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.15.6"
-  kotlin("plugin.spring") version "1.9.20"
-  kotlin("plugin.jpa") version "1.9.20"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.1"
+  kotlin("plugin.spring") version "2.0.0"
+  kotlin("plugin.jpa") version "2.0.0"
 }
 
 configurations {
@@ -19,7 +19,7 @@ dependencies {
   implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
   implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
   implementation("org.json:json:20231013")
-  implementation("org.flywaydb:flyway-core:9.19.4")
+  implementation("org.flywaydb:flyway-core:10.14.0")
   implementation("org.postgresql:postgresql:42.7.3")
   implementation("org.ehcache:ehcache:3.10.8")
   implementation("javax.cache:cache-api:1.1.1")
@@ -34,13 +34,13 @@ dependencies {
 }
 
 java {
-  toolchain.languageVersion.set(JavaLanguageVersion.of(19))
+  toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-      jvmTarget = "19"
+      jvmTarget = "21"
     }
   }
 }
