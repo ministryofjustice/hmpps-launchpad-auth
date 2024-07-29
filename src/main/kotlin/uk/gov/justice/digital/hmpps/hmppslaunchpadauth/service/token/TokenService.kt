@@ -23,10 +23,12 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.ClientService
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SandboxSsoService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoRequestService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.UserApprovedClientService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication.AuthenticationInfo
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.PrisonerApiService
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.UserClaims
 import java.net.URI
 import java.util.*
 
@@ -119,7 +121,7 @@ class TokenService(
       )
     }
     validateRedirectUri(redirectUri, ssoRequest)
-    val token = generateToken(ssoRequest.userId!!, client.id, ssoRequest.client.scopes, ssoRequest.client.nonce, null)
+    val token = generateToken(ssoRequest.userId!!, client.id, ssoRequest.client.scopes, ssoRequest.client.nonce, null, client.sandbox)
     ssoRequestService.deleteSsoRequestById(ssoRequest.id)
     return token
   }
@@ -147,7 +149,7 @@ class TokenService(
           )
         }
     validateScopeInRefreshTokenClaims(scopes, userApprovedClient.scopes)
-    return generateToken(userId, client.id, userApprovedClient.scopes, nonce, refreshTokenPayloadOld.body)
+    return generateToken(userId, client.id, userApprovedClient.scopes, nonce, refreshTokenPayloadOld.body, client.sandbox)
   }
 
   private fun generateToken(
@@ -156,8 +158,14 @@ class TokenService(
     scopes: Set<Scope>,
     nonce: String?,
     refreshTokenPayloadOld: Claims?,
+    sandbox: Boolean
   ): Token {
-    val prisonerData = prisonerApiService.getPrisonerData(prisonerId)
+    var prisonerData: UserClaims
+    if (sandbox) {
+      prisonerData = SandboxSsoService.getThirdPartyTestUser()
+    } else {
+      prisonerData = prisonerApiService.getPrisonerData(prisonerId)
+    }
     val idTokenPayload = IdTokenPayload()
     val idTokenPayloadClaims = idTokenPayload.generatePayload(
       prisonerData.booking,
