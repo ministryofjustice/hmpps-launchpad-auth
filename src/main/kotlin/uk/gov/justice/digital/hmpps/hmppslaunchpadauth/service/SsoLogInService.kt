@@ -79,7 +79,7 @@ class SsoLogInService(
     )
     if (client.sandbox) {
       // if (!client.autoApprove)
-      ssoRequest.userId = "random_userId@moj.com"
+      ssoRequest.userId = "random_userId@test.com"
       ssoRequestService.updateSsoRequest(ssoRequest)
       // val view =
       return  updateSsoRequestSandboxClient(ssoRequest.id)
