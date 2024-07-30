@@ -10,8 +10,8 @@ import java.util.*
 class IdTokenPayload {
 
   private fun buildClaims(
-    booking: Booking,
-    establishment: Establishment,
+    booking: Booking?,
+    establishment: Establishment?,
     user: User,
     clientId: UUID,
     scopes: Set<Scope>,
@@ -31,10 +31,10 @@ class IdTokenPayload {
     claims = TokenCommonClaims.buildCommonClaims(clientId.toString(), user.id, claims)
     claims["exp"] = Instant.now().plusSeconds(validityInSeconds).epochSecond
     claims["iss"] = issuerUrl
-    if (scopes.contains(Scope.USER_BOOKING_READ)) {
+    if (scopes.contains(Scope.USER_BOOKING_READ) && booking != null) {
       claims["booking"] = booking
     }
-    if (scopes.contains(Scope.USER_ESTABLISHMENT_READ)) {
+    if (scopes.contains(Scope.USER_ESTABLISHMENT_READ) && establishment  != null) {
       claims["establishment"] = establishment
     }
     return claims
@@ -50,6 +50,6 @@ class IdTokenPayload {
     issuerUrl: String,
     validityInSeconds: Long,
   ): LinkedHashMap<String, Any> {
-    return buildClaims(booking!!, establishment!!, user, clientId, scopes, nonce, issuerUrl, validityInSeconds)
+    return buildClaims(booking, establishment, user, clientId, scopes, nonce, issuerUrl, validityInSeconds)
   }
 }
