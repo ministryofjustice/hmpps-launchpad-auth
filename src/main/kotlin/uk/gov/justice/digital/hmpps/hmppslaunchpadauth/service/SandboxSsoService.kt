@@ -9,7 +9,7 @@ import java.util.UUID
 // @Service
 class SandboxSsoService() {
   companion object {
-    fun getThirdPartyTestUser() : UserClaims {
+    fun getThirdPartyTestUser(): UserClaims {
       val user = User("random_user@test.com", "John", "Smith")
       val booking = Booking(UUID.randomUUID().toString())
       val establishment = Establishment("EEI", "Test Establishment", "Test Establishment", false)

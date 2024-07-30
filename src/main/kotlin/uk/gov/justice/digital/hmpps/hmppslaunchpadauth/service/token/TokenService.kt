@@ -158,7 +158,7 @@ class TokenService(
     scopes: Set<Scope>,
     nonce: String?,
     refreshTokenPayloadOld: Claims?,
-    sandbox: Boolean
+    sandbox: Boolean,
   ): Token {
     var prisonerData: UserClaims
     if (sandbox) {

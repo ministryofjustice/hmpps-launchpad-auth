@@ -82,7 +82,7 @@ class SsoLogInService(
       ssoRequest.userId = "random_userId@test.com"
       ssoRequestService.updateSsoRequest(ssoRequest)
       // val view =
-      return  updateSsoRequestSandboxClient(ssoRequest.id)
+      return updateSsoRequestSandboxClient(ssoRequest.id)
       // return view.url
     } else {
       return UriComponentsBuilder.fromHttpUrl(builtAzureOauth2Url())
@@ -95,7 +95,6 @@ class SsoLogInService(
         .queryParam("redirect_uri", UriUtils.encode(launchpadRedirectUrl, StandardCharsets.UTF_8))
         .build(true).toUriString()
     }
-
   }
 
   fun updateSsoRequest(token: String?, state: UUID): Any {
@@ -117,21 +116,11 @@ class SsoLogInService(
       )
     }
     var approvalRequired = false
-    /*if (client.sandbox) {
-      if (client.autoApprove) {
-        createOrUpdateUserApprovedClient(ssoRequest, true)
-        logger.info("Successful sso login for client {} and user id {}", ssoRequest.client.id, ssoRequest.userId)
-        return RedirectView(buildClientRedirectUrl(ssoRequest))
-      } else {
-        // Auto Approve = false and user approval is required
-        approvalRequired = createOrUpdateUserApprovedClient(ssoRequest, false)
-      }
-    }*/
     if (token != null) {
-      //if (token != null) {
-        ssoRequest = updateSsoRequestWithUserId(token, ssoRequest)
+      // if (token != null) {
+      ssoRequest = updateSsoRequestWithUserId(token, ssoRequest)
       // }
-      if (client.autoApprove)  {
+      if (client.autoApprove) {
         createOrUpdateUserApprovedClient(ssoRequest, true)
         logger.info("Successful sso login for client {} and user id {}", ssoRequest.client.id, ssoRequest.userId)
         return RedirectView(buildClientRedirectUrl(ssoRequest))

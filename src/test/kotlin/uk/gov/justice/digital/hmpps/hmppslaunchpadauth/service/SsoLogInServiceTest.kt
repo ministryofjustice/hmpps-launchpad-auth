@@ -118,7 +118,7 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
       ssoRequest.id.toString(),
       ssoRequest.client.nonce,
     )
-    val result = URL(url)
+    val result = URL(url.toString())
     assertNotNull(result)
   }
 

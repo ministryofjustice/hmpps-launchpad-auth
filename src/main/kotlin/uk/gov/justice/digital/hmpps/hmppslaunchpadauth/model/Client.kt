@@ -45,7 +45,7 @@ data class Client(
   val description: String,
 
   @Column(name = "sandbox")
-  val sandbox: Boolean = false
+  val sandbox: Boolean = false,
 ) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
