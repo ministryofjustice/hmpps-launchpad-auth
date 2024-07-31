@@ -34,7 +34,7 @@ class IdTokenPayload {
     if (scopes.contains(Scope.USER_BOOKING_READ) && booking != null) {
       claims["booking"] = booking
     }
-    if (scopes.contains(Scope.USER_ESTABLISHMENT_READ) && establishment  != null) {
+    if (scopes.contains(Scope.USER_ESTABLISHMENT_READ) && establishment != null) {
       claims["establishment"] = establishment
     }
     return claims
