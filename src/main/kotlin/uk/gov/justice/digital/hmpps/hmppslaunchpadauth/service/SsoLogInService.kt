@@ -78,12 +78,9 @@ class SsoLogInService(
       clientId,
     )
     if (client.sandbox) {
-      // if (!client.autoApprove)
-      ssoRequest.userId = "random_userId@test.com"
+      ssoRequest.userId = "random_user"
       ssoRequestService.updateSsoRequest(ssoRequest)
-      // val view =
       return updateSsoRequestSandboxClient(ssoRequest.id)
-      // return view.url
     } else {
       return UriComponentsBuilder.fromHttpUrl(builtAzureOauth2Url())
         .queryParam("response_type", "id_token")
