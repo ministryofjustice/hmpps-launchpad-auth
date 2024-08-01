@@ -38,7 +38,7 @@ enum class Scope(val scope: String) {
           template.add("Read basic information like your name")
         }
         if (scope == USER_BOOKING_READ) {
-          template.add("Prison booking details (tbc)")
+          template.add("null")
         }
         if (scope == USER_ESTABLISHMENT_READ) {
           template.add("Read prison information like the name of your prison")
