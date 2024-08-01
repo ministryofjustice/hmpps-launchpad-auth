@@ -144,11 +144,15 @@ class UserApprovedClientService(
           INVALID_REQUEST_MSG,
         )
       }
+      var logoUri: String? = null
+      if (!client.logoUri.isNullOrEmpty()) {
+        logoUri = client.logoUri
+      }
       clients.add(
         UserApprovedClientDto(
           client.id,
           client.name,
-          client.logoUri,
+          logoUri,
           client.description,
           client.autoApprove,
           userApprovedClient.createdDate,
