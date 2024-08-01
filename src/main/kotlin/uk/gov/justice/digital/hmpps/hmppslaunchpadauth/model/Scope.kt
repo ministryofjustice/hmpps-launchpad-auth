@@ -35,19 +35,16 @@ enum class Scope(val scope: String) {
       val template = HashSet<String>()
       scopes.forEach { scope ->
         if (scope == USER_BASIC_READ) {
-          template.add("Your name")
-        }
-        if (scope == USER_BOOKING_READ) {
-          template.add("Prison booking details (tbc)")
+          template.add("Read basic information like your name")
         }
         if (scope == USER_ESTABLISHMENT_READ) {
-          template.add("Details of your prison")
+          template.add("Read prison information like the name of your prison")
         }
         if (scope == USER_CLIENTS_READ) {
-          template.add("Apps you’ve allowed access to")
+          template.add("Read the list of applications you use")
         }
         if (scope == USER_CLIENTS_DELETE) {
-          template.add("Apps you’ve removed access to")
+          template.add("Remove access to applications you use")
         }
       }
       return template

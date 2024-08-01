@@ -144,11 +144,15 @@ class UserApprovedClientService(
           INVALID_REQUEST_MSG,
         )
       }
+      var logoUri: String? = null
+      if (!client.logoUri.isNullOrEmpty()) {
+        logoUri = client.logoUri
+      }
       clients.add(
         UserApprovedClientDto(
           client.id,
           client.name,
-          client.logoUri,
+          logoUri,
           client.description,
           client.autoApprove,
           userApprovedClient.createdDate,
@@ -167,12 +171,14 @@ class UserApprovedClientService(
   private fun convertScopes(scopes: Set<Scope>): List<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope> {
     val scopeDto = ArrayList<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope>()
     scopes.forEach { scope ->
-      scopeDto.add(
-        uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(
-          scope.toString(),
-          Scope.getTemplateTextByScopes(setOf(scope)).first(),
-        ),
-      )
+      if (scope != Scope.USER_BOOKING_READ) {
+        scopeDto.add(
+          uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(
+            scope.toString(),
+            Scope.getTemplateTextByScopes(setOf(scope)).first(),
+          ),
+        )
+      }
     }
     return scopeDto
   }
