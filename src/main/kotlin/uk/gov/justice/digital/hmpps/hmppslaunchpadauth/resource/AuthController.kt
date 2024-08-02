@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_REQUEST_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.View
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
@@ -87,14 +88,18 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
         " Although optional, it is recommended. Max character length is 128.",
     )
     @RequestParam(required = false) nonce: String?,
-  ): View {
+  ): Any {
     validateResponseType(responseType, redirectUri, state)
     validateSize(state, "state", redirectUri, state)
     validateSize(nonce, "nonce", redirectUri, state)
     val scopes = Scope.removeAllowListScopesNotRequired(scope, allowListedScopes.split(","))
-    val url = ssoLoginService.initiateSsoLogin(clientId, responseType, scopes, redirectUri, state, nonce)
+    val urlOrView = ssoLoginService.initiateSsoLogin(clientId, responseType, scopes, redirectUri, state, nonce)
     logger.info("Sign in request sent to azure for client $clientId")
-    return View(url)
+    if (urlOrView is String) {
+      return View(urlOrView)
+    } else {
+      return urlOrView as ModelAndView
+    }
   }
 
   @Hidden

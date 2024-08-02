@@ -31,7 +31,7 @@ class ClientService(private var clientRepository: ClientRepository) {
     redirectUri: String,
     state: String?,
     nonce: String?,
-  ) {
+  ): Client {
     val client = clientRepository.findById(clientId).orElseThrow {
       val message = "Client with client_id $clientId does not exist"
       ApiException(message, HttpStatus.FORBIDDEN, ApiErrorTypes.ACCESS_DENIED.toString(), INVALID_CLIENT_ID_MSG)
@@ -40,6 +40,7 @@ class ClientService(private var clientRepository: ClientRepository) {
     validateScopes(scopes, client.scopes, redirectUri, state)
     validateResponseType(responseType, redirectUri, state)
     validateUri(redirectUri, client.registeredRedirectUris, state)
+    return client
   }
 
   private fun isEnabled(enabled: Boolean, redirectUri: String, state: String?) {
