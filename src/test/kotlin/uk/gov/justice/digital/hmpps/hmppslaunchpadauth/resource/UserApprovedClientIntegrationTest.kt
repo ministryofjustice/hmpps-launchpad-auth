@@ -127,7 +127,7 @@ class UserApprovedClientIntegrationTest(
     val pagedResult = response.body as PagedResult<UserApprovedClientDto>
     val userApprovedClientDtos = pagedResult.content
     val clientOne = userApprovedClientDtos[0]
-    val scopes = clientOne.scopes
+    val scopes: List<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope> = clientOne.scopes
     scopes.forEach { scope ->
       assertFalse(scope.type == Scope.USER_BOOKING_READ.toString())
     }

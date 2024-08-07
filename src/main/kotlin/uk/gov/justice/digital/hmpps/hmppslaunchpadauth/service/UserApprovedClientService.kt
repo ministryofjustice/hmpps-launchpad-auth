@@ -112,7 +112,8 @@ class UserApprovedClientService(
       pageResult.content.forEach { x ->
         if (!usersToBeDeleted.contains(x.userId)) {
           val usersApprovedClients = userApprovedClientRepository.findUserApprovedClientsByUserId(x.userId)
-          val filtered = usersApprovedClients.filter { userApprovedClient -> userApprovedClient.lastModifiedDate.isBefore(date) }
+          val filtered =
+            usersApprovedClients.filter { userApprovedClient -> userApprovedClient.lastModifiedDate.isBefore(date) }
           if (usersApprovedClients.size == filtered.size) {
             usersToBeDeleted.add(usersApprovedClients[0].userId)
             usersApprovedClients.forEach { userApprovedClient -> userApprovedClientsToBeDeleted.add(userApprovedClient.id) }
@@ -171,14 +172,12 @@ class UserApprovedClientService(
   private fun convertScopes(scopes: Set<Scope>): List<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope> {
     val scopeDto = ArrayList<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope>()
     scopes.forEach { scope ->
-      if (scope != Scope.USER_BOOKING_READ) {
-        scopeDto.add(
-          uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(
-            scope.toString(),
-            Scope.getTemplateTextByScopes(setOf(scope)).first(),
-          ),
-        )
-      }
+      scopeDto.add(
+        uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(
+          scope.toString(),
+          Scope.getTemplateTextByScopes(setOf(scope)).first(),
+        ),
+      )
     }
     return scopeDto
   }
