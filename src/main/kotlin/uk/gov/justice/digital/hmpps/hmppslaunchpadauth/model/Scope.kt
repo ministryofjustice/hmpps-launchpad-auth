@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model
 
-import java.lang.IllegalArgumentException
-
 enum class Scope(val scope: String) {
   USER_BASIC_READ("user.basic.read"),
   USER_ESTABLISHMENT_READ("user.establishment.read"),
@@ -51,6 +49,51 @@ enum class Scope(val scope: String) {
         }
       }
       return template
+    }
+
+    fun getScopeDtosByScopes(scopes: Set<Scope>): List<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope> {
+      val scopeDtos = ArrayList<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope>()
+      if (scopes.contains(USER_BASIC_READ)) {
+        scopeDtos.add(
+          uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(
+            Scope.USER_BASIC_READ.toString(),
+            "Read basic information like your name",
+          ),
+        )
+      }
+      if (scopes.contains(USER_BOOKING_READ)) {
+        scopeDtos.add(
+          uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(
+            Scope.USER_BOOKING_READ.toString(),
+            null,
+          ),
+        )
+      }
+      if (scopes.contains(USER_ESTABLISHMENT_READ)) {
+        scopeDtos.add(
+          uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(
+            Scope.USER_ESTABLISHMENT_READ.toString(),
+            "Read prison information like the name of your prison",
+          ),
+        )
+      }
+      if (scopes.contains(USER_CLIENTS_READ)) {
+        scopeDtos.add(
+          uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(
+            Scope.USER_CLIENTS_READ.toString(),
+            "Read the list of applications you use",
+          ),
+        )
+      }
+      if (scopes.contains(USER_CLIENTS_DELETE)) {
+        scopeDtos.add(
+          uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(
+            Scope.USER_CLIENTS_DELETE.toString(),
+            "Remove access to applications you use",
+          ),
+        )
+      }
+      return scopeDtos
     }
 
     fun cleanScopes(scopes: String): Set<String> {
