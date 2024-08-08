@@ -56,7 +56,7 @@ enum class Scope(val scope: String) {
       if (scopes.contains(USER_BASIC_READ)) {
         scopeDtos.add(
           uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(
-            Scope.USER_BASIC_READ.toString(),
+            USER_BASIC_READ.toString(),
             "Read basic information like your name",
           ),
         )
@@ -64,7 +64,7 @@ enum class Scope(val scope: String) {
       if (scopes.contains(USER_BOOKING_READ)) {
         scopeDtos.add(
           uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(
-            Scope.USER_BOOKING_READ.toString(),
+            USER_BOOKING_READ.toString(),
             null,
           ),
         )
@@ -72,7 +72,7 @@ enum class Scope(val scope: String) {
       if (scopes.contains(USER_ESTABLISHMENT_READ)) {
         scopeDtos.add(
           uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(
-            Scope.USER_ESTABLISHMENT_READ.toString(),
+            USER_ESTABLISHMENT_READ.toString(),
             "Read prison information like the name of your prison",
           ),
         )
@@ -80,7 +80,7 @@ enum class Scope(val scope: String) {
       if (scopes.contains(USER_CLIENTS_READ)) {
         scopeDtos.add(
           uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(
-            Scope.USER_CLIENTS_READ.toString(),
+            USER_CLIENTS_READ.toString(),
             "Read the list of applications you use",
           ),
         )
@@ -88,7 +88,7 @@ enum class Scope(val scope: String) {
       if (scopes.contains(USER_CLIENTS_DELETE)) {
         scopeDtos.add(
           uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(
-            Scope.USER_CLIENTS_DELETE.toString(),
+            USER_CLIENTS_DELETE.toString(),
             "Remove access to applications you use",
           ),
         )
