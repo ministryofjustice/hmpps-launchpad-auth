@@ -33,7 +33,8 @@ class ScopeTest {
     val textSet = Scope.getTemplateTextByScopes(
       setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_READ, Scope.USER_CLIENTS_DELETE),
     )
-    assertEquals(4, textSet.size)
+    assertEquals(5, textSet.size)
+    assertTrue(textSet.contains(null))
     assertTrue(textSet.contains("Read basic information like your name"))
     assertTrue(textSet.contains("Read prison information like the name of your prison"))
     assertTrue(textSet.contains("Read the list of applications you use"))
