@@ -118,22 +118,9 @@ class UserApprovedClientController(
   ): ResponseEntity<Void> {
     val authenticationInfo = authentication.authenticate(authorization) as AuthenticationUserInfo
     validateUserId(userId, authenticationInfo.userId)
-    validateClientId(clientId, authenticationInfo.clientId)
     validateScope(Scope.USER_CLIENTS_DELETE, authenticationInfo.userApprovedScope)
     userApprovedClientService.revokeClientAccess(userId, clientId)
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-  }
-
-  private fun validateClientId(clientId: UUID, clientIdFromToken: UUID) {
-    if (!clientId.equals(clientIdFromToken)) {
-      val message = "Client id $clientId in api path do not match with client id $clientIdFromToken in token"
-      throw ApiException(
-        message,
-        HttpStatus.BAD_REQUEST,
-        ApiErrorTypes.INVALID_REQUEST.toString(),
-        INVALID_CLIENT_ID_MSG,
-      )
-    }
   }
 
   private fun validateUserId(userId: String, userIdFromToken: String) {
