@@ -75,7 +75,7 @@ class SsoRequestService(
       UUID.randomUUID(),
       UUID.randomUUID(),
       LocalDateTime.now(ZoneOffset.UTC),
-      UUID.randomUUID(),
+      authorizationCode,
       SsoClient(
         clientId,
         state,
