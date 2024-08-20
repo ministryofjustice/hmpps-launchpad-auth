@@ -29,8 +29,8 @@ class ServiceAccessEndpoint(private var sarService: SarService) {
         "personReferenceNumber and caseReferenceNumber, both cannot be null",
         HttpStatus.BAD_REQUEST,
         "Bad Request",
-        "personReferenceNumber and caseReferenceNumber, both cannot be null"
-        )
+        "personReferenceNumber and caseReferenceNumber, both cannot be null",
+      )
     }
     if (personReferenceNumber != null) {
       userid = personReferenceNumber
