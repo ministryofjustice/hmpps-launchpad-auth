@@ -24,22 +24,22 @@ class SarService(
   ): List<UserApprovedClientDto> {
     var userApprovedClients: List<UserApprovedClient>
     if (fromDate != null && toDate == null) {
-      userApprovedClients = userApprovedClientRepository.findUserApprovedClientsByUserIdAndCreatedDateGreaterThanEqual(
+      userApprovedClients = userApprovedClientRepository.findUserApprovedClientsByUserIdAndCreatedDateIsGreaterThanEqual(
         userId,
         fromDate.atStartOfDay(),
       )
     } else if (fromDate == null && toDate != null) {
       userApprovedClients =
-        userApprovedClientRepository.findUserApprovedClientsByUserIdAndLastModifiedDateGreaterThanEqual(
+        userApprovedClientRepository.findUserApprovedClientsByUserIdAndLastModifiedDateIsLessThanEqual(
           userId,
-          toDate.atStartOfDay(),
+          toDate.plusDays(1).atStartOfDay(),
         )
     } else if (fromDate != null && toDate != null) {
       userApprovedClients =
-        userApprovedClientRepository.findUserApprovedClientsByUserIdAndCreatedDateGreaterThanEqualAndLastModifiedDateLessThanEqual(
+        userApprovedClientRepository.findUserApprovedClientsByUserIdAndCreatedDateIsGreaterThanEqualAndLastModifiedDateIsLessThanEqual(
           userId,
           fromDate.atStartOfDay(),
-          toDate.atStartOfDay(),
+          toDate.plusDays(1).atStartOfDay(),
         )
     } else {
       userApprovedClients = userApprovedClientRepository.findUserApprovedClientsByUserId(userId)
