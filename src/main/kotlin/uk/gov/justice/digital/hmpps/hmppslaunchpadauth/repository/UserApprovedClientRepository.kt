@@ -23,4 +23,10 @@ interface UserApprovedClientRepository : JpaRepository<UserApprovedClient, UUID>
   fun findUserApprovedClientsByLastModifiedDateIsLessThan(date: LocalDateTime, pageable: Pageable): Page<UserApprovedClient>
 
   fun findUserApprovedClientsByUserId(userId: String): List<UserApprovedClient>
+
+  fun findUserApprovedClientsByUserIdAndCreatedDateGreaterThanEqual(userId: String, createdDate: LocalDateTime): List<UserApprovedClient>
+
+  fun findUserApprovedClientsByUserIdAndLastModifiedDateGreaterThanEqual(userId: String, lastModifiedDate: LocalDateTime): List<UserApprovedClient>
+
+  fun findUserApprovedClientsByUserIdAndCreatedDateGreaterThanEqualAndLastModifiedDateLessThanEqual(userId: String, createdDate: LocalDateTime, lastModifiedDate: LocalDateTime): List<UserApprovedClient>
 }
