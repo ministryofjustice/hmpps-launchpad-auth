@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
@@ -39,7 +40,9 @@ class UserApprovedClientService(
       userApprovedClient.userId,
       userApprovedClient.clientId,
     )
-    return userApprovedClientRepository.save(userApprovedClient)
+    val scopes = ObjectMapper().writeValueAsString(userApprovedClient.scopes)
+    userApprovedClientRepository.upsertUserApprovedClient(userApprovedClient.id, userApprovedClient.createdDate, userApprovedClient.lastModifiedDate, userApprovedClient.clientId, userApprovedClient.userId, scopes)
+    return userApprovedClientRepository.findUserApprovedClientByUserIdAndClientId(userApprovedClient.userId, userApprovedClient.clientId).get()
   }
 
   fun getUserApprovedClientById(id: UUID): Optional<UserApprovedClient> {
