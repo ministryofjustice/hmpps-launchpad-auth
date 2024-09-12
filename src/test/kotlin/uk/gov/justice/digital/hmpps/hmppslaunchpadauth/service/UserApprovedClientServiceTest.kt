@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -51,7 +52,8 @@ class UserApprovedClientServiceTest {
       dateAndTimeInUTC,
       dateAndTimeInUTC,
     )
-    Mockito.`when`(userApprovedClientRepository.save(expected)).thenReturn(expected)
+    Mockito.doNothing().`when`(userApprovedClientRepository).upsertUserApprovedClient(expected.id, expected.createdDate, expected.lastModifiedDate, expected.clientId, expected.userId, ObjectMapper().writeValueAsString(expected.scopes))
+    Mockito.`when`(userApprovedClientRepository.findUserApprovedClientByUserIdAndClientId(expected.userId, expected.clientId)).thenReturn(Optional.of(expected))
     val result = userApprovedClientService.upsertUserApprovedClient(expected)
     assertUserApprovedClient(expected, result)
   }
@@ -67,7 +69,8 @@ class UserApprovedClientServiceTest {
     )
     expected.scopes = setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_DELETE)
     expected.lastModifiedDate = LocalDateTime.now(ZoneOffset.UTC)
-    Mockito.`when`(userApprovedClientRepository.save(expected)).thenReturn(expected)
+    Mockito.doNothing().`when`(userApprovedClientRepository).upsertUserApprovedClient(expected.id, expected.createdDate, expected.lastModifiedDate, expected.clientId, expected.userId, ObjectMapper().writeValueAsString(expected.scopes))
+    Mockito.`when`(userApprovedClientRepository.findUserApprovedClientByUserIdAndClientId(expected.userId, expected.clientId)).thenReturn(Optional.of(expected))
     val result = userApprovedClientService.upsertUserApprovedClient(expected)
     assertEquals(expected, result)
   }

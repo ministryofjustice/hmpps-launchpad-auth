@@ -30,7 +30,7 @@ dependencies {
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.boot:spring-boot-starter-webflux")
-  testImplementation("com.h2database:h2:2.0.204")
+  testImplementation("com.h2database:h2:2.3.232")
   testImplementation("org.wiremock:wiremock-standalone:3.3.1")
 }
 
