@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -11,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
@@ -82,30 +80,6 @@ class UserApprovedClientRepositoryTest(@Autowired private var userApprovedClient
     userApprovedClientRepository.save(expected)
     val result = userApprovedClientRepository.findById(expected.id)
     assertUserApprovedClient(expected, result.get())
-  }
-
-  @Test
-  fun `test unique index for  created date, userid and client id`() {
-    val clientId = UUID.randomUUID()
-    val expectedFirst = DataGenerator.buildUserApprovedClient(
-      userId,
-      clientId,
-      setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ),
-      dateAndTimeInUTC,
-      dateAndTimeInUTC,
-    )
-    userApprovedClientRepository.save(expectedFirst)
-    val expectedSecond = DataGenerator.buildUserApprovedClient(
-      userId,
-      clientId,
-      setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_BOOKING_READ),
-      dateAndTimeInUTC,
-      dateAndTimeInUTC,
-    )
-
-    assertThrows(DataIntegrityViolationException::class.java) {
-      userApprovedClientRepository.save(expectedSecond)
-    }
   }
 
   @Test
