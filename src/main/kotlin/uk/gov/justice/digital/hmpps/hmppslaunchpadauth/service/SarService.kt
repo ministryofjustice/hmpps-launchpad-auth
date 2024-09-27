@@ -9,15 +9,17 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedClientRepository
+import uk.gov.justice.hmpps.kotlin.sar.HmppsPrisonSubjectAccessRequestService
+import uk.gov.justice.hmpps.kotlin.sar.HmppsSubjectAccessRequestContent
 import java.time.LocalDate
 
 @Service
 class SarService(
   private var userApprovedClientRepository: UserApprovedClientRepository,
   private var clientService: ClientService,
-) {
+): HmppsPrisonSubjectAccessRequestService {
 
-  fun getUsers(
+  private fun getUsers(
     userId: String,
     fromDate: LocalDate?,
     toDate: LocalDate?,
@@ -82,5 +84,14 @@ class SarService(
 
   private fun convertScopes(scopes: Set<Scope>): List<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope> {
     return Scope.getScopeDtosByScopes(scopes)
+  }
+
+  override fun getPrisonContentFor(
+    prn: String,
+    fromDate: LocalDate?,
+    toDate: LocalDate?,
+  ): HmppsSubjectAccessRequestContent? {
+    val users = getUsers(prn, fromDate, toDate)
+    return HmppsSubjectAccessRequestContent(users)
   }
 }

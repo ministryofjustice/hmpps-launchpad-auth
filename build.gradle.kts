@@ -26,6 +26,8 @@ dependencies {
     exclude(group = "org.yaml", module = "snakeyaml")
   }
 
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.0.7")
+
   runtimeOnly("org.flywaydb:flyway-database-postgresql:10.16.0")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")

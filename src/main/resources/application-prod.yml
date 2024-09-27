@@ -8,3 +8,13 @@ hmpps:
     url: https://sign-in.hmpps.service.justice.gov.uk
   prison-api:
     url: https://prison-api.prison.service.justice.gov.uk
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://sign-in.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json
+      client:
+        provider:
+          hmpps-auth:
+            token-uri: https://sign-in.hmpps.service.justice.gov.uk/auth/oauth/token
