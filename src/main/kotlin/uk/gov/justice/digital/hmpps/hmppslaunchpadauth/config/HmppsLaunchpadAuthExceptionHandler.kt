@@ -123,7 +123,6 @@ class HmppsLaunchpadAuthExceptionHandler {
         )
     }
     log.error("Unexpected exception {}", e.message)
-    log.error(" exception trace {}", e.printStackTrace())
     return ResponseEntity
       .status(HttpStatus.INTERNAL_SERVER_ERROR)
       .body(

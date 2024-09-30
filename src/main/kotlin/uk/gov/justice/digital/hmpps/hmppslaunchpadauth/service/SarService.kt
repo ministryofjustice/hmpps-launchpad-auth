@@ -12,41 +12,43 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedCl
 import uk.gov.justice.hmpps.kotlin.sar.HmppsPrisonSubjectAccessRequestService
 import uk.gov.justice.hmpps.kotlin.sar.HmppsSubjectAccessRequestContent
 import java.time.LocalDate
+import java.time.chrono.ChronoLocalDateTime
 
 @Service
 class SarService(
   private var userApprovedClientRepository: UserApprovedClientRepository,
   private var clientService: ClientService,
-): HmppsPrisonSubjectAccessRequestService {
+) : HmppsPrisonSubjectAccessRequestService {
 
   private fun getUsers(
     userId: String,
     fromDate: LocalDate?,
     toDate: LocalDate?,
   ): List<UserApprovedClientDto> {
-    var userApprovedClients: List<UserApprovedClient>
-    if (fromDate != null && toDate == null) {
-      userApprovedClients = userApprovedClientRepository.findUserApprovedClientsByUserIdAndCreatedDateIsGreaterThanEqual(
-        userId,
-        fromDate.atStartOfDay(),
-      )
-    } else if (fromDate == null && toDate != null) {
-      userApprovedClients =
-        userApprovedClientRepository.findUserApprovedClientsByUserIdAndLastModifiedDateIsLessThanEqual(
-          userId,
-          toDate.plusDays(1).atStartOfDay(),
-        )
-    } else if (fromDate != null && toDate != null) {
-      userApprovedClients =
-        userApprovedClientRepository.findUserApprovedClientsByUserIdAndCreatedDateIsGreaterThanEqualAndLastModifiedDateIsLessThanEqual(
-          userId,
-          fromDate.atStartOfDay(),
-          toDate.plusDays(1).atStartOfDay(),
-        )
-    } else {
-      userApprovedClients = userApprovedClientRepository.findUserApprovedClientsByUserId(userId)
+    var sarContent = ArrayList<UserApprovedClient>()
+    var userApprovedClients: List<UserApprovedClient> =
+      userApprovedClientRepository.findUserApprovedClientsByUserId(userId)
+    userApprovedClients.forEach { userApprovedClient ->
+      if (fromDate != null && toDate == null) {
+        if (userApprovedClient.createdDate.isAfter(ChronoLocalDateTime.from(fromDate.atStartOfDay()))) {
+          sarContent.add(userApprovedClient)
+        }
+      } else if (fromDate == null && toDate != null) {
+        if (userApprovedClient.lastModifiedDate.isBefore(ChronoLocalDateTime.from(toDate.atStartOfDay()))) {
+          sarContent.add(userApprovedClient)
+        }
+      } else if (fromDate != null && toDate != null) {
+        if (
+          !userApprovedClient.createdDate.isAfter(ChronoLocalDateTime.from(fromDate.atStartOfDay())) &&
+          !userApprovedClient.lastModifiedDate.isBefore(ChronoLocalDateTime.from(toDate.atStartOfDay()))
+        ) {
+          sarContent.add(userApprovedClient)
+        }
+      } else {
+        sarContent.add(userApprovedClient)
+      }
     }
-    return getUserApprovedClientsDto(userApprovedClients)
+    return getUserApprovedClientsDto(sarContent)
   }
 
   private fun getUserApprovedClientsDto(

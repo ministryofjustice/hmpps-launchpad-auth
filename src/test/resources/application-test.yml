@@ -15,6 +15,8 @@ launchpad:
     kid: 83e8f409-deb9-4fde-b036-8bd2bc8a414d
     iss-url: https://launchpad-auth-dev.hmpps.service.justice.gov.uk
 hmpps:
+  test:
+    jwt-helper-enabled: false
   auth:
     url: http://localhost:8085
     username: anything
@@ -43,6 +45,15 @@ spring:
     driver-class-name: org.h2.Driver
   flyway:
     enabled: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://sign-in-dev.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json
+      client:
+        provider:
+          hmpps-auth:
+            token-uri: https://sign-in-dev.hmpps.service.justice.gov.uk/auth/oauth/token
 
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"

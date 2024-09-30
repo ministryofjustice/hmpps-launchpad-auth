@@ -2,16 +2,13 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import uk.gov.justice.hmpps.kotlin.auth.dsl.ResourceServerConfigurationCustomizer
+import org.springframework.security.config.annotation.web.builders.WebSecurity
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer
 
 @Configuration
 class SecurityConfig {
   @Bean
-  fun resourceServerCustomizer() = ResourceServerConfigurationCustomizer {
-    unauthorizedRequestPaths {
-      addPaths = setOf(
-        "/v1/**",
-      )
-    }
+  fun webSecurityCustomizer(): WebSecurityCustomizer? {
+    return WebSecurityCustomizer { web: WebSecurity -> web.ignoring().requestMatchers("/v1/**") }
   }
 }
