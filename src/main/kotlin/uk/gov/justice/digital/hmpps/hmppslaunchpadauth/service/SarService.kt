@@ -25,9 +25,9 @@ class SarService(
     fromDate: LocalDate?,
     toDate: LocalDate?,
   ): List<SarContentDto> {
-    var userApprovedClients: List<UserApprovedClient> =
+    val userApprovedClients: List<UserApprovedClient> =
       userApprovedClientRepository.findUserApprovedClientsByUserId(userId)
-    var sarContent = userApprovedClients.stream().filter { userApprovedClient ->
+    val sarContent = userApprovedClients.stream().filter { userApprovedClient ->
       (fromDate == null || fromDate.atStartOfDay() <= userApprovedClient.lastModifiedDate) &&
         (toDate == null || toDate.atStartOfDay() >= userApprovedClient.lastModifiedDate)
     }.toList()
