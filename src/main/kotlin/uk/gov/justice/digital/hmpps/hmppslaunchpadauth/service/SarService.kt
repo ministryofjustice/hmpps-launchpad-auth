@@ -48,10 +48,6 @@ class SarService(
           AuthServiceConstant.INVALID_REQUEST_MSG,
         )
       }
-      var logoUri: String? = null
-      if (!client.logoUri.isNullOrEmpty()) {
-        logoUri = client.logoUri
-      }
       sarContentDtos.add(
         SarContentDto(
           client.id,
