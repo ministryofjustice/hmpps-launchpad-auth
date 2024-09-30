@@ -34,7 +34,6 @@ dependencies {
   testImplementation("org.springframework.boot:spring-boot-starter-webflux")
   testImplementation("com.h2database:h2:2.0.204")
   testImplementation("org.wiremock:wiremock-standalone:3.3.1")
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.0.7")
 }
 
 java {

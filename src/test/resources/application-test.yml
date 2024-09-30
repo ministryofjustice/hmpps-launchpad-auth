@@ -15,8 +15,6 @@ launchpad:
     kid: 83e8f409-deb9-4fde-b036-8bd2bc8a414d
     iss-url: https://launchpad-auth-dev.hmpps.service.justice.gov.uk
 hmpps:
-  test:
-    jwt-helper-enabled: false
   auth:
     url: http://localhost:8085
     username: anything

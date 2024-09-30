@@ -3,7 +3,8 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.HumanReadable
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.SarContentDto
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
@@ -12,7 +13,6 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedCl
 import uk.gov.justice.hmpps.kotlin.sar.HmppsPrisonSubjectAccessRequestService
 import uk.gov.justice.hmpps.kotlin.sar.HmppsSubjectAccessRequestContent
 import java.time.LocalDate
-import java.time.chrono.ChronoLocalDateTime
 
 @Service
 class SarService(
@@ -24,37 +24,20 @@ class SarService(
     userId: String,
     fromDate: LocalDate?,
     toDate: LocalDate?,
-  ): List<UserApprovedClientDto> {
-    var sarContent = ArrayList<UserApprovedClient>()
+  ): List<SarContentDto> {
     var userApprovedClients: List<UserApprovedClient> =
       userApprovedClientRepository.findUserApprovedClientsByUserId(userId)
-    userApprovedClients.forEach { userApprovedClient ->
-      if (fromDate != null && toDate == null) {
-        if (userApprovedClient.createdDate.isAfter(ChronoLocalDateTime.from(fromDate.atStartOfDay()))) {
-          sarContent.add(userApprovedClient)
-        }
-      } else if (fromDate == null && toDate != null) {
-        if (userApprovedClient.lastModifiedDate.isBefore(ChronoLocalDateTime.from(toDate.atStartOfDay()))) {
-          sarContent.add(userApprovedClient)
-        }
-      } else if (fromDate != null && toDate != null) {
-        if (
-          !userApprovedClient.createdDate.isAfter(ChronoLocalDateTime.from(fromDate.atStartOfDay())) &&
-          !userApprovedClient.lastModifiedDate.isBefore(ChronoLocalDateTime.from(toDate.atStartOfDay()))
-        ) {
-          sarContent.add(userApprovedClient)
-        }
-      } else {
-        sarContent.add(userApprovedClient)
-      }
-    }
+    var sarContent = userApprovedClients.stream().filter { userApprovedClient ->
+      (fromDate == null || fromDate.atStartOfDay() <= userApprovedClient.lastModifiedDate) &&
+        (toDate == null || toDate.atStartOfDay() >= userApprovedClient.lastModifiedDate)
+    }.toList()
     return getUserApprovedClientsDto(sarContent)
   }
 
   private fun getUserApprovedClientsDto(
     userApprovedClients: List<UserApprovedClient>,
-  ): List<UserApprovedClientDto> {
-    val userApprovedClientDtos = ArrayList<UserApprovedClientDto>()
+  ): List<SarContentDto> {
+    val sarContentDtos = ArrayList<SarContentDto>()
     userApprovedClients.forEach { userApprovedClient ->
       val client = clientService.getClientById(userApprovedClient.clientId).orElseThrow {
         val message = "Client id ${userApprovedClient.clientId} not found"
@@ -69,23 +52,27 @@ class SarService(
       if (!client.logoUri.isNullOrEmpty()) {
         logoUri = client.logoUri
       }
-      userApprovedClientDtos.add(
-        UserApprovedClientDto(
+      sarContentDtos.add(
+        SarContentDto(
           client.id,
           client.name,
-          logoUri,
-          client.description,
-          client.autoApprove,
           userApprovedClient.createdDate,
+          userApprovedClient.lastModifiedDate,
           convertScopes(userApprovedClient.scopes),
         ),
       )
     }
-    return userApprovedClientDtos
+    return sarContentDtos
   }
 
-  private fun convertScopes(scopes: Set<Scope>): List<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope> {
-    return Scope.getScopeDtosByScopes(scopes)
+  private fun convertScopes(scopes: Set<Scope>): List<HumanReadable> {
+    val humanReadables = ArrayList<HumanReadable>()
+    Scope.getTemplateTextByScopes(scopes).forEach { scope ->
+      if (!scope.isNullOrEmpty()) {
+        humanReadables.add(HumanReadable(scope))
+      }
+    }
+    return humanReadables
   }
 
   override fun getPrisonContentFor(
