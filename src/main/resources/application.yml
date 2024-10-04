@@ -103,6 +103,11 @@ launchpad:
       name: chelmsford
       displayName: HMP Chelmsford
       youth: false
+     CFI:
+       agencyId: CFI
+       name: cardiff
+       displayName: HMP Cardiff
+       youth: false
      CKI:
       agencyId: CKI
       name: cookhamwood
