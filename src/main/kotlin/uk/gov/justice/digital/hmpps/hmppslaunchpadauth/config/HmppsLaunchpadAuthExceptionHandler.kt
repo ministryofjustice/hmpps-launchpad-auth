@@ -24,7 +24,7 @@ class HmppsLaunchpadAuthExceptionHandler {
 
   @ExceptionHandler(ApiException::class)
   fun handleApiException(e: ApiException): ResponseEntity<ApiError> {
-    log.error("Api Exception: {}", e.message)
+    log.error("Api Exception: {} {}", e.message, e.cause)
     return ResponseEntity
       .status(e.code)
       .body(
@@ -37,7 +37,7 @@ class HmppsLaunchpadAuthExceptionHandler {
 
   @ExceptionHandler(SsoException::class)
   fun handleSingleSignOnException(e: SsoException): RedirectView {
-    log.error("Single sign on exception: {}", e.message)
+    log.error("Single sign on exception: {} {}", e.message, e.cause)
     val url = UriComponentsBuilder.fromHttpUrl(e.redirectUri)
       .queryParam("error", e.error)
       .queryParam("error_description", e.errorDescription)
@@ -122,7 +122,7 @@ class HmppsLaunchpadAuthExceptionHandler {
           ),
         )
     }
-    log.error("Unexpected exception {}", e.message)
+    log.error("Unexpected exception {} {}", e.message, e.cause)
     return ResponseEntity
       .status(HttpStatus.INTERNAL_SERVER_ERROR)
       .body(
