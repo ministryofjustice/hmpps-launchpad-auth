@@ -77,6 +77,9 @@ class SarService(
     toDate: LocalDate?,
   ): HmppsSubjectAccessRequestContent? {
     val users = getUsers(prn, fromDate, toDate)
+    if (users.size == 0) {
+      return null
+    }
     return HmppsSubjectAccessRequestContent(users)
   }
 }

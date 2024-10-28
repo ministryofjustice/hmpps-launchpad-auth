@@ -4,6 +4,7 @@ import jakarta.servlet.ServletException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MissingRequestHeaderException
@@ -121,6 +122,10 @@ class HmppsLaunchpadAuthExceptionHandler {
             errorDescription = "${e.message}",
           ),
         )
+    }
+    if (e is AuthorizationDeniedException) {
+      log.error("Access Denied due to invalid authorization {}", e.message)
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
     }
     log.error("Unexpected exception {}", e.message)
     return ResponseEntity
