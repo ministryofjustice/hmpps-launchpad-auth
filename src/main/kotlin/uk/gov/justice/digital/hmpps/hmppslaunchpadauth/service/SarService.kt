@@ -20,7 +20,7 @@ class SarService(
   private var clientService: ClientService,
 ) : HmppsPrisonSubjectAccessRequestService {
 
-  private fun getUsers(
+  private fun getUserApprovedClients(
     userId: String,
     fromDate: LocalDate?,
     toDate: LocalDate?,
@@ -76,8 +76,8 @@ class SarService(
     fromDate: LocalDate?,
     toDate: LocalDate?,
   ): HmppsSubjectAccessRequestContent? {
-    val users = getUsers(prn, fromDate, toDate)
-    if (users.size == 0) {
+    val users = getUserApprovedClients(prn, fromDate, toDate)
+    if (users.isEmpty()) {
       return null
     }
     return HmppsSubjectAccessRequestContent(users)
