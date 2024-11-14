@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  hmpps: ministryofjustice/hmpps@7
+  hmpps: ministryofjustice/hmpps@10
   slack: circleci/slack@4.12.5
 
 parameters:
@@ -55,6 +55,8 @@ workflows:
           env: "dev"
           jira_update: true
           context: hmpps-common-vars
+          pipeline_id: <<pipeline.id>>
+          pipeline_number: <<pipeline.number>>
           filters:
             branches:
               only:
@@ -73,6 +75,8 @@ workflows:
           env: "preprod"
           jira_update: true
           jira_env_type: staging
+          pipeline_id: <<pipeline.id>>
+          pipeline_number: <<pipeline.number>>
           context:
             - hmpps-common-vars
             - hmpps-launchpad-preprod
@@ -90,6 +94,8 @@ workflows:
           jira_env_type: production
           slack_notification: true
           slack_channel_name: launchpad-alerts
+          pipeline_id: <<pipeline.id>>
+          pipeline_number: <<pipeline.number>>
           context:
             - hmpps-common-vars
             - hmpps-launchpad-prod
