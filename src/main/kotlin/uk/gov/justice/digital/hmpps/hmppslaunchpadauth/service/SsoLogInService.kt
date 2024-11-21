@@ -114,9 +114,7 @@ class SsoLogInService(
     }
     var approvalRequired = false
     if (token != null) {
-      // if (token != null) {
       ssoRequest = updateSsoRequestWithUserId(token, ssoRequest)
-      // }
       if (client.autoApprove) {
         createOrUpdateUserApprovedClient(ssoRequest, true)
         logger.info("Successful sso login for client {} and user id {}", ssoRequest.client.id, ssoRequest.userId)
