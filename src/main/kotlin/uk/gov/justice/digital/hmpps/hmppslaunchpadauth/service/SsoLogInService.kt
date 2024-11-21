@@ -59,7 +59,7 @@ class SsoLogInService(
     redirectUri: String,
     state: String?,
     nonce: String?,
-  ): String {
+  ): Any {
     logger.info(
       "Single sign on request received for client: {}, with response_type: {}, scopes: {}, redirect_uri: {}",
       clientId,
@@ -67,7 +67,7 @@ class SsoLogInService(
       scopes,
       redirectUri,
     )
-    clientService.validateParams(clientId, responseType, scopes, redirectUri, state, nonce)
+    val client = clientService.validateParams(clientId, responseType, scopes, redirectUri, state, nonce)
     val scopeSet = Scope.cleanScopes(scopes)
     val scopesEnums = getScopeEnumsFromValues(scopeSet)
     val ssoRequest = ssoRequestService.generateSsoRequest(
@@ -77,15 +77,21 @@ class SsoLogInService(
       redirectUri,
       clientId,
     )
-    return UriComponentsBuilder.fromHttpUrl(builtAzureOauth2Url())
-      .queryParam("response_type", "id_token")
-      .queryParam("client_id", launchpadClientId)
-      .queryParam("scope", UriUtils.encode("openid email profile", StandardCharsets.UTF_8))
-      .queryParam("state", ssoRequest.id)
-      .queryParam("nonce", ssoRequest.nonce)
-      .queryParam("response_mode", "form_post")
-      .queryParam("redirect_uri", UriUtils.encode(launchpadRedirectUrl, StandardCharsets.UTF_8))
-      .build(true).toUriString()
+    if (client.sandbox) {
+      ssoRequest.userId = "random_user"
+      ssoRequestService.updateSsoRequest(ssoRequest)
+      return updateSsoRequestSandboxClient(ssoRequest.id)
+    } else {
+      return UriComponentsBuilder.fromHttpUrl(builtAzureOauth2Url())
+        .queryParam("response_type", "id_token")
+        .queryParam("client_id", launchpadClientId)
+        .queryParam("scope", UriUtils.encode("openid email profile", StandardCharsets.UTF_8))
+        .queryParam("state", ssoRequest.id)
+        .queryParam("nonce", ssoRequest.nonce)
+        .queryParam("response_mode", "form_post")
+        .queryParam("redirect_uri", UriUtils.encode(launchpadRedirectUrl, StandardCharsets.UTF_8))
+        .build(true).toUriString()
+    }
   }
 
   fun updateSsoRequest(token: String?, state: UUID): Any {
@@ -130,6 +136,34 @@ class SsoLogInService(
     } else {
       logger.info("Successful sso login for client {} and user id {}", ssoRequest.client.id, ssoRequest.userId)
       return RedirectView(buildClientRedirectUrl(ssoRequest))
+    }
+  }
+
+  fun updateSsoRequestSandboxClient(state: UUID): Any {
+    logger.info("jwt token received from azure")
+    var ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {
+      val message = "State $state send on callback url do not exist"
+      ApiException(message, HttpStatus.FORBIDDEN, ApiErrorTypes.ACCESS_DENIED.toString(), ACCESS_DENIED_MSG)
+    }
+    val clientId = ssoRequest.client.id
+    val client = clientService.getClientById(clientId).orElseThrow {
+      val message = "Client $clientId of sso request do not exist"
+      SsoException(
+        message,
+        HttpStatus.FOUND,
+        ApiErrorTypes.INVALID_REQUEST.toString(),
+        INVALID_CLIENT_ID_MSG,
+        ssoRequest.client.redirectUri,
+        ssoRequest.client.state,
+      )
+    }
+    if (!client.autoApprove) {
+      createOrUpdateUserApprovedClient(ssoRequest, true)
+      return buildModelAndView(state, ssoRequest, client)
+    } else {
+      createOrUpdateUserApprovedClient(ssoRequest, false)
+      logger.info("Successful sso login for client {} and user id {}", ssoRequest.client.id, ssoRequest.userId)
+      return buildClientRedirectUrl(ssoRequest)
     }
   }
 

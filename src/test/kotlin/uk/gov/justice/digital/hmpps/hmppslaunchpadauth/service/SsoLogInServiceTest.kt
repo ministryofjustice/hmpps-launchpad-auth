@@ -102,14 +102,16 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
         ssoRequest.client.id,
       ),
     ).thenReturn(ssoRequest)
-    Mockito.doNothing().`when`(clientService).validateParams(
-      ssoRequest.client.id,
-      "code",
-      Scope.USER_BASIC_READ.toString(),
-      ssoRequest.client.redirectUri,
-      ssoRequest.id.toString(),
-      ssoRequest.client.nonce,
-    )
+    Mockito.`when`(
+      clientService.validateParams(
+        ssoRequest.client.id,
+        "code",
+        Scope.USER_BASIC_READ.toString(),
+        ssoRequest.client.redirectUri,
+        ssoRequest.id.toString(),
+        ssoRequest.client.nonce,
+      ),
+    ).thenReturn(client)
     val url = ssoLoginService.initiateSsoLogin(
       ssoRequest.client.id,
       "code",
@@ -118,7 +120,7 @@ class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInServic
       ssoRequest.id.toString(),
       ssoRequest.client.nonce,
     )
-    val result = URL(url)
+    val result = URL(url.toString())
     assertNotNull(result)
   }
 
