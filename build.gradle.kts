@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.8"
   kotlin("plugin.spring") version "2.0.0"
   kotlin("plugin.jpa") version "2.0.0"
 }
@@ -22,16 +22,17 @@ dependencies {
   implementation("org.flywaydb:flyway-core:10.16.0")
   implementation("org.postgresql:postgresql:42.7.3")
   implementation("org.ehcache:ehcache:3.10.8")
-  implementation("javax.cache:cache-api:1.1.1")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0") {
     exclude(group = "org.yaml", module = "snakeyaml")
   }
+
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.0.7")
 
   runtimeOnly("org.flywaydb:flyway-database-postgresql:10.16.0")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.boot:spring-boot-starter-webflux")
-  testImplementation("com.h2database:h2:2.0.204")
+  testImplementation("com.h2database:h2:2.3.232")
   testImplementation("org.wiremock:wiremock-standalone:3.3.1")
 }
 

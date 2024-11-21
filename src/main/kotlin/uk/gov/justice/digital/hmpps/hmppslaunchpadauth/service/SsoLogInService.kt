@@ -270,7 +270,7 @@ class SsoLogInService(
   private fun buildModelAndView(state: UUID, ssoRequest: SsoRequest, client: Client): ModelAndView {
     val modelAndView = ModelAndView("user_approval")
     modelAndView.addObject("state", state)
-    modelAndView.addObject("scopes", Scope.getTemplateTextByScopes(ssoRequest.client.scopes).sortedDescending())
+    modelAndView.addObject("scopes", Scope.getTemplateTextByScopes(ssoRequest.client.scopes))
     modelAndView.addObject("client", client)
     return modelAndView
   }

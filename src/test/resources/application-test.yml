@@ -43,6 +43,15 @@ spring:
     driver-class-name: org.h2.Driver
   flyway:
     enabled: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://sign-in-dev.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json
+      client:
+        provider:
+          hmpps-auth:
+            token-uri: https://sign-in-dev.hmpps.service.justice.gov.uk/auth/oauth/token
 
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"

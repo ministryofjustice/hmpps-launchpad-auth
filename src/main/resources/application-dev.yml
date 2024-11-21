@@ -13,5 +13,14 @@ hmpps:
     url: https://prison-api-dev.prison.service.justice.gov.uk
 
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://sign-in-dev.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json
+      client:
+        provider:
+          hmpps-auth:
+            token-uri: https://sign-in-dev.hmpps.service.justice.gov.uk/auth/oauth/token
   flyway:
     locations: classpath:db/migration/dev

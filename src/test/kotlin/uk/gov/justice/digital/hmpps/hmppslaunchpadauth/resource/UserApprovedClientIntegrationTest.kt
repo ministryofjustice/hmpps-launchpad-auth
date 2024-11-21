@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -126,6 +127,10 @@ class UserApprovedClientIntegrationTest(
     val pagedResult = response.body as PagedResult<UserApprovedClientDto>
     val userApprovedClientDtos = pagedResult.content
     val clientOne = userApprovedClientDtos[0]
+    val scopes: List<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope> = clientOne.scopes
+    scopes.forEach { scope ->
+      assertFalse(scope.type == Scope.USER_BOOKING_READ.toString())
+    }
     assertEquals(pagedResult.totalElements, 1)
     assertEquals(1, localDateTime.compareTo(dateTimeInUTC))
     assertEquals(dateTimeInUTC.format(dateTimeFormatter), clientOne.createdDate.format(dateTimeFormatter))

@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
@@ -39,7 +40,9 @@ class UserApprovedClientService(
       userApprovedClient.userId,
       userApprovedClient.clientId,
     )
-    return userApprovedClientRepository.save(userApprovedClient)
+    val scopes = ObjectMapper().writeValueAsString(userApprovedClient.scopes)
+    userApprovedClientRepository.upsertUserApprovedClient(userApprovedClient.id, userApprovedClient.createdDate, userApprovedClient.lastModifiedDate, userApprovedClient.clientId, userApprovedClient.userId, scopes)
+    return userApprovedClientRepository.findUserApprovedClientByUserIdAndClientId(userApprovedClient.userId, userApprovedClient.clientId).get()
   }
 
   fun getUserApprovedClientById(id: UUID): Optional<UserApprovedClient> {
@@ -112,7 +115,8 @@ class UserApprovedClientService(
       pageResult.content.forEach { x ->
         if (!usersToBeDeleted.contains(x.userId)) {
           val usersApprovedClients = userApprovedClientRepository.findUserApprovedClientsByUserId(x.userId)
-          val filtered = usersApprovedClients.filter { userApprovedClient -> userApprovedClient.lastModifiedDate.isBefore(date) }
+          val filtered =
+            usersApprovedClients.filter { userApprovedClient -> userApprovedClient.lastModifiedDate.isBefore(date) }
           if (usersApprovedClients.size == filtered.size) {
             usersToBeDeleted.add(usersApprovedClients[0].userId)
             usersApprovedClients.forEach { userApprovedClient -> userApprovedClientsToBeDeleted.add(userApprovedClient.id) }
@@ -144,11 +148,15 @@ class UserApprovedClientService(
           INVALID_REQUEST_MSG,
         )
       }
+      var logoUri: String? = null
+      if (!client.logoUri.isNullOrEmpty()) {
+        logoUri = client.logoUri
+      }
       clients.add(
         UserApprovedClientDto(
           client.id,
           client.name,
-          client.logoUri,
+          logoUri,
           client.description,
           client.autoApprove,
           userApprovedClient.createdDate,
@@ -165,15 +173,6 @@ class UserApprovedClientService(
   }
 
   private fun convertScopes(scopes: Set<Scope>): List<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope> {
-    val scopeDto = ArrayList<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope>()
-    scopes.forEach { scope ->
-      scopeDto.add(
-        uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope(
-          scope.toString(),
-          Scope.getTemplateTextByScopes(setOf(scope)).first(),
-        ),
-      )
-    }
-    return scopeDto
+    return Scope.getScopeDtosByScopes(scopes)
   }
 }
