@@ -87,7 +87,7 @@ launchpad:
     private-key: ${PRIVATE_KEY}
     public-key: ${PUBLIC_KEY}
     kid: ${KID}
-    sandbox-user: LaunchpadAuthTestUser
+    sandbox-user: LAUNCHPADAUTHTESTUSER
     agencies:
      BNI:
       agencyId: BNI
