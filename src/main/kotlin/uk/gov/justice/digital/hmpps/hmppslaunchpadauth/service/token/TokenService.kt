@@ -61,6 +61,9 @@ class TokenService(
   @Value("\${launchpad.auth.iss-url}")
   private lateinit var issuerUrl: String
 
+  @Value("\${launchpad.auth.sandbox-user}")
+  private lateinit var sandboxUser: String
+
   companion object {
     private val logger = LoggerFactory.getLogger(TokenService::class.java)
   }
@@ -162,7 +165,7 @@ class TokenService(
   ): Token {
     var prisonerData: UserClaims
     if (sandbox) {
-      prisonerData = SandboxSsoService.getThirdPartyTestUser()
+      prisonerData = SandboxSsoService.getThirdPartyTestUser(sandboxUser)
     } else {
       prisonerData = prisonerApiService.getPrisonerData(prisonerId)
     }

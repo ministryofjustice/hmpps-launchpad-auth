@@ -5,8 +5,8 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.priso
 
 class SandboxSsoService() {
   companion object {
-    fun getThirdPartyTestUser(): UserClaims {
-      val user = User("LaunchpadAuthTestUser", "John", "Smith")
+    fun getThirdPartyTestUser(userId: String): UserClaims {
+      val user = User(userId, "John", "Smith")
       return UserClaims(null, null, user)
     }
   }

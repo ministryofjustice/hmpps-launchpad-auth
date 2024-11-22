@@ -48,6 +48,9 @@ class SsoLogInService(
   @Value("\${azure.launchpad-redirectUri}")
   private lateinit var launchpadRedirectUrl: String
 
+  @Value("\${launchpad.auth.sandbox-user}")
+  private lateinit var sandboxUser: String
+
   companion object {
     private val logger = LoggerFactory.getLogger(SsoLogInService::class.java)
   }
@@ -78,7 +81,7 @@ class SsoLogInService(
       clientId,
     )
     if (client.sandbox) {
-      ssoRequest.userId = "random_user"
+      ssoRequest.userId = sandboxUser
       ssoRequestService.updateSsoRequest(ssoRequest)
       return updateSsoRequestSandboxClient(ssoRequest.id)
     } else {
@@ -140,7 +143,7 @@ class SsoLogInService(
   }
 
   fun updateSsoRequestSandboxClient(state: UUID): Any {
-    logger.info("jwt token received from azure")
+    logger.info("Third party sso integration test. Creating sandbox user.")
     var ssoRequest = ssoRequestService.getSsoRequestById(state).orElseThrow {
       val message = "State $state send on callback url do not exist"
       ApiException(message, HttpStatus.FORBIDDEN, ApiErrorTypes.ACCESS_DENIED.toString(), ACCESS_DENIED_MSG)
