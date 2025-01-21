@@ -63,6 +63,7 @@ generic-service:
       DB_ENDPOINT: "rds_instance_endpoint"
 
   allowlist:
+    unrestricted: "0.0.0.0/0"
     groups:
       - internal
 
