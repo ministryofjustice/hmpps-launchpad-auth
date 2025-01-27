@@ -10,7 +10,7 @@ parameters:
     default: launchpad-alerts-nonprod
   releases-slack-channel:
     type: string
-    default: launchpad-alerts
+    default: prisoner_facing_services_releases
 
 jobs:
   validate:
