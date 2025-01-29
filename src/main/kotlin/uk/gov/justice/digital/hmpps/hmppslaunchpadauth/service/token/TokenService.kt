@@ -165,7 +165,7 @@ class TokenService(
   ): Token {
     var prisonerData: UserClaims
     if (sandbox) {
-      prisonerData = SandboxSsoService.getThirdPartyTestUser(sandboxUser)
+      prisonerData = SandboxSsoService.getThirdPartyTestUser(sandboxUser, scopes)
     } else {
       prisonerData = prisonerApiService.getPrisonerData(prisonerId)
     }
