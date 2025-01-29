@@ -8,15 +8,15 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.priso
 class SandboxSsoService() {
   companion object {
     fun getThirdPartyTestUser(userId: String, scopes: Set<Scope>): UserClaims {
-      val user = User(userId, "John","Smith")
+      val user = User(userId, "John", "Smith")
       var establishment: Establishment? = null
       if (scopes.contains(Scope.USER_ESTABLISHMENT_READ)) {
         establishment = Establishment(
           "HTE",
           "Test Establishment",
           "HMP TestEstablishment",
-          false
-          )
+          false,
+        )
       }
       return UserClaims(null, establishment, user)
     }
