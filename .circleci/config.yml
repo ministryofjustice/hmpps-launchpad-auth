@@ -93,7 +93,7 @@ workflows:
           jira_update: true
           jira_env_type: production
           slack_notification: true
-          slack_channel_name: launchpad-alerts
+          slack_channel_name: << pipeline.parameters.releases-slack-channel >>
           pipeline_id: <<pipeline.id>>
           pipeline_number: <<pipeline.number>>
           context:
