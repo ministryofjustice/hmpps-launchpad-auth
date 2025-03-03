@@ -19,7 +19,7 @@ generic-service:
     SPRING_PROFILES_ACTIVE: "dev"
 
   allowlist:
-    nutrition-app-dev: 94.14.26.195
+    nutrition-app-dev: 151.230.203.104
     nutrition-app-dev-2: 94.12.242.130
     nutrition-app-staging: 3.10.88.156
     nutrition-app-dev-3: 51.19.33.88
