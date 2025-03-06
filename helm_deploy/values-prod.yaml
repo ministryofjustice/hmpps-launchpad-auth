@@ -16,6 +16,7 @@ generic-service:
   allowlist:
     nutrition-app-prod: 18.170.16.19
     nutrition-app-prod-1: 51.19.33.88
+    nutrition-app-prod-2: 151.230.203.104
     groups:
       - internal
       - prisons
