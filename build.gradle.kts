@@ -36,14 +36,12 @@ dependencies {
   testImplementation("org.wiremock:wiremock-standalone:3.3.1")
 }
 
-java {
-  toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+kotlin {
+  jvmToolchain(21)
 }
 
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-      jvmTarget = "21"
-    }
+    compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
   }
 }
