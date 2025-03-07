@@ -34,37 +34,33 @@ const val USER_ID = "G2320VD"
 class DataGenerator {
 
   companion object {
-    fun buildClient(enabled: Boolean, autoApprove: Boolean): Client {
-      return Client(
+    fun buildClient(enabled: Boolean, autoApprove: Boolean): Client = Client(
+      UUID.randomUUID(),
+      UUID.randomUUID().toString(),
+      setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ, Scope.USER_ESTABLISHMENT_READ),
+      setOf(AuthorizationGrantType.AUTHORIZATION_CODE, AuthorizationGrantType.REFRESH_TOKEN),
+      setOf(REDIRECT_URI),
+      enabled,
+      autoApprove,
+      "Test App",
+      LOGO_URI,
+      "Test App for test environment",
+    )
+
+    fun buildSsoRequest(): SsoRequest = SsoRequest(
+      UUID.randomUUID(),
+      UUID.randomUUID(),
+      LocalDateTime.now(ZoneOffset.UTC),
+      UUID.randomUUID(),
+      SsoClient(
         UUID.randomUUID(),
         UUID.randomUUID().toString(),
-        setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ, Scope.USER_ESTABLISHMENT_READ),
-        setOf(AuthorizationGrantType.AUTHORIZATION_CODE, AuthorizationGrantType.REFRESH_TOKEN),
-        setOf(REDIRECT_URI),
-        enabled,
-        autoApprove,
-        "Test App",
-        LOGO_URI,
-        "Test App for test environment",
-      )
-    }
-
-    fun buildSsoRequest(): SsoRequest {
-      return SsoRequest(
-        UUID.randomUUID(),
-        UUID.randomUUID(),
-        LocalDateTime.now(ZoneOffset.UTC),
-        UUID.randomUUID(),
-        SsoClient(
-          UUID.randomUUID(),
-          UUID.randomUUID().toString(),
-          UUID.randomUUID().toString(),
-          setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ),
-          "http://localhost:8080/test",
-        ),
-        "testuser@test.com",
-      )
-    }
+        UUID.randomUUID().toString(),
+        setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ),
+        "http://localhost:8080/test",
+      ),
+      "testuser@test.com",
+    )
 
     fun jwtBuilder(issue: Instant, exp: Instant, nonce: UUID, userId: String?, secret: String): String {
       val privateKey = getPrivateKey(secret)
@@ -95,16 +91,14 @@ class DataGenerator {
       scopes: Set<Scope>,
       createdDate: LocalDateTime,
       lastModifiedDate: LocalDateTime,
-    ): UserApprovedClient {
-      return UserApprovedClient(
-        UUID.randomUUID(),
-        userId,
-        clientId,
-        scopes,
-        createdDate,
-        lastModifiedDate,
-      )
-    }
+    ): UserApprovedClient = UserApprovedClient(
+      UUID.randomUUID(),
+      userId,
+      clientId,
+      scopes,
+      createdDate,
+      lastModifiedDate,
+    )
 
     /*fun createValidAccessToken() {
       val password = UUID.randomUUID().toString()

@@ -182,20 +182,16 @@ class SsoLogInService(
     return RedirectView(url)
   }
 
-  private fun buildClientRedirectUrl(ssoRequest: SsoRequest): String {
-    return UriComponentsBuilder.fromHttpUrl(ssoRequest.client.redirectUri)
-      .queryParam("code", ssoRequest.authorizationCode)
-      .queryParamIfPresent("state", Optional.ofNullable(getEncodedValue(ssoRequest.client.state)))
-      .build(true).toUriString()
-  }
+  private fun buildClientRedirectUrl(ssoRequest: SsoRequest): String = UriComponentsBuilder.fromHttpUrl(ssoRequest.client.redirectUri)
+    .queryParam("code", ssoRequest.authorizationCode)
+    .queryParamIfPresent("state", Optional.ofNullable(getEncodedValue(ssoRequest.client.state)))
+    .build(true).toUriString()
 
-  private fun buildClientRedirectUrlAccessForNotApproved(ssoRequest: SsoRequest): String {
-    return UriComponentsBuilder.fromHttpUrl(ssoRequest.client.redirectUri)
-      .queryParam("error", ApiErrorTypes.ACCESS_DENIED.toString())
-      .queryParam("error_description", ACCESS_DENIED_MSG)
-      .queryParamIfPresent("state", Optional.ofNullable(getEncodedValue(ssoRequest.client.state)))
-      .build(true).toUriString()
-  }
+  private fun buildClientRedirectUrlAccessForNotApproved(ssoRequest: SsoRequest): String = UriComponentsBuilder.fromHttpUrl(ssoRequest.client.redirectUri)
+    .queryParam("error", ApiErrorTypes.ACCESS_DENIED.toString())
+    .queryParam("error_description", ACCESS_DENIED_MSG)
+    .queryParamIfPresent("state", Optional.ofNullable(getEncodedValue(ssoRequest.client.state)))
+    .build(true).toUriString()
 
   private fun getEncodedValue(value: String?): String? {
     var encodedValue: String? = null
@@ -285,7 +281,5 @@ class SsoLogInService(
     }
   }
 
-  private fun builtAzureOauth2Url(): String {
-    return "$oauth2BaseUrl/$tenantId/$oauth2ApiPath"
-  }
+  private fun builtAzureOauth2Url(): String = "$oauth2BaseUrl/$tenantId/$oauth2ApiPath"
 }

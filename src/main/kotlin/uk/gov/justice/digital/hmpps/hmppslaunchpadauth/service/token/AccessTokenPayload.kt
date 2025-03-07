@@ -25,7 +25,5 @@ class AccessTokenPayload {
     clientId: UUID,
     scopes: Set<Scope>,
     validityInSeconds: Long,
-  ): LinkedHashMap<String, Any> {
-    return buildClaims(user, clientId, scopes, validityInSeconds)
-  }
+  ): LinkedHashMap<String, Any> = buildClaims(user, clientId, scopes, validityInSeconds)
 }

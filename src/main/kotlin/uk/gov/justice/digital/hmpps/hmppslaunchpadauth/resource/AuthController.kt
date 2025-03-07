@@ -107,9 +107,7 @@ class AuthController(private var ssoLoginService: SsoLogInService) {
   fun getAuthCode(
     @RequestParam("id_token", required = false) token: String?,
     @RequestParam state: UUID,
-  ): Any {
-    return ssoLoginService.updateSsoRequest(token, state)
-  }
+  ): Any = ssoLoginService.updateSsoRequest(token, state)
 
   @Hidden
   @PostMapping("/authorize-client", consumes = ["application/x-www-form-urlencoded"])

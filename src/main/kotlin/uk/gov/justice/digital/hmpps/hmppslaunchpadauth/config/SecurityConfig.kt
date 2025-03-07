@@ -8,7 +8,5 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @Configuration
 class SecurityConfig {
   @Bean
-  fun webSecurityCustomizer(): WebSecurityCustomizer? {
-    return WebSecurityCustomizer { web: WebSecurity -> web.ignoring().requestMatchers("/v1/**") }
-  }
+  fun webSecurityCustomizer(): WebSecurityCustomizer? = WebSecurityCustomizer { web: WebSecurity -> web.ignoring().requestMatchers("/v1/**") }
 }

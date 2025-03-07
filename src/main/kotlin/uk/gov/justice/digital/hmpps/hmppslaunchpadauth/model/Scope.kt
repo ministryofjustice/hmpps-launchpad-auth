@@ -7,9 +7,7 @@ enum class Scope(val scope: String) {
   USER_CLIENTS_READ("user.clients.read"),
   USER_CLIENTS_DELETE("user.clients.delete"), ;
 
-  override fun toString(): String {
-    return scope
-  }
+  override fun toString(): String = scope
 
   companion object {
     fun isStringMatchEnumValue(value: String, scopes: Set<Scope>): Boolean {

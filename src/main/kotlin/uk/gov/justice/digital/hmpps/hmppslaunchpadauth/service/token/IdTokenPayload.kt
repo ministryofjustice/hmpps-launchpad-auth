@@ -49,7 +49,5 @@ class IdTokenPayload {
     nonce: String?,
     issuerUrl: String,
     validityInSeconds: Long,
-  ): LinkedHashMap<String, Any> {
-    return buildClaims(booking, establishment, user, clientId, scopes, nonce, issuerUrl, validityInSeconds)
-  }
+  ): LinkedHashMap<String, Any> = buildClaims(booking, establishment, user, clientId, scopes, nonce, issuerUrl, validityInSeconds)
 }
