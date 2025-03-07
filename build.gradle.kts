@@ -36,8 +36,8 @@ dependencies {
   testImplementation("org.wiremock:wiremock-standalone:3.3.1")
 }
 
-kotlin {
-  jvmToolchain(21)
+java {
+  toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
 tasks {
