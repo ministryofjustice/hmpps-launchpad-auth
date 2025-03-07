@@ -5,7 +5,5 @@ import org.springframework.stereotype.Component
 @Component
 class UserIdValidator : Validator<String> {
 
-  override fun isValid(source: String): Boolean {
-    return "^[A-Z][0-9]{4}[A-Z]{2}$".toRegex().matches(source)
-  }
+  override fun isValid(source: String): Boolean = "^[A-Z][0-9]{4}[A-Z]{2}$".toRegex().matches(source)
 }

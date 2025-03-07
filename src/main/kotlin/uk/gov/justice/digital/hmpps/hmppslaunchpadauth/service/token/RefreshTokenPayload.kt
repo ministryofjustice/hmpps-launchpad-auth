@@ -28,7 +28,5 @@ class RefreshTokenPayload {
     clientId: UUID,
     scopes: Set<Scope>,
     validityInSeconds: Long,
-  ): LinkedHashMap<String, Any> {
-    return buildClaims(accessTokenId, user, clientId, scopes, validityInSeconds)
-  }
+  ): LinkedHashMap<String, Any> = buildClaims(accessTokenId, user, clientId, scopes, validityInSeconds)
 }

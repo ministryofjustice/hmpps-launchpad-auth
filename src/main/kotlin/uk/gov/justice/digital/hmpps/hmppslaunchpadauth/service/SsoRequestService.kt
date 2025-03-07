@@ -88,9 +88,7 @@ class SsoRequestService(
     return createSsoRequest(ssoRequest)
   }
 
-  fun getSsoRequestByAuthorizationCode(code: UUID): Optional<SsoRequest> {
-    return ssoRequestRepository.findSsoRequestByAuthorizationCode(code)
-  }
+  fun getSsoRequestByAuthorizationCode(code: UUID): Optional<SsoRequest> = ssoRequestRepository.findSsoRequestByAuthorizationCode(code)
 
   fun deleteOldSsoRequests() {
     logger.info("Delete SSO requests older than 10 minutes")

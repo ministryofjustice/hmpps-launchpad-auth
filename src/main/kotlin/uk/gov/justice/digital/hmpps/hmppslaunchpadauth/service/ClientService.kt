@@ -20,9 +20,7 @@ import java.util.*
 @Service
 class ClientService(private var clientRepository: ClientRepository) {
 
-  fun getClientById(id: UUID): Optional<Client> {
-    return clientRepository.findById(id)
-  }
+  fun getClientById(id: UUID): Optional<Client> = clientRepository.findById(id)
 
   fun validateParams(
     clientId: UUID,

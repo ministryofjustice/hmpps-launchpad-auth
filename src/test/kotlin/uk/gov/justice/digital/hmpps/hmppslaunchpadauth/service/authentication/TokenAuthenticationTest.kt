@@ -151,29 +151,25 @@ class TokenAuthenticationTest(
     assertEquals(HttpStatus.FORBIDDEN, exception.code)
   }
 
-  private fun buildClient(enabled: Boolean): Client {
-    return Client(
-      clientId,
-      encoder.encode(password),
-      scopes,
-      grants,
-      setOf(redirectUri),
-      enabled,
-      true,
-      "Test App",
-      logoUri,
-      "Test Description",
-    )
-  }
+  private fun buildClient(enabled: Boolean): Client = Client(
+    clientId,
+    encoder.encode(password),
+    scopes,
+    grants,
+    setOf(redirectUri),
+    enabled,
+    true,
+    "Test App",
+    logoUri,
+    "Test Description",
+  )
 
-  private fun buildUserApprovedClient(): UserApprovedClient {
-    return UserApprovedClient(
-      UUID.randomUUID(),
-      USER_ID,
-      clientId,
-      userApprovedScopes,
-      LocalDateTime.now(ZoneOffset.UTC),
-      LocalDateTime.now(ZoneOffset.UTC),
-    )
-  }
+  private fun buildUserApprovedClient(): UserApprovedClient = UserApprovedClient(
+    UUID.randomUUID(),
+    USER_ID,
+    clientId,
+    userApprovedScopes,
+    LocalDateTime.now(ZoneOffset.UTC),
+    LocalDateTime.now(ZoneOffset.UTC),
+  )
 }

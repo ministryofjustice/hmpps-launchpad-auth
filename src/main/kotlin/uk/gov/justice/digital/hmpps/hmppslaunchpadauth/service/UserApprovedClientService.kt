@@ -172,7 +172,5 @@ class UserApprovedClientService(
     )
   }
 
-  private fun convertScopes(scopes: Set<Scope>): List<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope> {
-    return Scope.getScopeDtosByScopes(scopes)
-  }
+  private fun convertScopes(scopes: Set<Scope>): List<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope> = Scope.getScopeDtosByScopes(scopes)
 }

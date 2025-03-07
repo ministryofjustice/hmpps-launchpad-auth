@@ -11,7 +11,5 @@ enum class ApiErrorTypes(private val error: String) {
   INVALID_TOKEN("invalid_token"),
   EXPIRED_TOKEN("expired_token"), ;
 
-  override fun toString(): String {
-    return error
-  }
+  override fun toString(): String = error
 }

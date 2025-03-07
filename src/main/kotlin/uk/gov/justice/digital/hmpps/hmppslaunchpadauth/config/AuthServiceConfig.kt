@@ -10,17 +10,11 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.priso
 class AuthServiceConfig {
 
   @Bean
-  fun bCryptPasswordEncoder(): BCryptPasswordEncoder {
-    return BCryptPasswordEncoder()
-  }
+  fun bCryptPasswordEncoder(): BCryptPasswordEncoder = BCryptPasswordEncoder()
 
   @Bean("restTemplate")
-  fun restTemplate(): RestTemplate {
-    return RestTemplate()
-  }
+  fun restTemplate(): RestTemplate = RestTemplate()
 
   @Bean("establishments")
-  fun establishments(): PrisonEstablishments {
-    return PrisonEstablishments()
-  }
+  fun establishments(): PrisonEstablishments = PrisonEstablishments()
 }

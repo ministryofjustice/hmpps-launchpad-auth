@@ -5,7 +5,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.priso
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.User
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model.UserClaims
 
-class SandboxSsoService() {
+class SandboxSsoService {
   companion object {
     fun getThirdPartyTestUser(userId: String, scopes: Set<Scope>): UserClaims {
       val user = User(userId, "John", "Smith")
