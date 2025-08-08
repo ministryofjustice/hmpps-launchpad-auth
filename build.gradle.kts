@@ -18,7 +18,7 @@ dependencies {
   implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
   implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
   implementation("org.json:json:20231013")
-  implementation("org.flywaydb:flyway-core:10.16.0")
+  implementation("org.flywaydb:flyway-core:11.11.0")
   implementation("org.postgresql:postgresql:42.7.3")
   implementation("org.ehcache:ehcache:3.10.8")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9") {
@@ -27,7 +27,7 @@ dependencies {
 
   implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.4.7")
 
-  runtimeOnly("org.flywaydb:flyway-database-postgresql:10.16.0")
+  runtimeOnly("org.flywaydb:flyway-database-postgresql:11.11.0")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.4.7")
