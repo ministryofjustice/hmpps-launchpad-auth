@@ -17,7 +17,7 @@ dependencies {
   implementation("io.jsonwebtoken:jjwt-api:0.11.5")
   implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
   implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
-  implementation("org.json:json:20231013")
+  implementation("org.json:json:20250517")
   implementation("org.flywaydb:flyway-core:10.16.0")
   implementation("org.postgresql:postgresql:42.7.3")
   implementation("org.ehcache:ehcache:3.10.8")
