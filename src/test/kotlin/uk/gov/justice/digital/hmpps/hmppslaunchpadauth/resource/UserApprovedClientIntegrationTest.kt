@@ -11,13 +11,11 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.HttpMethod
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.RequestEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.util.LinkedMultiValueMap
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.UserApprovedClientDto
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
@@ -29,7 +27,6 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedCl
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
-import java.net.URI
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -41,6 +38,7 @@ import java.util.*
 class UserApprovedClientIntegrationTest(
   @Autowired private var userApprovedClientRepository: UserApprovedClientRepository,
   @Autowired private var clientRepository: ClientRepository,
+  @Autowired private var webClientBuilder: WebClient.Builder,
   @Value("\${launchpad.auth.access-token-validity-seconds}")
   private var accessTokenValiditySeconds: Long,
 ) {
@@ -48,8 +46,6 @@ class UserApprovedClientIntegrationTest(
   private val port = 0
 
   private val baseUrl = "http://localhost"
-
-  private val restTemplate: RestTemplate = RestTemplate()
 
   private val id = UUID.randomUUID()
   private val clientId = UUID.randomUUID()
@@ -117,13 +113,17 @@ class UserApprovedClientIntegrationTest(
 
   @Test
   fun `get user approved clients by user id`() {
-    val headers = LinkedMultiValueMap<String, String>()
-    headers.add("Authorization", authorizationHeader)
-    val url = URI("$baseUrl:$port/v1/users/$userID/clients?page=1&size=20")
-    val response = restTemplate.exchange(
-      RequestEntity<Any>(headers, HttpMethod.GET, url),
-      object : ParameterizedTypeReference<PagedResult<UserApprovedClientDto>>() {},
-    )
+    var webClient = webClientBuilder
+      .baseUrl("$baseUrl:$port")
+      .defaultHeader(HttpHeaders.AUTHORIZATION, authorizationHeader)
+      .build()
+
+    val response = webClient.get()
+      .uri("/v1/users/$userID/clients?page=1&size=20")
+      .retrieve()
+      .toEntity(object : ParameterizedTypeReference<PagedResult<UserApprovedClientDto>>() {})
+      .block()
+
     val pagedResult = response.body as PagedResult<UserApprovedClientDto>
     val userApprovedClientDtos = pagedResult.content
     val clientOne = userApprovedClientDtos[0]
@@ -143,13 +143,16 @@ class UserApprovedClientIntegrationTest(
 
   @Test
   fun `revoke client access`() {
-    val headers = LinkedMultiValueMap<String, String>()
-    headers.add("Authorization", authorizationHeader)
-    val url = URI("$baseUrl:$port/v1/users/$userID/clients/$clientId")
-    val response = restTemplate.exchange(
-      RequestEntity<Any>(headers, HttpMethod.DELETE, url),
-      object : ParameterizedTypeReference<ResponseEntity<Void>>() {},
-    )
+    var webClient = webClientBuilder
+      .baseUrl("$baseUrl:$port")
+      .defaultHeader(HttpHeaders.AUTHORIZATION, authorizationHeader)
+      .build()
+
+    val response = webClient.delete()
+      .uri("/v1/users/$userID/clients/$clientId")
+      .retrieve()
+      .toEntity(object : ParameterizedTypeReference<ResponseEntity<Void>>() {})
+      .block()
     assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
     assertTrue(userApprovedClientRepository.findUserApprovedClientByUserIdAndClientId(userID, clientId).isEmpty)
   }
