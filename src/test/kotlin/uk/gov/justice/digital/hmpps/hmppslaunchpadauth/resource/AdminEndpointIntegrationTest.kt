@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
+import com.github.tomakehurst.wiremock.http.Response.response
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -7,12 +8,12 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.http.HttpMethod
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpStatus
-import org.springframework.http.RequestEntity
+import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
@@ -24,7 +25,6 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.SsoRequestRepo
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedClientRepository
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
-import java.net.URI
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -37,13 +37,12 @@ class AdminEndpointIntegrationTest(
   @Autowired private var clientRepository: ClientRepository,
   @Autowired private var ssoRequestRepository: SsoRequestRepository,
   @Autowired private var encoder: BCryptPasswordEncoder,
+  @Autowired private var webClientBuilder: WebClient.Builder,
 ) {
   @LocalServerPort
   private val port = 0
 
   private val baseUrl = "http://localhost"
-
-  private val restTemplate: RestTemplate = RestTemplate()
 
   private val id = UUID.randomUUID()
   private val clientIdOne = UUID.randomUUID()
@@ -342,11 +341,16 @@ class AdminEndpointIntegrationTest(
   @Test
   fun `test purge stale sso requests`() {
     Assertions.assertEquals(7, ssoRequestRepository.findAll().size)
-    var url = URI("$baseUrl:$port/v1/admin/purge-stale-sso-tokens")
-    var response = restTemplate.exchange(
-      RequestEntity<Any>(null, HttpMethod.POST, url),
-      String.javaClass,
-    )
+
+    var webClient = webClientBuilder
+      .baseUrl("$baseUrl:$port")
+      .build()
+    val response = webClient.post()
+      .uri("/v1/admin/purge-stale-sso-tokens")
+      .retrieve()
+      .toEntity(object : ParameterizedTypeReference<ResponseEntity<Void>>() {})
+      .block()
+
     Assertions.assertEquals(HttpStatus.ACCEPTED.value(), response.statusCode.value())
     Assertions.assertEquals(1, ssoRequestRepository.findAll().size)
   }
@@ -354,11 +358,16 @@ class AdminEndpointIntegrationTest(
   @Test
   fun `test purge inactive users approved clients of inactive users`() {
     Assertions.assertEquals(8, userApprovedClientRepository.findAll().size)
-    var url = URI("$baseUrl:$port/v1/admin/purge-inactive-users")
-    var response = restTemplate.exchange(
-      RequestEntity<Any>(null, HttpMethod.POST, url),
-      String.javaClass,
-    )
+
+    var webClient = webClientBuilder
+      .baseUrl("$baseUrl:$port")
+      .build()
+    val response = webClient.post()
+      .uri("/v1/admin/purge-inactive-users")
+      .retrieve()
+      .toEntity(object : ParameterizedTypeReference<ResponseEntity<Void>>() {})
+      .block()
+
     Assertions.assertEquals(HttpStatus.ACCEPTED.value(), response.statusCode.value())
     Assertions.assertEquals(3, userApprovedClientRepository.findAll().size)
   }
@@ -384,11 +393,16 @@ class AdminEndpointIntegrationTest(
     )
     userApprovedClientRepository.saveAll(Arrays.asList(uacFirst, uacSecond))
     Assertions.assertEquals(2, userApprovedClientRepository.findAll().size)
-    var url = URI("$baseUrl:$port/v1/admin/purge-inactive-users")
-    var response = restTemplate.exchange(
-      RequestEntity<Any>(null, HttpMethod.POST, url),
-      String.javaClass,
-    )
+
+    var webClient = webClientBuilder
+      .baseUrl("$baseUrl:$port")
+      .build()
+    val response = webClient.post()
+      .uri("/v1/admin/purge-inactive-users")
+      .retrieve()
+      .toEntity(object : ParameterizedTypeReference<ResponseEntity<Void>>() {})
+      .block()
+
     Assertions.assertEquals(HttpStatus.ACCEPTED.value(), response.statusCode.value())
     Assertions.assertEquals(2, userApprovedClientRepository.findAll().size)
   }
@@ -414,11 +428,15 @@ class AdminEndpointIntegrationTest(
     )
     userApprovedClientRepository.saveAll(Arrays.asList(uacFirst, uacSecond))
     Assertions.assertEquals(2, userApprovedClientRepository.findAll().size)
-    var url = URI("$baseUrl:$port/v1/admin/purge-inactive-users")
-    var response = restTemplate.exchange(
-      RequestEntity<Any>(null, HttpMethod.POST, url),
-      String.javaClass,
-    )
+
+    var webClient = webClientBuilder
+      .baseUrl("$baseUrl:$port")
+      .build()
+    val response = webClient.post()
+      .uri("/v1/admin/purge-inactive-users")
+      .retrieve()
+      .toEntity(object : ParameterizedTypeReference<ResponseEntity<Void>>() {})
+      .block()
     Assertions.assertEquals(HttpStatus.ACCEPTED.value(), response.statusCode.value())
     Assertions.assertEquals(0, userApprovedClientRepository.findAll().size)
   }
