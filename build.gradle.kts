@@ -1,7 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.5"
-  kotlin("plugin.spring") version "2.2.0"
-  kotlin("plugin.jpa") version "2.2.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.7"
+  kotlin("plugin.spring") version "2.2.10"
+  kotlin("plugin.jpa") version "2.2.10"
 }
 
 configurations {
@@ -14,25 +14,25 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
   implementation("org.springframework.boot:spring-boot-starter-cache")
-  implementation("io.jsonwebtoken:jjwt-api:0.11.5")
-  implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
-  implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
+  implementation("io.jsonwebtoken:jjwt-api:0.13.0")
+  implementation("io.jsonwebtoken:jjwt-impl:0.13.0")
+  implementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
   implementation("org.json:json:20231013")
-  implementation("org.flywaydb:flyway-core:10.16.0")
-  implementation("org.postgresql:postgresql:42.7.3")
-  implementation("org.ehcache:ehcache:3.10.8")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9") {
+  implementation("org.flywaydb:flyway-core:10.22.0")
+  implementation("org.postgresql:postgresql:42.7.7")
+  implementation("org.ehcache:ehcache:3.11.0")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.11") {
     exclude(group = "org.yaml", module = "snakeyaml")
   }
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.4.7")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.5.0")
 
-  runtimeOnly("org.flywaydb:flyway-database-postgresql:10.16.0")
+  runtimeOnly("org.flywaydb:flyway-database-postgresql:10.22.0")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.4.7")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.5.0")
   testImplementation("org.springframework.boot:spring-boot-starter-webflux")
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.30") {
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.32") {
     exclude(group = "io.swagger.core.v3")
   }
   testImplementation("com.h2database:h2:2.3.232")
