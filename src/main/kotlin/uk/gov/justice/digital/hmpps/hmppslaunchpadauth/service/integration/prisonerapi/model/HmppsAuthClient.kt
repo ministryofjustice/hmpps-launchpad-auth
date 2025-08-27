@@ -1,27 +1,21 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model
 
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.RequestEntity
 import org.springframework.stereotype.Component
-import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.HMPPS_AUTH_ACCESS_TOKEN_CACHE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
-import java.net.URI
 import java.util.*
 
 @Component
-class HmppsAuthClient(@Qualifier("restTemplate") private var restTemplate: RestTemplate) {
+class HmppsAuthClient(private var webClientBuilder: WebClient.Builder) {
 
   @Value("\${hmpps.auth.url}")
   private lateinit var hmppsAuthBaseUrl: String
@@ -38,19 +32,19 @@ class HmppsAuthClient(@Qualifier("restTemplate") private var restTemplate: RestT
 
   @Cacheable(HMPPS_AUTH_ACCESS_TOKEN_CACHE, key = "#root.methodName")
   fun getBearerToken(): String {
-    val headers = LinkedMultiValueMap<String, String>()
-    headers.add(HttpHeaders.AUTHORIZATION, getBasicAuthHeader())
-    headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
     logger.info("Calling HMPPS Auth service for access token")
     try {
-      val response = restTemplate.exchange(
-        RequestEntity<Any>(
-          headers,
-          HttpMethod.POST,
-          URI("$hmppsAuthBaseUrl/auth/oauth/token?grant_type=client_credentials"),
-        ),
-        object : ParameterizedTypeReference<HmppsAuthAccessToken>() {},
-      )
+      val webClient = webClientBuilder
+        .baseUrl(hmppsAuthBaseUrl)
+        .defaultHeader(HttpHeaders.AUTHORIZATION, getBasicAuthHeader())
+        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .build()
+      val response = webClient.post()
+        .uri("/auth/oauth/token?grant_type=client_credentials")
+        .retrieve()
+        .toEntity(HmppsAuthAccessToken::class.java)
+        .block()!!
+
       if (response.statusCode.is2xxSuccessful && response.body != null) {
         return "Bearer ${response.body.accessToken}"
       } else {

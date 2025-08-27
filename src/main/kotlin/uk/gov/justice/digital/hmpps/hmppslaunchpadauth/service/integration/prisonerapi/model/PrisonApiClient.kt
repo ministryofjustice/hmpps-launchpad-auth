@@ -1,31 +1,25 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.prisonerapi.model
 
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.jcache.JCacheCacheManager
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.RequestEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
-import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.HMPPS_AUTH_ACCESS_TOKEN_CACHE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INTERNAL_SERVER_ERROR_MSG
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
-import java.net.URI
 
 @Component
 class PrisonApiClient(
   private var hmppsAuthClient: HmppsAuthClient,
-  @Qualifier("restTemplate") private var restTemplate: RestTemplate,
   private var cacheManager: JCacheCacheManager,
+  private val webClientBuilder: WebClient.Builder,
 ) {
 
   @Value("\${hmpps.prison-api.url}")
@@ -68,17 +62,19 @@ class PrisonApiClient(
   }
 
   private fun connectToPrisonApi(accessToken: String, offenderId: String): ResponseEntity<OffenderBooking> {
-    val headers = LinkedMultiValueMap<String, String>()
-    headers.add(HttpHeaders.AUTHORIZATION, accessToken)
-    headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+    val webClient = webClientBuilder
+      .baseUrl(hmppsPrisonApiBaseUrl)
+      .defaultHeader(HttpHeaders.AUTHORIZATION, accessToken)
+      .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+      .build()
+
     logger.info("Calling Prison Api for getting profile for offender id: $offenderId")
-    return restTemplate.exchange(
-      RequestEntity<Any>(
-        headers,
-        HttpMethod.GET,
-        URI("$hmppsPrisonApiBaseUrl/api/bookings/offenderNo/$offenderId?fullInfo=false&extraInfo=false&csraSummary=false"),
-      ),
-      object : ParameterizedTypeReference<OffenderBooking>() {},
-    )
+
+    val response = webClient.get()
+      .uri("/api/bookings/offenderNo/$offenderId?fullInfo=false&extraInfo=false&csraSummary=false")
+      .retrieve()
+      .toEntity(OffenderBooking::class.java)
+      .block()!!
+    return response
   }
 }

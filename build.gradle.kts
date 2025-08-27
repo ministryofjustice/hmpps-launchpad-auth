@@ -26,6 +26,7 @@ dependencies {
   }
 
   implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.4.7")
+  implementation("org.springframework.boot:spring-boot-starter-webflux")
 
   runtimeOnly("org.flywaydb:flyway-database-postgresql:10.16.0")
 

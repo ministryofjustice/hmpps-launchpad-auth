@@ -13,17 +13,14 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.RequestEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.BodyInserters
+import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.ApiError
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Token
@@ -42,11 +39,9 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator.Compa
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.USER_ID
-import java.net.URI
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -58,6 +53,8 @@ class TokenControllerIntegrationTest(
   @Autowired private var encoder: BCryptPasswordEncoder,
   @Value("\${launchpad.auth.access-token-validity-seconds}")
   private var accessTokenValiditySeconds: Long,
+  @Autowired
+  var webClientBuilder: WebClient.Builder,
 ) {
   @LocalServerPort
   private val port = 0
@@ -69,17 +66,12 @@ class TokenControllerIntegrationTest(
   private lateinit var publicKey: String
 
   private val baseUrl = "http://localhost"
-
-  private val restTemplate: RestTemplate = RestTemplate()
-
   private val id = UUID.randomUUID()
   private val clientId = UUID.randomUUID()
   private val userID = "G2320VD"
-  private val localDateTime = LocalDateTime.now() // Default time zone set for config is Europe/Paris
   private val dateTimeInUTC = LocalDateTime.now(ZoneOffset.UTC)
   private lateinit var clientDBOne: Client
   private lateinit var userApprovedClientOne: UserApprovedClient
-  private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
   private lateinit var authorizationHeader: String
   private lateinit var ssoRequest: SsoRequest
   private val clientState: String = "12345"
@@ -187,27 +179,43 @@ class TokenControllerIntegrationTest(
   fun `get token and use token for api call`() {
     // confirm sso request record exist before token request
     Assertions.assertEquals(true, ssoRequestRepository.findById(ssoRequest.id).isPresent)
-    var headers = LinkedMultiValueMap<String, String>()
-    headers.add("Authorization", authorizationHeader)
-    var url = URI("$baseUrl:$port/v1/oauth2/token?code=$code&grant_type=authorization_code&redirect_uri=$REDIRECT_URI")
-    var response = restTemplate.exchange(
-      RequestEntity<Any>(headers, HttpMethod.POST, url),
-      object : ParameterizedTypeReference<Token>() {},
-    )
+    var webClient = webClientBuilder
+      .baseUrl("$baseUrl:$port")
+      .defaultHeader(HttpHeaders.AUTHORIZATION, authorizationHeader)
+      .build()
+    var response = webClient.post()
+      .uri("/v1/oauth2/token")
+      .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+      .body(
+        BodyInserters.fromFormData("code", code.toString())
+          .with("grant_type", "authorization_code")
+          .with("redirect_uri", REDIRECT_URI),
+      )
+      .retrieve()
+      .toEntity(Token::class.java)
+      .block()
+
     var token: Token = response.body
-    Assertions.assertNotNull(token?.idToken)
-    Assertions.assertNotNull(token?.accessToken)
-    Assertions.assertNotNull(token?.refreshToken)
-    Assertions.assertEquals("Bearer", token?.tokenType)
-    Assertions.assertEquals(accessTokenValiditySeconds - 1, token?.expiresIn)
+    Assertions.assertNotNull(token.idToken)
+    Assertions.assertNotNull(token.accessToken)
+    Assertions.assertNotNull(token.refreshToken)
+    Assertions.assertEquals("Bearer", token.tokenType)
+    Assertions.assertEquals(accessTokenValiditySeconds - 1, token.expiresIn)
     // confirm ssorequest deleted
     Assertions.assertEquals(true, ssoRequestRepository.findById(ssoRequest.id).isEmpty)
-    url =
-      URI("$baseUrl:$port/v1/oauth2/token?grant_type=refresh_token&nonce=anything&refresh_token=${token.refreshToken}")
-    response = restTemplate.exchange(
-      RequestEntity<Any>(headers, HttpMethod.POST, url),
-      object : ParameterizedTypeReference<Token>() {},
-    )
+
+    response = webClient.post()
+      .uri("/v1/oauth2/token")
+      .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+      .body(
+        BodyInserters.fromFormData("refresh_token", token.refreshToken)
+          .with("grant_type", "refresh_token")
+          .with("nonce", "anything"),
+      )
+      .retrieve()
+      .toEntity(Token::class.java)
+      .block()
+
     token = response.body
     assertResponseHeaders(response.headers)
     Assertions.assertNotNull(token.idToken)
@@ -216,61 +224,116 @@ class TokenControllerIntegrationTest(
     assertIdTokenClaims(token.idToken)
     assertAccessTokenClaims(token.accessToken)
     assertRefreshTokenClaims(token.refreshToken)
-    Assertions.assertEquals("Bearer", token?.tokenType)
-    Assertions.assertEquals(accessTokenValiditySeconds - 1, token?.expiresIn)
+    Assertions.assertEquals("Bearer", token.tokenType)
+    Assertions.assertEquals(accessTokenValiditySeconds - 1, token.expiresIn)
 
     // use expire refreshToken
     var exception = Assertions.assertThrows(HttpClientErrorException::class.java) {
       val refreshToken =
         updateTokenExpireTime(token.refreshToken, Instant.now().minusSeconds(60).epochSecond)
-      url =
-        URI("$baseUrl:$port/v1/oauth2/token?grant_type=refresh_token&nonce=anything&refresh_token=$refreshToken")
-      response = restTemplate.exchange(
-        RequestEntity<Any>(headers, HttpMethod.POST, url),
-        object : ParameterizedTypeReference<Token>() {},
-      )
+
+      webClient.post()
+        .uri("/v1/oauth2/token")
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        .body(
+          BodyInserters.fromFormData("refresh_token", refreshToken.toString())
+            .with("grant_type", "refresh_token")
+            .with("nonce", "anything"),
+        )
+        .retrieve()
+        .toEntity(Token::class.java)
+        .doOnError { ex ->
+          if (ex is org.springframework.web.reactive.function.client.WebClientResponseException) {
+            throw HttpClientErrorException(
+              ex.statusCode,
+              ex.statusText,
+              ex.headers,
+              ex.responseBodyAsByteArray,
+              null,
+            )
+          } else {
+            throw org.springframework.web.client.HttpClientErrorException(HttpStatus.BAD_REQUEST, ex.message)
+          }
+        }
+        .block()
     }
     Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), exception.statusCode.value())
     assertResponseHeaders(exception.responseHeaders)
 
     // using access token in auth header
-    headers.remove("Authorization")
-    headers.add("Authorization", "Bearer " + token.accessToken)
-    url = URI("$baseUrl:$port/v1/users/$userID/clients?page=1&size=20")
-    var apiResponse = restTemplate.exchange(
-      RequestEntity<Any>(headers, HttpMethod.GET, url),
-      object : ParameterizedTypeReference<PagedResult<UserApprovedClientDto>>() {},
-    )
-    var pagedResult = apiResponse.body as PagedResult<UserApprovedClientDto>
+    webClient = webClientBuilder
+      .baseUrl("$baseUrl:$port")
+      .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token.accessToken)
+      .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+      .build()
+
+    val apiResponse = webClient.get()
+      .uri("/v1/users/$userID/clients?page=1&size=20")
+      .retrieve()
+      .toEntity(object : ParameterizedTypeReference<PagedResult<UserApprovedClientDto>>() {})
+      .block()!!
+
+    val pagedResult = apiResponse.body as PagedResult<UserApprovedClientDto>
     assertResponseHeaders(apiResponse.headers)
     Assertions.assertEquals(HttpStatus.OK.value(), apiResponse.statusCode.value())
     Assertions.assertNotNull(pagedResult.content)
 
     // Using id token in auth header expected response should be Http 401
-    headers.remove("Authorization")
-    headers.add("Authorization", "Bearer " + token.idToken)
-    url = URI("$baseUrl:$port/v1/users/$userID/clients?page=1&size=20")
     exception = Assertions.assertThrows(HttpClientErrorException::class.java) {
-      restTemplate.exchange(
-        url,
-        HttpMethod.GET,
-        HttpEntity<Any>(headers),
-        ApiError::class.java,
-      )
+      webClient = webClientBuilder
+        .baseUrl("$baseUrl:$port")
+        .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token.idToken)
+        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .build()
+
+      webClient.get()
+        .uri("/v1/users/$userID/clients?page=1&size=20")
+        .retrieve()
+        .toEntity(ApiError::class.java)
+        .doOnError { ex ->
+          if (ex is org.springframework.web.reactive.function.client.WebClientResponseException) {
+            throw HttpClientErrorException(
+              ex.statusCode,
+              ex.statusText,
+              ex.headers,
+              ex.responseBodyAsByteArray,
+              null,
+            )
+          } else {
+            throw HttpClientErrorException(HttpStatus.BAD_REQUEST, ex.message)
+          }
+        }
+        .block()
     }
     Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), exception.statusCode.value())
     assertResponseHeaders(exception.responseHeaders)
+
     // Using refresh token in auth header expected response should be Http 401
-    headers.remove("Authorization")
-    headers.add("Authorization", "Bearer " + token.refreshToken)
-    url = URI("$baseUrl:$port/v1/users/$userID/clients?page=1&size=20")
     exception = Assertions.assertThrows(HttpClientErrorException::class.java) {
-      restTemplate.exchange(
-        url,
-        HttpMethod.GET,
-        HttpEntity<Any>(headers),
-        ApiError::class.java,
-      )
+      webClient = webClientBuilder
+        .baseUrl("$baseUrl:$port")
+        .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token.refreshToken)
+        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .build()
+
+      webClient.get()
+        .uri("/v1/users/$userID/clients?page=1&size=20")
+        .retrieve()
+        .toEntity(ApiError::class.java)
+        .doOnError { ex ->
+          if (ex is org.springframework.web.reactive.function.client.WebClientResponseException) {
+            throw org.springframework.web.client.HttpClientErrorException(
+              ex.statusCode,
+              ex.statusText,
+              ex.headers,
+              ex.responseBodyAsByteArray,
+              null,
+            )
+          } else {
+            throw org.springframework.web.client.HttpClientErrorException(HttpStatus.BAD_REQUEST, ex.message)
+          }
+        }
+        .block()
     }
     Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), exception.statusCode.value())
     assertResponseHeaders(exception.responseHeaders)
@@ -282,7 +345,7 @@ class TokenControllerIntegrationTest(
     val exp = claims["exp"] as Int
     Assertions.assertTrue(exp > Instant.now().epochSecond)
     Assertions.assertEquals(clientId.toString(), claims["aud"])
-    Assertions.assertEquals(userID.toString(), claims["sub"])
+    Assertions.assertEquals(userID, claims["sub"])
     Assertions.assertEquals("Test User", claims["name"])
     Assertions.assertEquals("Test", claims["given_name"])
     Assertions.assertEquals("User", claims["family_name"])
