@@ -18,7 +18,7 @@ generic-service:
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     SPRING_PROFILES_ACTIVE: "dev"
-    ENVIRONMENT_NAME: DEV
+    ENVIRONMENT_NAME: "dev"
 
   allowlist:
     nutrition-app-dev: 151.230.203.104
