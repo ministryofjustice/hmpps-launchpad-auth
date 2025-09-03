@@ -12,6 +12,7 @@ generic-service:
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     SPRING_PROFILES_ACTIVE: "prod"
+    ENVIRONMENT_NAME: "prod"
 
   allowlist:
     nutrition-app-prod: 18.170.16.19
