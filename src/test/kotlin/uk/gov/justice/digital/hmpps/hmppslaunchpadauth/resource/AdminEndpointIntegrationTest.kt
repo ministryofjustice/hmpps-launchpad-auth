@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
+import com.fasterxml.uuid.Generators
 import com.github.tomakehurst.wiremock.http.Response.response
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -254,7 +255,7 @@ class AdminEndpointIntegrationTest(
     )
 
     userApprovedClientOne = UserApprovedClient(
-      UUID.randomUUID(),
+      Generators.timeBasedEpochGenerator().generate(),
       userIDFirst,
       clientIdOne,
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
@@ -262,7 +263,7 @@ class AdminEndpointIntegrationTest(
       dateTimeInUTCBefore7Years,
     )
     userApprovedClientSecond = UserApprovedClient(
-      UUID.randomUUID(),
+      Generators.timeBasedEpochGenerator().generate(),
       userIDSecond,
       clientIdOne,
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
@@ -270,7 +271,7 @@ class AdminEndpointIntegrationTest(
       dateTimeInUTCBefore7Years,
     )
     userApprovedClientThird = UserApprovedClient(
-      UUID.randomUUID(),
+      Generators.timeBasedEpochGenerator().generate(),
       userIDThird,
       clientIdOne,
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
@@ -278,7 +279,7 @@ class AdminEndpointIntegrationTest(
       dateTimeInUTCBefore7Years,
     )
     userApprovedClientFourth = UserApprovedClient(
-      UUID.randomUUID(),
+      Generators.timeBasedEpochGenerator().generate(),
       userIDFourth,
       clientIdOne,
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
@@ -286,7 +287,7 @@ class AdminEndpointIntegrationTest(
       dateTimeInUTCBefore7Years,
     )
     userApprovedClientFifth = UserApprovedClient(
-      UUID.randomUUID(),
+      Generators.timeBasedEpochGenerator().generate(),
       userIDFifth,
       clientIdOne,
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
@@ -294,7 +295,7 @@ class AdminEndpointIntegrationTest(
       dateTimeInUTCBefore7Years,
     )
     userApprovedClientSixth = UserApprovedClient(
-      UUID.randomUUID(),
+      Generators.timeBasedEpochGenerator().generate(),
       userIDSixth,
       clientIdOne,
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
@@ -302,7 +303,7 @@ class AdminEndpointIntegrationTest(
       dateTimeInUTCBefore7Years,
     )
     userApprovedClientSeventh = UserApprovedClient(
-      UUID.randomUUID(),
+      Generators.timeBasedEpochGenerator().generate(),
       userIDSeventh,
       clientIdSecond,
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
@@ -310,7 +311,7 @@ class AdminEndpointIntegrationTest(
       dateTimeInUTCBefore3Years,
     )
     userApprovedClientEight = UserApprovedClient(
-      UUID.randomUUID(),
+      Generators.timeBasedEpochGenerator().generate(),
       userIDSixth,
       clientIdSecond,
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
@@ -376,7 +377,7 @@ class AdminEndpointIntegrationTest(
   fun `test purge inactive users when for a single user has one active and other inactive users approved clients`() {
     userApprovedClientRepository.deleteAll()
     val uacFirst = UserApprovedClient(
-      UUID.randomUUID(),
+      Generators.timeBasedEpochGenerator().generate(),
       userIDFirst,
       clientIdOne,
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
@@ -384,7 +385,7 @@ class AdminEndpointIntegrationTest(
       dateTimeInUTCBefore7Years,
     )
     val uacSecond = UserApprovedClient(
-      UUID.randomUUID(),
+      Generators.timeBasedEpochGenerator().generate(),
       userIDFirst,
       clientIdSecond,
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
@@ -411,7 +412,7 @@ class AdminEndpointIntegrationTest(
   fun `test purge inactive users when for a single user has all inactive users approved clients`() {
     userApprovedClientRepository.deleteAll()
     val uacFirst = UserApprovedClient(
-      UUID.randomUUID(),
+      Generators.timeBasedEpochGenerator().generate(),
       userIDFirst,
       clientIdOne,
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
@@ -419,7 +420,7 @@ class AdminEndpointIntegrationTest(
       dateTimeInUTCBefore7Years,
     )
     val uacSecond = UserApprovedClient(
-      UUID.randomUUID(),
+      Generators.timeBasedEpochGenerator().generate(),
       userIDFirst,
       clientIdSecond,
       setOf(Scope.USER_BASIC_READ, Scope.USER_CLIENTS_READ, Scope.USER_ESTABLISHMENT_READ, Scope.USER_CLIENTS_DELETE),
