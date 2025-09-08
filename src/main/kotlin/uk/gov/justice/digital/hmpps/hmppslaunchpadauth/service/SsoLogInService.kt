@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 
+import com.fasterxml.uuid.Generators
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
@@ -249,7 +250,7 @@ class SsoLogInService(
           val localDateTimeInUTC = LocalDateTime.now(ZoneOffset.UTC)
           approvalRequired = false
           val userApprovedClient = UserApprovedClient(
-            UUID.randomUUID(),
+            Generators.timeBasedEpochGenerator().generate(),
             ssoRequest.userId!!,
             ssoRequest.client.id,
             ssoRequest.client.scopes,

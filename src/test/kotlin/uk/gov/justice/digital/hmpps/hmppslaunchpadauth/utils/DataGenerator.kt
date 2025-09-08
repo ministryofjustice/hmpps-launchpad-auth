@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils
 
+import com.fasterxml.uuid.Generators
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.http.HttpStatus
@@ -92,7 +93,7 @@ class DataGenerator {
       createdDate: LocalDateTime,
       lastModifiedDate: LocalDateTime,
     ): UserApprovedClient = UserApprovedClient(
-      UUID.randomUUID(),
+      Generators.timeBasedEpochGenerator().generate(),
       userId,
       clientId,
       scopes,

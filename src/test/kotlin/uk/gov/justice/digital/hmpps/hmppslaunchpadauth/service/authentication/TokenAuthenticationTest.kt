@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication
 
+import com.fasterxml.uuid.Generators
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -165,7 +166,7 @@ class TokenAuthenticationTest(
   )
 
   private fun buildUserApprovedClient(): UserApprovedClient = UserApprovedClient(
-    UUID.randomUUID(),
+    Generators.timeBasedEpochGenerator().generate(),
     USER_ID,
     clientId,
     userApprovedScopes,
