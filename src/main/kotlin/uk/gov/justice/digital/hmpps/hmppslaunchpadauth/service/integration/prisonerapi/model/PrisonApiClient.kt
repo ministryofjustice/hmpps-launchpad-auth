@@ -8,18 +8,23 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
-import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.analytics.AppInsightEventType
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.analytics.TelemetryService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.HMPPS_AUTH_ACCESS_TOKEN_CACHE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INTERNAL_SERVER_ERROR_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INVALID_PRISONER_ID
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
+import java.util.*
 
 @Component
 class PrisonApiClient(
   private var hmppsAuthClient: HmppsAuthClient,
   private var cacheManager: JCacheCacheManager,
   private val webClientBuilder: WebClient.Builder,
+  private var telemetryService: TelemetryService,
 ) {
 
   @Value("\${hmpps.prison-api.url}")
@@ -29,18 +34,25 @@ class PrisonApiClient(
     private val logger = LoggerFactory.getLogger(PrisonApiClient::class.java)
   }
 
-  fun getOffenderBooking(offenderId: String): OffenderBooking {
+  fun getOffenderBooking(offenderId: String, clientId: UUID): OffenderBooking {
     val accessToken = hmppsAuthClient.getBearerToken()
     try {
-      val response = connectToPrisonApi(accessToken, offenderId)
+      val response = connectToPrisonApi(accessToken, offenderId, clientId)
       return handlePrisonApiResponse(offenderId, response)
-    } catch (e: HttpClientErrorException) {
+    } catch (e: WebClientResponseException) {
       var message: String
       if (e.statusCode.value() == HttpStatus.UNAUTHORIZED.value()) {
         cacheManager.getCache(HMPPS_AUTH_ACCESS_TOKEN_CACHE).clear()
         message = "Invalid or Expired access token sent to Prison API"
       } else if (e.statusCode.value() == HttpStatus.NOT_FOUND.value()) {
         message = "Record for offender id: $offenderId  do not exist"
+
+        telemetryService.addTelemetryData(
+          AppInsightEventType.LOGIN_SUCCESSFUL_BUT_PRISONER_RECORD_NOT_FOUND,
+          offenderId,
+          clientId,
+        )
+        throw ApiException("$message", HttpStatus.NOT_FOUND, ApiErrorTypes.SERVER_ERROR.toString(), INVALID_PRISONER_ID)
       } else if (e.message != null) {
         message = e.message!!
       } else {
@@ -61,7 +73,7 @@ class PrisonApiClient(
     }
   }
 
-  private fun connectToPrisonApi(accessToken: String, offenderId: String): ResponseEntity<OffenderBooking> {
+  private fun connectToPrisonApi(accessToken: String, offenderId: String, clientId: UUID): ResponseEntity<OffenderBooking> {
     val webClient = webClientBuilder
       .baseUrl(hmppsPrisonApiBaseUrl)
       .defaultHeader(HttpHeaders.AUTHORIZATION, accessToken)

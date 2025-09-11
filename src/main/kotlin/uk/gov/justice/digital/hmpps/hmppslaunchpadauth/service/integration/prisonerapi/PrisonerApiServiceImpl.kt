@@ -20,8 +20,8 @@ class PrisonerApiServiceImpl(
   private var prisonEstablishments: PrisonEstablishments,
 ) : PrisonerApiService {
 
-  override fun getPrisonerData(prisonerId: String): UserClaims {
-    val profile = offenderBooking.getOffenderBooking(prisonerId)
+  override fun getPrisonerData(prisonerId: String, clientId: UUID): UserClaims {
+    val profile = offenderBooking.getOffenderBooking(prisonerId, clientId)
     val user = User(prisonerId, profile.firstName, profile.lastName)
     val establishment = prisonEstablishments.agencies.get(profile.agencyId)
     if (establishment == null) {

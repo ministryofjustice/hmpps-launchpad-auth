@@ -7,8 +7,8 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
-import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.HMPPS_AUTH_ACCESS_TOKEN_CACHE
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
@@ -55,7 +55,7 @@ class HmppsAuthClient(private var webClientBuilder: WebClient.Builder) {
           "Server Error",
         )
       }
-    } catch (e: HttpClientErrorException) {
+    } catch (e: WebClientResponseException) {
       throw ApiException(
         "Response code ${e.statusCode.value()} making request to Hmpps auth for access token",
         HttpStatus.INTERNAL_SERVER_ERROR,

@@ -17,5 +17,6 @@ class AuthServiceConstant {
     const val HMPPS_AUTH_ACCESS_TOKEN_CACHE = "hmpps-auth-token"
     const val INVALID_AZURE_AD_TENANT = "Invalid Azure AD tenant"
     const val INVALID_USER_ID = "Invalid user id"
+    const val INVALID_PRISONER_ID = "Invalid Prisoner data"
   }
 }
