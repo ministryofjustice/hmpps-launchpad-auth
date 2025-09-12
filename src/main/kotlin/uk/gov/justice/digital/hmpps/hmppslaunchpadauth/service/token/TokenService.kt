@@ -167,7 +167,7 @@ class TokenService(
     if (sandbox) {
       prisonerData = SandboxSsoService.getThirdPartyTestUser(sandboxUser, scopes)
     } else {
-      prisonerData = prisonerApiService.getPrisonerData(prisonerId)
+      prisonerData = prisonerApiService.getPrisonerData(prisonerId, clientId)
     }
     val idTokenPayload = IdTokenPayload()
     val idTokenPayloadClaims = idTokenPayload.generatePayload(

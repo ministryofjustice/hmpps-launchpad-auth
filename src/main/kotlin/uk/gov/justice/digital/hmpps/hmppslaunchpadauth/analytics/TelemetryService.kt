@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.priso
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 @Component
 class TelemetryService(private var telemetryClient: TelemetryClient) {
@@ -36,5 +37,10 @@ class TelemetryService(private var telemetryClient: TelemetryClient) {
     } catch (e: Exception) {
       logger.error("Issue sending telemetry data: ${e.message}")
     }
+  }
+
+  fun addTelemetryData(eventType: AppInsightEventType, prisonerId: String, clientId: UUID) {
+    val map: LinkedHashMap<String, Any> = linkedMapOf("PrisonerId" to prisonerId, "ClientId" to clientId.toString())
+    telemetryClient.trackEvent(eventType.toString(), map as Map<String, String>?, null)
   }
 }

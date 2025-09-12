@@ -18,9 +18,9 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.ApiError
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Token
@@ -228,7 +228,7 @@ class TokenControllerIntegrationTest(
     Assertions.assertEquals(accessTokenValiditySeconds - 1, token.expiresIn)
 
     // use expire refreshToken
-    var exception = Assertions.assertThrows(HttpClientErrorException::class.java) {
+    var exception = Assertions.assertThrows(WebClientResponseException::class.java) {
       val refreshToken =
         updateTokenExpireTime(token.refreshToken, Instant.now().minusSeconds(60).epochSecond)
 
@@ -244,21 +244,21 @@ class TokenControllerIntegrationTest(
         .toEntity(Token::class.java)
         .doOnError { ex ->
           if (ex is org.springframework.web.reactive.function.client.WebClientResponseException) {
-            throw HttpClientErrorException(
-              ex.statusCode,
+            throw WebClientResponseException(
+              ex.statusCode.value(),
               ex.statusText,
               ex.headers,
               ex.responseBodyAsByteArray,
               null,
             )
           } else {
-            throw org.springframework.web.client.HttpClientErrorException(HttpStatus.BAD_REQUEST, ex.message)
+            throw WebClientResponseException(HttpStatus.BAD_REQUEST.value(), ex.message, null, null, null, null)
           }
         }
         .block()
     }
     Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), exception.statusCode.value())
-    assertResponseHeaders(exception.responseHeaders)
+    assertResponseHeaders(exception.headers)
 
     // using access token in auth header
     webClient = webClientBuilder
@@ -279,7 +279,7 @@ class TokenControllerIntegrationTest(
     Assertions.assertNotNull(pagedResult.content)
 
     // Using id token in auth header expected response should be Http 401
-    exception = Assertions.assertThrows(HttpClientErrorException::class.java) {
+    exception = Assertions.assertThrows(WebClientResponseException::class.java) {
       webClient = webClientBuilder
         .baseUrl("$baseUrl:$port")
         .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token.idToken)
@@ -292,24 +292,24 @@ class TokenControllerIntegrationTest(
         .toEntity(ApiError::class.java)
         .doOnError { ex ->
           if (ex is org.springframework.web.reactive.function.client.WebClientResponseException) {
-            throw HttpClientErrorException(
-              ex.statusCode,
+            throw WebClientResponseException(
+              ex.statusCode.value(),
               ex.statusText,
               ex.headers,
               ex.responseBodyAsByteArray,
               null,
             )
           } else {
-            throw HttpClientErrorException(HttpStatus.BAD_REQUEST, ex.message)
+            throw WebClientResponseException(HttpStatus.BAD_REQUEST.value(), ex.message, null, null, null, null)
           }
         }
         .block()
     }
     Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), exception.statusCode.value())
-    assertResponseHeaders(exception.responseHeaders)
+    assertResponseHeaders(exception.headers)
 
     // Using refresh token in auth header expected response should be Http 401
-    exception = Assertions.assertThrows(HttpClientErrorException::class.java) {
+    exception = Assertions.assertThrows(WebClientResponseException::class.java) {
       webClient = webClientBuilder
         .baseUrl("$baseUrl:$port")
         .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token.refreshToken)
@@ -322,21 +322,21 @@ class TokenControllerIntegrationTest(
         .toEntity(ApiError::class.java)
         .doOnError { ex ->
           if (ex is org.springframework.web.reactive.function.client.WebClientResponseException) {
-            throw org.springframework.web.client.HttpClientErrorException(
-              ex.statusCode,
+            throw WebClientResponseException(
+              ex.statusCode.value(),
               ex.statusText,
               ex.headers,
               ex.responseBodyAsByteArray,
               null,
             )
           } else {
-            throw org.springframework.web.client.HttpClientErrorException(HttpStatus.BAD_REQUEST, ex.message)
+            throw WebClientResponseException(HttpStatus.BAD_REQUEST.value(), ex.message, null, null, null, null)
           }
         }
         .block()
     }
     Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), exception.statusCode.value())
-    assertResponseHeaders(exception.responseHeaders)
+    assertResponseHeaders(exception.headers)
   }
 
   private fun assertIdTokenClaims(idToken: String) {
