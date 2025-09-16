@@ -5,7 +5,7 @@ launchpad:
     iss-url: https://launchpad-auth-preprod.hmpps.service.justice.gov.uk
 hmpps:
   auth:
-    url: https://sign-in-preprod.hmpps.service.justice.gov.uk
+    url: https://sign-in-preprod.hmpps.service.justice.gov.uk/auth
   prison-api:
     url: https://prison-api-preprod.prison.service.justice.gov.uk
 spring:

@@ -9,7 +9,7 @@ import java.time.Duration
 
 @Configuration
 class WebClientConfiguration(
-  @param:Value("\${launchpad.auth.iss-url}") val hmppsAuthBaseUri: String,
+  @param:Value("\${hmpps.auth.url}") val hmppsAuthBaseUri: String,
   @param:Value("\${hmpps.prison-api.url}") val hmppsPrisonApiBaseUri: String,
   @param:Value("\${api.health-timeout:2s}") val healthTimeout: Duration,
 ) {
