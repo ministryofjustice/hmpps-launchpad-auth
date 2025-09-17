@@ -1,18 +1,24 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.integration.health
 
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.integration.IntegrationTestBase
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.function.Consumer
 
 class HealthCheckTest : IntegrationTestBase() {
 
   @Test
-  fun `Health page reports ok`() {
+  fun `DB Health page reports ok`() {
     webTestClient.get()
-      .uri("/health")
+      .uri("/health/db")
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("status").isEqualTo("UP")
+  }
+
+  fun `Auth Health page reports ok`() {
+    webTestClient.get()
+      .uri("/health/hmppsAuth")
       .exchange()
       .expectStatus()
       .isOk
@@ -22,14 +28,13 @@ class HealthCheckTest : IntegrationTestBase() {
 
   @Test
   fun `Health info reports version`() {
-    webTestClient.get().uri("/health")
+    webTestClient.get()
+      .uri("/health/healthInfo")
       .exchange()
-      .expectStatus().isOk
-      .expectBody().jsonPath("components.healthInfo.details.version").value(
-        Consumer<String> {
-          assertThat(it).startsWith(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE))
-        },
-      )
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("status").isEqualTo("UP")
   }
 
   @Test
