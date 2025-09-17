@@ -86,7 +86,7 @@ class TokenControllerIntegrationTest(
     wiremock.start()
     WireMock.configureFor("localhost", wiremock.port())
     WireMock.stubFor(
-      WireMock.post(WireMock.urlEqualTo("/auth/oauth/token?grant_type=client_credentials")).willReturn(
+      WireMock.post(WireMock.urlEqualTo("/oauth/token?grant_type=client_credentials")).willReturn(
         WireMock.aResponse()
           .withStatus(HttpStatus.OK.value())
           .withHeader("Content-Type", "application/json")

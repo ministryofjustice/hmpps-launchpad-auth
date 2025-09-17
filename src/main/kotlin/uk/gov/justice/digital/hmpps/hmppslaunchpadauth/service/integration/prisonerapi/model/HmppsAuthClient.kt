@@ -40,7 +40,7 @@ class HmppsAuthClient(private var webClientBuilder: WebClient.Builder) {
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .build()
       val response = webClient.post()
-        .uri("/auth/oauth/token?grant_type=client_credentials")
+        .uri("/oauth/token?grant_type=client_credentials")
         .retrieve()
         .toEntity(HmppsAuthAccessToken::class.java)
         .block()!!
