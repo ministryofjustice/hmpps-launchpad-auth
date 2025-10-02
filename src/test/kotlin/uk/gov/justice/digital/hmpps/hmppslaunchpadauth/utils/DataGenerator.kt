@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils
 
 import com.fasterxml.uuid.Generators
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
@@ -81,7 +80,7 @@ class DataGenerator {
         .setExpiration(expDate)
         .signWith(
           privateKey,
-          SignatureAlgorithm.RS256,
+          Jwts.SIG.RS256,
         )
         .compact()
     }

@@ -2,8 +2,9 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
+import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.Jwts.claims
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -257,7 +258,7 @@ class TokenControllerIntegrationTest(
         }
         .block()
     }
-    Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), exception.statusCode.value())
+    Assertions.assertEquals(HttpStatus.FORBIDDEN.value(), exception.statusCode.value())
     assertResponseHeaders(exception.headers)
 
     // using access token in auth header
@@ -342,9 +343,10 @@ class TokenControllerIntegrationTest(
   private fun assertIdTokenClaims(idToken: String) {
     Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(idToken, publicKey))
     val claims = TokenGenerationAndValidation.parseClaims(idToken, publicKey).body
-    val exp = claims["exp"] as Int
+    val exp = claims["exp"] as Long
     Assertions.assertTrue(exp > Instant.now().epochSecond)
-    Assertions.assertEquals(clientId.toString(), claims["aud"])
+    val signInUser = getsignedInUserFromClaims(claims)
+    Assertions.assertEquals(clientId.toString(), signInUser)
     Assertions.assertEquals(userID, claims["sub"])
     Assertions.assertEquals("Test User", claims["name"])
     Assertions.assertEquals("Test", claims["given_name"])
@@ -354,9 +356,10 @@ class TokenControllerIntegrationTest(
   private fun assertAccessTokenClaims(accessToken: String) {
     Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(accessToken, publicKey))
     val claims = TokenGenerationAndValidation.parseClaims(accessToken, publicKey).body
-    val exp = claims["exp"] as Int
+    val exp = claims["exp"] as Long
     Assertions.assertTrue(exp > Instant.now().epochSecond)
-    Assertions.assertEquals(clientId.toString(), claims["aud"])
+    val signInUser = getsignedInUserFromClaims(claims)
+    Assertions.assertEquals(clientId.toString(), signInUser)
     Assertions.assertEquals(userID, claims["sub"])
     val scopes = claims["scopes"] as ArrayList<String>
     assertScopes(scopes, userApprovedClientOne.scopes)
@@ -364,10 +367,11 @@ class TokenControllerIntegrationTest(
 
   private fun assertRefreshTokenClaims(refreshToken: String) {
     Assertions.assertTrue(TokenGenerationAndValidation.validateJwtTokenSignature(refreshToken, publicKey))
-    val claims = TokenGenerationAndValidation.parseClaims(refreshToken, publicKey).body
-    val exp = claims["exp"] as Int
+    val claims = TokenGenerationAndValidation.parseClaims(refreshToken, publicKey).payload
+    val exp = claims["exp"] as Long
     Assertions.assertTrue(exp > Instant.now().epochSecond)
-    Assertions.assertEquals(clientId.toString(), claims["aud"])
+    val signInUser = getsignedInUserFromClaims(claims)
+    Assertions.assertEquals(clientId.toString(), signInUser)
     Assertions.assertEquals(userID, claims["sub"])
     val scopes = claims["scopes"] as ArrayList<String>
     assertScopes(scopes, userApprovedClientOne.scopes)
@@ -381,12 +385,13 @@ class TokenControllerIntegrationTest(
   }
 
   private fun updateTokenExpireTime(token: String, exp: Long): String {
-    val claims = TokenGenerationAndValidation.parseClaims(token, publicKey)
-    claims.body["exp"] = exp
+    val jws = TokenGenerationAndValidation.parseClaims(token, publicKey)
+    val claims = HashMap<String, Any>(jws.payload)
+    claims["exp"] = exp
     return Jwts.builder()
-      .addClaims(claims.body)
-      .setHeader(claims.header)
-      .signWith(SignatureAlgorithm.RS256, getPrivateKey(privateKey))
+      .claims().add(claims).and()
+      .header().add(jws.header).and()
+      .signWith(getPrivateKey(privateKey), Jwts.SIG.RS256)
       .compact()
   }
 
@@ -400,5 +405,10 @@ class TokenControllerIntegrationTest(
     Assertions.assertEquals(listOf("0"), httpHeaders[HttpHeaders.EXPIRES])
     Assertions.assertEquals(listOf("DENY"), httpHeaders["X-Frame-Options"])
     Assertions.assertEquals(listOf("nosniff"), httpHeaders["X-Content-Type-Options"])
+  }
+
+  private fun getsignedInUserFromClaims(claims: Claims): String {
+    val client = claims["aud"] as LinkedHashSet<Any>
+    return client.first as String
   }
 }

@@ -1,12 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token
 
 import io.jsonwebtoken.Claims
-import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator
-import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.jackson.io.JacksonSerializer
 import org.springframework.http.HttpStatus
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
@@ -33,10 +29,10 @@ class TokenGenerationAndValidation {
       try {
         val privateKey = getPrivateKey(privateKeyInString)
         return Jwts.builder()
-          .serializeToJsonWith(JacksonSerializer(mapper.build()))
-          .addClaims(payloadMap)
-          .setHeader(headerMap)
-          .signWith(privateKey, SignatureAlgorithm.RS256)
+          .json(JacksonSerializer(mapper.build()))
+          .claims().add(payloadMap).and()
+          .header().add(headerMap).and()
+          .signWith(privateKey, Jwts.SIG.RS256)
           .compact()
       } catch (e: Exception) {
         val message = "Exception during token creation ${e.message}"
@@ -59,12 +55,11 @@ class TokenGenerationAndValidation {
           invalidTokenFormat(token)
         }
         val publicKey = getPublicKey(publicKeyInString)
-        return DefaultJwtSignatureValidator(SignatureAlgorithm.RS256, publicKey, Decoders.BASE64URL).isValid(
-          chunks[0] + "." + chunks[1],
-          chunks[2],
-        )
+        Jwts.parser().verifyWith(publicKey).build().parseSignedClaims(token)
+        return true
       } catch (e: Exception) {
         val message = "Exception during token verification ${e.message}"
+        return false
         throw ApiException(
           message,
           HttpStatus.FORBIDDEN,
@@ -77,8 +72,16 @@ class TokenGenerationAndValidation {
     fun parseClaims(token: String, publicKeyInString: String): Jws<Claims> {
       try {
         val publicKey = getPublicKey(publicKeyInString)
-        return Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(token)
-      } catch (e: ExpiredJwtException) {
+        return Jwts.parser().verifyWith(publicKey).build().parseSignedClaims(token)
+      } catch (e: io.jsonwebtoken.JwtException) {
+        val message = "Invalid $token"
+        throw ApiException(
+          message,
+          HttpStatus.BAD_REQUEST,
+          ApiErrorTypes.INVALID_TOKEN.toString(),
+          ApiErrorTypes.INVALID_TOKEN.toString(),
+        )
+      } catch (e: IllegalArgumentException) {
         val message = "Invalid $token"
         throw ApiException(
           message,
@@ -89,7 +92,7 @@ class TokenGenerationAndValidation {
       }
     }
 
-    fun validateExpireTime(expireAt: Int) {
+    fun validateExpireTime(expireAt: Long) {
       val currentEpocTime = Instant.now().epochSecond
       if (currentEpocTime > expireAt) {
         throw IllegalArgumentException("Token has expired")

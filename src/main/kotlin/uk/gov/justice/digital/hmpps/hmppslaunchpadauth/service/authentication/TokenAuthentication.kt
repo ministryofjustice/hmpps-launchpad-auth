@@ -34,11 +34,12 @@ class TokenAuthentication(
       if (TokenGenerationAndValidation.validateJwtTokenSignature(token, publicKey)) {
         val claims = getJwsClaims(token)
         checkIfRefreshToken(claims)
-        val expireAt = getClaim("exp", claims) as Int
+        val expireAt = getClaim("exp", claims) as Long
         validateExpireTime(expireAt)
         getClaim("jti", claims) as String
-        getClaim("iat", claims) as Int
-        val aud = getClaim("aud", claims) as String
+        getClaim("iat", claims) as Long
+        val client = getClaim("aud", claims) as LinkedHashSet<Any>
+        val aud = client.first as String
         val clientId = validateAndGetUUIDInClaim(aud, "aud")
         val userId = getClaim("sub", claims) as String
         val scopes = getClaim("scopes", claims)
@@ -80,7 +81,7 @@ class TokenAuthentication(
   private fun getJwsClaims(token: String): Claims {
     try {
       val jwsClaims = TokenGenerationAndValidation.parseClaims(token, publicKey)
-      return jwsClaims.body
+      return jwsClaims.payload
     } catch (e: JwtException) {
       val message = "Exception during parsing claims in token authentication ${e.message}"
       throw ApiException(
@@ -92,7 +93,7 @@ class TokenAuthentication(
     }
   }
 
-  private fun validateExpireTime(exp: Int) {
+  private fun validateExpireTime(exp: Long) {
     try {
       TokenGenerationAndValidation.validateExpireTime(exp)
     } catch (e: IllegalArgumentException) {
