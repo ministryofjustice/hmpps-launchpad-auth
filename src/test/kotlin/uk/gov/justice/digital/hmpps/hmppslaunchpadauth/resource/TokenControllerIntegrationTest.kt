@@ -344,8 +344,8 @@ class TokenControllerIntegrationTest(
     val claims = TokenGenerationAndValidation.parseClaims(idToken, publicKey).body
     val exp = claims["exp"] as Long
     Assertions.assertTrue(exp > Instant.now().epochSecond)
-    val signInUser = getclientFromClaims(claims)
-    Assertions.assertEquals(clientId.toString(), signInUser)
+    val client = getclientFromClaims(claims)
+    Assertions.assertEquals(clientId.toString(), client)
     Assertions.assertEquals(userID, claims["sub"])
     Assertions.assertEquals("Test User", claims["name"])
     Assertions.assertEquals("Test", claims["given_name"])
@@ -357,8 +357,8 @@ class TokenControllerIntegrationTest(
     val claims = TokenGenerationAndValidation.parseClaims(accessToken, publicKey).body
     val exp = claims["exp"] as Long
     Assertions.assertTrue(exp > Instant.now().epochSecond)
-    val signInUser = getclientFromClaims(claims)
-    Assertions.assertEquals(clientId.toString(), signInUser)
+    val client = getclientFromClaims(claims)
+    Assertions.assertEquals(clientId.toString(), client)
     Assertions.assertEquals(userID, claims["sub"])
     val scopes = claims["scopes"] as ArrayList<String>
     assertScopes(scopes, userApprovedClientOne.scopes)
@@ -369,8 +369,8 @@ class TokenControllerIntegrationTest(
     val claims = TokenGenerationAndValidation.parseClaims(refreshToken, publicKey).payload
     val exp = claims["exp"] as Long
     Assertions.assertTrue(exp > Instant.now().epochSecond)
-    val signInUser = getclientFromClaims(claims)
-    Assertions.assertEquals(clientId.toString(), signInUser)
+    val client = getclientFromClaims(claims)
+    Assertions.assertEquals(clientId.toString(), client)
     Assertions.assertEquals(userID, claims["sub"])
     val scopes = claims["scopes"] as ArrayList<String>
     assertScopes(scopes, userApprovedClientOne.scopes)
