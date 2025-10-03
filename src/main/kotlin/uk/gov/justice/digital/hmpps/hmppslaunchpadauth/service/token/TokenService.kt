@@ -195,7 +195,7 @@ class TokenService(
         val v = value as String
         refreshTokenPayloadClaims[v] = refreshTokenPayloadOld[value] as Any
       }
-      refreshTokenPayloadClaims.put("ati", accessTokenId)
+      refreshTokenPayloadClaims["ati"] = accessTokenId
     } else {
       val refreshTokenPayload = RefreshTokenPayload()
       val accessTokenId = accessTokenPayloadClaims["jti"] as String
@@ -299,16 +299,15 @@ class TokenService(
 
   private fun validateAndGetRefreshTokenPayloadClaims(refreshToken: String, clientId: UUID): Jws<Claims> {
     if (TokenGenerationAndValidation.validateJwtTokenSignature(refreshToken, publicKey)) {
-      val jwsClaims: Jws<Claims> = TokenGenerationAndValidation.parseClaims(refreshToken, publicKey)
-      val claims = jwsClaims.payload
-      checkIfAccessToken(claims)
-      val exp = getClaim("exp", claims) as Long
-      val jti = getClaim("jti", claims) as String
+      val claims = TokenGenerationAndValidation.parseClaims(refreshToken, publicKey)
+      checkIfAccessToken(claims.payload)
+      val exp = getClaim("exp", claims.payload) as Long
+      val jti = getClaim("jti", claims.payload) as String
       validateAndGetUUIDInClaim(jti, "jti")
-      getClaim("iat", claims) as Long
+      getClaim("iat", claims.payload) as Long
       validateExpireTime(exp)
-      getClaim("sub", claims) as String
-      val client = getClaim("aud", claims) as LinkedHashSet<Any>
+      getClaim("sub", claims.payload) as String
+      val client = getClaim("aud", claims.payload) as LinkedHashSet<Any>
       val clientIdInRefreshToken = client.first
       if (clientId.toString() != clientIdInRefreshToken) {
         val message =
@@ -320,7 +319,7 @@ class TokenService(
           INVALID_REQUEST_MSG,
         )
       }
-      return jwsClaims
+      return claims
     } else {
       val message = "Refresh token signature is invalid"
       throw ApiException(

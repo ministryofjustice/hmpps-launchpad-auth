@@ -4,7 +4,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import java.util.*
 
@@ -45,6 +44,5 @@ class TokenGenerationAndValidationTest {
     val token = TokenGenerationAndValidation.generateJwtToken(claims, header, privateKey)
     val result = TokenGenerationAndValidation.validateJwtTokenSignature(token, publicKey)
     assertEquals(false, result)
-    assertDoesNotThrow { TokenGenerationAndValidation.validateJwtTokenSignature(token, publicKey) }
   }
 }

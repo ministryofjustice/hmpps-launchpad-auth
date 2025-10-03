@@ -58,14 +58,7 @@ class TokenGenerationAndValidation {
         Jwts.parser().verifyWith(publicKey).build().parseSignedClaims(token)
         return true
       } catch (e: Exception) {
-        val message = "Exception during token verification ${e.message}"
         return false
-        throw ApiException(
-          message,
-          HttpStatus.FORBIDDEN,
-          ApiErrorTypes.INVALID_TOKEN.toString(),
-          ApiErrorTypes.INVALID_TOKEN.toString(),
-        )
       }
     }
 

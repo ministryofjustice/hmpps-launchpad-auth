@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.Jwts.claims
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -345,7 +344,7 @@ class TokenControllerIntegrationTest(
     val claims = TokenGenerationAndValidation.parseClaims(idToken, publicKey).body
     val exp = claims["exp"] as Long
     Assertions.assertTrue(exp > Instant.now().epochSecond)
-    val signInUser = getsignedInUserFromClaims(claims)
+    val signInUser = getclientFromClaims(claims)
     Assertions.assertEquals(clientId.toString(), signInUser)
     Assertions.assertEquals(userID, claims["sub"])
     Assertions.assertEquals("Test User", claims["name"])
@@ -358,7 +357,7 @@ class TokenControllerIntegrationTest(
     val claims = TokenGenerationAndValidation.parseClaims(accessToken, publicKey).body
     val exp = claims["exp"] as Long
     Assertions.assertTrue(exp > Instant.now().epochSecond)
-    val signInUser = getsignedInUserFromClaims(claims)
+    val signInUser = getclientFromClaims(claims)
     Assertions.assertEquals(clientId.toString(), signInUser)
     Assertions.assertEquals(userID, claims["sub"])
     val scopes = claims["scopes"] as ArrayList<String>
@@ -370,7 +369,7 @@ class TokenControllerIntegrationTest(
     val claims = TokenGenerationAndValidation.parseClaims(refreshToken, publicKey).payload
     val exp = claims["exp"] as Long
     Assertions.assertTrue(exp > Instant.now().epochSecond)
-    val signInUser = getsignedInUserFromClaims(claims)
+    val signInUser = getclientFromClaims(claims)
     Assertions.assertEquals(clientId.toString(), signInUser)
     Assertions.assertEquals(userID, claims["sub"])
     val scopes = claims["scopes"] as ArrayList<String>
@@ -407,7 +406,7 @@ class TokenControllerIntegrationTest(
     Assertions.assertEquals(listOf("nosniff"), httpHeaders["X-Content-Type-Options"])
   }
 
-  private fun getsignedInUserFromClaims(claims: Claims): String {
+  private fun getclientFromClaims(claims: Claims): String {
     val client = claims["aud"] as LinkedHashSet<Any>
     return client.first as String
   }
