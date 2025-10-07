@@ -38,8 +38,7 @@ class TokenAuthentication(
         validateExpireTime(expireAt)
         getClaim("jti", claims) as String
         getClaim("iat", claims) as Long
-        val client = getClaim("aud", claims) as LinkedHashSet<Any>
-        val aud = client.first as String
+        val aud = getAudClaims("aud", claims) as String
         val clientId = validateAndGetUUIDInClaim(aud, "aud")
         val userId = getClaim("sub", claims) as String
         val scopes = getClaim("scopes", claims)
@@ -76,6 +75,23 @@ class TokenAuthentication(
       )
     }
     return claim
+  }
+
+  private fun getAudClaims(claimName: String, claims: Claims): Any {
+    val claimSet = claims[claimName]
+    if (claimSet is HashSet<*> && !claimSet.isEmpty()) {
+      val firstClaim = claimSet.first() as? String
+      if (!firstClaim.isNullOrEmpty()) {
+        return firstClaim
+      }
+    }
+    val message = "Required claim $claimName not found in access token"
+    throw ApiException(
+      message,
+      HttpStatus.FORBIDDEN,
+      ApiErrorTypes.ACCESS_DENIED.toString(),
+      INVALID_TOKEN_MSG,
+    )
   }
 
   private fun getJwsClaims(token: String): Claims {
