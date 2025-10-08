@@ -138,8 +138,8 @@ class TokenService(
     logger.info("Generating token for refresh token for client id: ${client.id}")
     validateGrant(grantType, client.authorizedGrantTypes)
     val refreshTokenPayloadOld = validateAndGetRefreshTokenPayloadClaims(refreshToken, client.id)
-    val userId = refreshTokenPayloadOld.body["sub"] as String
-    val scopes = refreshTokenPayloadOld.body["scopes"] as Any
+    val userId = refreshTokenPayloadOld.payload["sub"] as String
+    val scopes = refreshTokenPayloadOld.payload["scopes"] as Any
     val userApprovedClient =
       userApprovedClientService.getUserApprovedClientByUserIdAndClientId(userId, client.id)
         .orElseThrow {
@@ -152,7 +152,7 @@ class TokenService(
           )
         }
     validateScopeInRefreshTokenClaims(scopes, userApprovedClient.scopes)
-    return generateToken(userId, client.id, userApprovedClient.scopes, nonce, refreshTokenPayloadOld.body, client.sandbox)
+    return generateToken(userId, client.id, userApprovedClient.scopes, nonce, refreshTokenPayloadOld.payload, client.sandbox)
   }
 
   private fun generateToken(
@@ -191,11 +191,11 @@ class TokenService(
     var refreshTokenPayloadClaims = LinkedHashMap<String, Any>()
     if (refreshTokenPayloadOld != null) {
       accessTokenPayloadClaims["scopes"] = refreshTokenPayloadOld["scopes"] as Any
-      refreshTokenPayloadOld["ati"] = accessTokenId
       refreshTokenPayloadOld.keys.forEach { value ->
         val v = value as String
         refreshTokenPayloadClaims[v] = refreshTokenPayloadOld[value] as Any
       }
+      refreshTokenPayloadClaims["ati"] = accessTokenId
     } else {
       val refreshTokenPayload = RefreshTokenPayload()
       val accessTokenId = accessTokenPayloadClaims["jti"] as String
@@ -270,7 +270,7 @@ class TokenService(
     }
   }
 
-  private fun validateExpireTime(exp: Int) {
+  private fun validateExpireTime(exp: Long) {
     try {
       TokenGenerationAndValidation.validateExpireTime(exp)
     } catch (e: IllegalArgumentException) {
@@ -300,14 +300,15 @@ class TokenService(
   private fun validateAndGetRefreshTokenPayloadClaims(refreshToken: String, clientId: UUID): Jws<Claims> {
     if (TokenGenerationAndValidation.validateJwtTokenSignature(refreshToken, publicKey)) {
       val claims = TokenGenerationAndValidation.parseClaims(refreshToken, publicKey)
-      checkIfAccessToken(claims.body)
-      val exp = getClaim("exp", claims.body) as Int
-      val jti = getClaim("jti", claims.body) as String
+      checkIfAccessToken(claims.payload)
+      val exp = getClaim("exp", claims.payload) as Long
+      val jti = getClaim("jti", claims.payload) as String
       validateAndGetUUIDInClaim(jti, "jti")
-      getClaim("iat", claims.body) as Int
+      getClaim("iat", claims.payload) as Long
       validateExpireTime(exp)
-      getClaim("sub", claims.body) as String
-      val clientIdInRefreshToken = getClaim("aud", claims.body) as String
+      getClaim("sub", claims.payload) as String
+      val client = getClaim("aud", claims.payload) as LinkedHashSet<Any>
+      val clientIdInRefreshToken = client.first
       if (clientId.toString() != clientIdInRefreshToken) {
         val message =
           "client id $clientId from auth header do not match with aud $clientIdInRefreshToken in refresh token"

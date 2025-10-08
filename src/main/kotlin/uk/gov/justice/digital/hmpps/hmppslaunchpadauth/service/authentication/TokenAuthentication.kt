@@ -34,11 +34,11 @@ class TokenAuthentication(
       if (TokenGenerationAndValidation.validateJwtTokenSignature(token, publicKey)) {
         val claims = getJwsClaims(token)
         checkIfRefreshToken(claims)
-        val expireAt = getClaim("exp", claims) as Int
+        val expireAt = getClaim("exp", claims) as Long
         validateExpireTime(expireAt)
         getClaim("jti", claims) as String
-        getClaim("iat", claims) as Int
-        val aud = getClaim("aud", claims) as String
+        getClaim("iat", claims) as Long
+        val aud = getAudClaims("aud", claims) as String
         val clientId = validateAndGetUUIDInClaim(aud, "aud")
         val userId = getClaim("sub", claims) as String
         val scopes = getClaim("scopes", claims)
@@ -77,10 +77,27 @@ class TokenAuthentication(
     return claim
   }
 
+  private fun getAudClaims(claimName: String, claims: Claims): Any {
+    val claimSet = claims[claimName]
+    if (claimSet is HashSet<*> && !claimSet.isEmpty()) {
+      val firstClaim = claimSet.first() as? String
+      if (!firstClaim.isNullOrEmpty()) {
+        return firstClaim
+      }
+    }
+    val message = "Required claim $claimName not found in access token"
+    throw ApiException(
+      message,
+      HttpStatus.FORBIDDEN,
+      ApiErrorTypes.ACCESS_DENIED.toString(),
+      INVALID_TOKEN_MSG,
+    )
+  }
+
   private fun getJwsClaims(token: String): Claims {
     try {
       val jwsClaims = TokenGenerationAndValidation.parseClaims(token, publicKey)
-      return jwsClaims.body
+      return jwsClaims.payload
     } catch (e: JwtException) {
       val message = "Exception during parsing claims in token authentication ${e.message}"
       throw ApiException(
@@ -92,7 +109,7 @@ class TokenAuthentication(
     }
   }
 
-  private fun validateExpireTime(exp: Int) {
+  private fun validateExpireTime(exp: Long) {
     try {
       TokenGenerationAndValidation.validateExpireTime(exp)
     } catch (e: IllegalArgumentException) {
