@@ -7,6 +7,7 @@ purge_stale_sso_tokens_schedule: "05-55/10 07-21 * * 1-5"
 
 generic-service:
   replicaCount: 2
+  serviceAccountName: hmpps-launchpad-preprod
 
   ingress:
     host: launchpad-auth-preprod.hmpps.service.justice.gov.uk
