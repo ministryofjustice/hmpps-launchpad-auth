@@ -29,6 +29,7 @@ dependencies {
   implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.7.0")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("com.fasterxml.uuid:java-uuid-generator:5.1.1")
+  implementation("com.nimbusds:nimbus-jose-jwt:10.5")
 
   runtimeOnly("org.flywaydb:flyway-database-postgresql:11.13.2")
 
