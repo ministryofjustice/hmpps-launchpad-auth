@@ -6,7 +6,6 @@ import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.RSAKey
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
 import java.math.BigInteger
 import java.security.KeyFactory
 import java.security.PublicKey
@@ -32,17 +31,13 @@ class JwkService(
 
   @Throws(Exception::class)
   private fun convertStringToRSAPublicKey(publicKeyString: String): RSAPublicKey {
-    // Remove PEM headers if present
     var publicKeyString = publicKeyString
     publicKeyString = publicKeyString
       .replace("-----BEGIN PUBLIC KEY-----", "")
       .replace("-----END PUBLIC KEY-----", "")
       .replace("\\s+".toRegex(), "")
 
-    // Decode Base64
     val decoded = Base64.getDecoder().decode(publicKeyString)
-
-    // Create KeyFactory and generate public key
     val keySpec = X509EncodedKeySpec(decoded)
     val keyFactory: KeyFactory = KeyFactory.getInstance("RSA")
     val publicKey: PublicKey = keyFactory.generatePublic(keySpec)
@@ -59,7 +54,5 @@ class JwkService(
 
   private fun base64UrlDecode(data: String): ByteArray = Base64.getUrlDecoder().decode(data)
 
-  fun rsaPublicKeyToBase64String(publicKey: RSAPublicKey) = Base64.getEncoder().encodeToString(publicKey.encoded)
-
-  fun validateTokenWithPublicKey(token: String) = TokenGenerationAndValidation.validateJwtTokenSignature(token, publicKey)
+  fun rsaPublicKeyToBase64String(publicKey: RSAPublicKey): String? = Base64.getEncoder().encodeToString(publicKey.encoded)
 }
