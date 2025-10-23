@@ -26,6 +26,7 @@ generic-service:
     nutrition-app-staging: 3.10.88.156
     nutrition-app-dev-3: 51.19.33.88
     nutrition-app-dev-4: 81.99.123.223
+    nutrition-app-dev-5: 2.220.227.159
     uservision-accessibility-testers: 5.181.59.114/32
     appsec-testers: 80.195.27.199
     groups:

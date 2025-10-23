@@ -19,6 +19,7 @@ generic-service:
     nutrition-app-prod-1: 51.19.33.88
     nutrition-app-prod-2: 151.230.203.104
     nutrition-app-prod-3: 81.99.123.223
+    nutrition-app-dev-4: 2.220.227.159
     groups:
       - internal
       - prisons
