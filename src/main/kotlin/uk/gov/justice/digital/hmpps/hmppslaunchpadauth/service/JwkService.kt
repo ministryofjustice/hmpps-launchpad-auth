@@ -31,13 +31,13 @@ class JwkService(
 
   @Throws(Exception::class)
   private fun convertStringToRSAPublicKey(publicKeyString: String): RSAPublicKey {
-    var publicKeyString = publicKeyString
-    publicKeyString = publicKeyString
+    var publicKeyPEM = publicKeyString
       .replace("-----BEGIN PUBLIC KEY-----", "")
+      .replace(System.lineSeparator(), "")
       .replace("-----END PUBLIC KEY-----", "")
       .replace("\\s+".toRegex(), "")
 
-    val decoded = Base64.getDecoder().decode(publicKeyString)
+    val decoded = Base64.getDecoder().decode(publicKeyPEM)
     val keySpec = X509EncodedKeySpec(decoded)
     val keyFactory: KeyFactory = KeyFactory.getInstance("RSA")
     val publicKey: PublicKey = keyFactory.generatePublic(keySpec)
