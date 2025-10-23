@@ -5,11 +5,17 @@ import com.nimbusds.jose.jwk.JWKSet
 import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.RSAKey
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.constant.AuthServiceConstant.Companion.INTERNAL_SERVER_ERROR_MSG
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiErrorTypes
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import java.math.BigInteger
 import java.security.KeyFactory
+import java.security.NoSuchAlgorithmException
 import java.security.PublicKey
 import java.security.interfaces.RSAPublicKey
+import java.security.spec.InvalidKeySpecException
 import java.security.spec.RSAPublicKeySpec
 import java.security.spec.X509EncodedKeySpec
 import java.util.*
@@ -29,19 +35,24 @@ class JwkService(
     return JWKSet(builder.build()).toJSONObject()
   }
 
-  @Throws(Exception::class)
   private fun convertStringToRSAPublicKey(publicKeyString: String): RSAPublicKey {
-    var publicKeyPEM = publicKeyString
-      .replace("-----BEGIN PUBLIC KEY-----", "")
-      .replace(System.lineSeparator(), "")
-      .replace("-----END PUBLIC KEY-----", "")
-      .replace("\\s+".toRegex(), "")
+    try {
+      var publicKeyPEM = publicKeyString
+        .replace("-----BEGIN PUBLIC KEY-----", "")
+        .replace(System.lineSeparator(), "")
+        .replace("-----END PUBLIC KEY-----", "")
+        .replace("\\s+".toRegex(), "")
 
-    val decoded = Base64.getDecoder().decode(publicKeyPEM)
-    val keySpec = X509EncodedKeySpec(decoded)
-    val keyFactory: KeyFactory = KeyFactory.getInstance("RSA")
-    val publicKey: PublicKey = keyFactory.generatePublic(keySpec)
-    return publicKey as RSAPublicKey
+      val decoded = Base64.getDecoder().decode(publicKeyPEM)
+      val keySpec = X509EncodedKeySpec(decoded)
+      val keyFactory: KeyFactory = KeyFactory.getInstance("RSA")
+      val publicKey: PublicKey = keyFactory.generatePublic(keySpec)
+      return publicKey as RSAPublicKey
+    } catch (e: NoSuchAlgorithmException) {
+      throw ApiException("NoSuchAlgorithm", HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), INTERNAL_SERVER_ERROR_MSG)
+    } catch (e: InvalidKeySpecException) {
+      throw ApiException("InvalidKeySpec", HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), INTERNAL_SERVER_ERROR_MSG)
+    }
   }
 
   fun jwkToRsaPublicKey(n: String, e: String): RSAPublicKey {
