@@ -185,6 +185,7 @@ class TokenService(
       prisonerData.user,
       clientId,
       scopes,
+      issuerUrl,
       accessTokenValiditySeconds,
     )
     val accessTokenId = accessTokenPayloadClaims["jti"] as String
