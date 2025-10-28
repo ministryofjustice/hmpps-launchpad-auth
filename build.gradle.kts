@@ -1,8 +1,8 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.1.1"
-  kotlin("plugin.spring") version "2.2.20"
-  kotlin("plugin.jpa") version "2.2.20"
-  id("org.owasp.dependencycheck") version "12.1.6"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.1.4"
+  kotlin("plugin.spring") version "2.2.21"
+  kotlin("plugin.jpa") version "2.2.21"
+  id("org.owasp.dependencycheck") version "12.1.8"
 }
 
 configurations {
@@ -19,23 +19,23 @@ dependencies {
   implementation("io.jsonwebtoken:jjwt-impl:0.13.0")
   implementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
   implementation("org.json:json:20250517")
-  implementation("org.flywaydb:flyway-core:11.13.2")
-  implementation("org.postgresql:postgresql:42.7.7")
+  implementation("org.flywaydb:flyway-core:11.15.0")
+  implementation("org.postgresql:postgresql:42.7.8")
   implementation("org.ehcache:ehcache:3.11.1")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13") {
     exclude(group = "org.yaml", module = "snakeyaml")
   }
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.7.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.8.1")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("com.fasterxml.uuid:java-uuid-generator:5.1.1")
 
-  runtimeOnly("org.flywaydb:flyway-database-postgresql:11.13.2")
+  runtimeOnly("org.flywaydb:flyway-database-postgresql:11.15.0")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.7.0")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.8.1")
   testImplementation("org.springframework.boot:spring-boot-starter-webflux")
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.34") {
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.35") {
     exclude(group = "io.swagger.core.v3")
   }
   testImplementation("com.h2database:h2:2.4.240")
