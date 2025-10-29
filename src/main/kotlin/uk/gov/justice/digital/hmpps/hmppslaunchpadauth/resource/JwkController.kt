@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.JwkService
 
 @RestController
-@RequestMapping("v1")
+@RequestMapping("")
 @Tag(name = "End Points")
 class JwkController(
   private var jwkService: JwkService,

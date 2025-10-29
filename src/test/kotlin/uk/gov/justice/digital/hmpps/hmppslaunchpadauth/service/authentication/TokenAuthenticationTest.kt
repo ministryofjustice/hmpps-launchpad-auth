@@ -57,6 +57,9 @@ class TokenAuthenticationTest(
   @Value("\${launchpad.auth.kid}")
   private lateinit var kid: String
 
+  @Value("\${launchpad.auth.iss-url}")
+  private lateinit var issUrl: String
+
   private val encoder = BCryptPasswordEncoder()
   private val password = UUID.randomUUID().toString()
   private val scopes = setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ)
@@ -83,6 +86,7 @@ class TokenAuthenticationTest(
       User(USER_ID, "John", "Smith"),
       clientId,
       userApprovedScopes,
+      issUrl,
       accessTokenValiditySeconds,
     )
     val authHeader = "Bearer " + TokenGenerationAndValidation.generateJwtToken(
@@ -109,6 +113,7 @@ class TokenAuthenticationTest(
       User(USER_ID, "John", "Smith"),
       clientId,
       userApprovedScopes,
+      issUrl,
       accessTokenValiditySeconds,
     )
     val authHeader = "Bearer " + TokenGenerationAndValidation.generateJwtToken(
