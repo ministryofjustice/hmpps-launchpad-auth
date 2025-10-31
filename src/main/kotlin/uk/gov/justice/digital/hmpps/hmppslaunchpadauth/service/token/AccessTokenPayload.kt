@@ -10,6 +10,7 @@ class AccessTokenPayload {
     user: User,
     clientId: UUID,
     scopes: Set<Scope>,
+    issuerUrl: String,
     validityInSeconds: Long,
   ): LinkedHashMap<String, Any> {
     var claims = LinkedHashMap<String, Any>()
@@ -17,6 +18,7 @@ class AccessTokenPayload {
     claims = TokenCommonClaims.buildCommonClaims(clientId.toString(), user.id, claims)
     claims["exp"] = Instant.now().plusSeconds(validityInSeconds).epochSecond
     claims["scopes"] = TokenCommonClaims.buildScopeTextsSet(scopes)
+    claims["iss"] = issuerUrl
     return claims
   }
 
@@ -24,6 +26,7 @@ class AccessTokenPayload {
     user: User,
     clientId: UUID,
     scopes: Set<Scope>,
+    issuerUrl: String,
     validityInSeconds: Long,
-  ): LinkedHashMap<String, Any> = buildClaims(user, clientId, scopes, validityInSeconds)
+  ): LinkedHashMap<String, Any> = buildClaims(user, clientId, scopes, issuerUrl, validityInSeconds)
 }

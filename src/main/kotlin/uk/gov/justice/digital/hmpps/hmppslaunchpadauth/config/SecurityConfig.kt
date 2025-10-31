@@ -8,5 +8,9 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @Configuration
 class SecurityConfig {
   @Bean
-  fun webSecurityCustomizer(): WebSecurityCustomizer? = WebSecurityCustomizer { web: WebSecurity -> web.ignoring().requestMatchers("/v1/**") }
+  fun webSecurityCustomizer(): WebSecurityCustomizer? = WebSecurityCustomizer { web: WebSecurity ->
+    web.ignoring().requestMatchers("/v1/**")
+    // Uncomment the line below to expose public key endpoint
+    // web.ignoring().requestMatchers("/.well-known/jwks.json")
+  }
 }
