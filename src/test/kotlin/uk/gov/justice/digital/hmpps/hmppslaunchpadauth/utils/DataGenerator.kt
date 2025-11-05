@@ -149,6 +149,7 @@ class DataGenerator {
       nonce: String?,
       secret: String,
       kid: String,
+      issUrl: String,
       validityInSeconds: Long,
     ): String {
       val accessTokenPayload = AccessTokenPayload()
@@ -157,6 +158,7 @@ class DataGenerator {
         User(USER_ID, "John", "Smith"),
         client.id,
         userApprovedClient.scopes,
+        issUrl,
         validityInSeconds,
       )
       return "Bearer " + TokenGenerationAndValidation.generateJwtToken(

@@ -63,6 +63,9 @@ class UserApprovedClientIntegrationTest(
   @Value("\${launchpad.auth.kid}")
   private lateinit var kid: String
 
+  @Value("\${launchpad.auth.iss-url}")
+  private lateinit var issUrl: String
+
   @BeforeEach
   fun beforeEach() {
     clientRepository.deleteAll()
@@ -101,6 +104,7 @@ class UserApprovedClientIntegrationTest(
       "test nonce",
       privateKey,
       kid,
+      issUrl,
       accessTokenValiditySeconds,
     )
   }
