@@ -39,7 +39,8 @@ dependencies {
   testImplementation("io.swagger.parser.v3:swagger-parser:2.1.34") {
     exclude(group = "io.swagger.core.v3")
   }
-  testImplementation("com.h2database:h2:2.4.240")
+  testImplementation("io.zonky.test:embedded-postgres:2.1.1")
+  testImplementation("io.zonky.test:embedded-database-spring-test:2.6.0")
   testImplementation("org.wiremock:wiremock-standalone:3.13.1")
 }
 

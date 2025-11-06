@@ -1,7 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
 import com.fasterxml.uuid.Generators
-import com.github.tomakehurst.wiremock.http.Response.response
+import io.zonky.test.db.AutoConfigureEmbeddedDatabase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -32,6 +32,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY)
 @ActiveProfiles("test")
 class AdminEndpointIntegrationTest(
   @Autowired private var userApprovedClientRepository: UserApprovedClientRepository,
