@@ -16,12 +16,13 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantT
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.ClientRepository
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.BaseIntegrationTest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
 import java.util.*
 
 @ExtendWith(MockitoExtension::class)
-class ClientServiceTest {
+class ClientServiceTest : BaseIntegrationTest() {
   @Mock
   lateinit var clientRepository: ClientRepository
   private lateinit var clientService: ClientService

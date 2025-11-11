@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
 
 import com.fasterxml.uuid.Generators
-import com.github.tomakehurst.wiremock.http.Response.response
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -24,6 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.ClientRepository
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.SsoRequestRepository
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedClientRepository
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.BaseIntegrationTest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
 import java.time.LocalDateTime
@@ -39,7 +39,7 @@ class AdminEndpointIntegrationTest(
   @Autowired private var ssoRequestRepository: SsoRequestRepository,
   @Autowired private var encoder: BCryptPasswordEncoder,
   @Autowired private var webClientBuilder: WebClient.Builder,
-) {
+) : BaseIntegrationTest() {
   @LocalServerPort
   private val port = 0
 

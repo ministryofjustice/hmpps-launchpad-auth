@@ -26,6 +26,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.integration.priso
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.AccessTokenPayload
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenCommonClaims
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.BaseIntegrationTest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator.Companion.generateRandomRSAKey
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
@@ -43,7 +44,7 @@ class TokenAuthenticationTest(
   @Autowired private var tokenAuthentication: TokenAuthentication,
   @Value("\${launchpad.auth.access-token-validity-seconds}")
   private var accessTokenValiditySeconds: Long,
-) {
+) : BaseIntegrationTest() {
 
   @MockBean
   private lateinit var userIdValidator: UserIdValidator
