@@ -25,6 +25,7 @@ class ClientRepositoryTest(@Autowired var clientRepository: ClientRepository) : 
 
   @AfterEach
   fun tearDown() {
+    clientRepository.deleteAll()
   }
 
   @Test

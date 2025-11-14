@@ -42,6 +42,7 @@ class UserApprovedClientServiceTest : BaseIntegrationTest() {
 
   @AfterEach
   fun tearDown() {
+    userApprovedClientRepository.deleteAll()
   }
 
   @Test

@@ -31,6 +31,7 @@ class SsoRequestServiceTest : BaseIntegrationTest() {
 
   @AfterEach
   fun tearDown() {
+    ssoRequestRepository.deleteAll()
   }
 
   @Test

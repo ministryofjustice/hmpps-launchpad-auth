@@ -36,6 +36,7 @@ class ClientServiceTest : BaseIntegrationTest() {
 
   @AfterEach
   fun tearDown() {
+    clientRepository.deleteAll()
   }
 
   @Test

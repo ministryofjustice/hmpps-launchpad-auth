@@ -13,7 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.BaseIntegrationTest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
-import java.util.*
+import java.util.UUID
 
 @DataJpaTest()
 @EnableJpaRepositories(basePackages = ["uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository"])
@@ -26,6 +26,7 @@ class SsoRequestRepositoryTest(@Autowired private var ssoRequestRepository: SsoR
 
   @AfterEach
   fun tearDown() {
+    ssoRequestRepository.deleteAll()
   }
 
   @Test
