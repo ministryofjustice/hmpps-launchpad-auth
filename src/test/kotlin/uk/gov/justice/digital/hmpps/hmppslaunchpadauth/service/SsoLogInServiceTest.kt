@@ -21,7 +21,6 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.BaseIntegrationTest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
@@ -33,7 +32,7 @@ import java.util.*
 
 @SpringBootTest(classes = [SsoLogInService::class])
 @ActiveProfiles("test")
-class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInService) : BaseIntegrationTest() {
+class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInService) {
   @MockBean
   private lateinit var ssoRequestService: SsoRequestService
 

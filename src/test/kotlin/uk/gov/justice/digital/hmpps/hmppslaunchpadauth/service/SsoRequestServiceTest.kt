@@ -12,12 +12,11 @@ import org.mockito.kotlin.any
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.SsoRequestRepository
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.BaseIntegrationTest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import java.util.*
 
 @ExtendWith(MockitoExtension::class)
-class SsoRequestServiceTest : BaseIntegrationTest() {
+class SsoRequestServiceTest {
   @Mock
   private lateinit var ssoRequestRepository: SsoRequestRepository
   private lateinit var ssoRequestService: SsoRequestService

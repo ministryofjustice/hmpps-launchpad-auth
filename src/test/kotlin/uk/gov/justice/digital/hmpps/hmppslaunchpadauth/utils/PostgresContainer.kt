@@ -10,10 +10,8 @@ object PostgresContainer {
 
   private fun startPostgresqlContainer(): PostgreSQLContainer<Nothing>? {
     if (isPostgresRunning()) {
-      System.out.print("Using existing PostgreSQL database")
       return null
     }
-    System.out.print("Creating a TestContainers PostgreSQL database")
     return PostgreSQLContainer<Nothing>("postgres:17").apply {
       withEnv("HOSTNAME_EXTERNAL", "localhost")
       withDatabaseName("launchpad-test")
