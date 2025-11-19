@@ -30,6 +30,7 @@ class SsoRequestServiceTest {
 
   @AfterEach
   fun tearDown() {
+    ssoRequestRepository.deleteAll()
   }
 
   @Test

@@ -34,15 +34,16 @@ spring:
     name: hmpps-launchpad-auth
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: false
-  datasource:
-    username: sa
-    password: password
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
+      ddl-auto: none
+    show-sql: true
+    generate-ddl: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
   flyway:
-    enabled: false
+    enabled: true
+    url: launchpad-test
+    user: launchpad
+    password: launchpad
+    clean-disabled: false
   security:
     oauth2:
       resourceserver:

@@ -35,6 +35,7 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.ClientReposito
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.SsoRequestRepository
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository.UserApprovedClientRepository
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.token.TokenGenerationAndValidation
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.BaseIntegrationTest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator.Companion.getPrivateKey
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.LOGO_URI
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.REDIRECT_URI
@@ -55,7 +56,7 @@ class TokenControllerIntegrationTest(
   private var accessTokenValiditySeconds: Long,
   @Autowired
   var webClientBuilder: WebClient.Builder,
-) {
+) : BaseIntegrationTest() {
   @LocalServerPort
   private val port = 0
 

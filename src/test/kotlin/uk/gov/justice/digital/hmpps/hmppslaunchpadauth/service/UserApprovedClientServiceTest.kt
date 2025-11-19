@@ -41,6 +41,7 @@ class UserApprovedClientServiceTest {
 
   @AfterEach
   fun tearDown() {
+    userApprovedClientRepository.deleteAll()
   }
 
   @Test
