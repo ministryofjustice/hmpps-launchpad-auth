@@ -18,7 +18,6 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.SsoLogInService
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.BaseIntegrationTest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -26,7 +25,7 @@ import java.util.*
 
 @SpringBootTest(classes = [AuthController::class])
 @ActiveProfiles("test")
-class AuthControllerTest(@Autowired private var authController: AuthController) : BaseIntegrationTest() {
+class AuthControllerTest(@Autowired private var authController: AuthController) {
 
   @MockBean
   private lateinit var ssoLoginService: SsoLogInService

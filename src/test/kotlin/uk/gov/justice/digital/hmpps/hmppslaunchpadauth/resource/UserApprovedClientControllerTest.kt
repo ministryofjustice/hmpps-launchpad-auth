@@ -17,14 +17,13 @@ import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.UserApprovedClientService
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication.Authentication
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service.authentication.AuthenticationUserInfo
-import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.BaseIntegrationTest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.USER_ID
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.validator.UserIdValidator
 import java.util.*
 
 @SpringBootTest(classes = [UserApprovedClientController::class, UserIdValidator::class])
 @ActiveProfiles("test")
-class UserApprovedClientControllerTest(@Autowired private var userApprovedClientController: UserApprovedClientController) : BaseIntegrationTest() {
+class UserApprovedClientControllerTest(@Autowired private var userApprovedClientController: UserApprovedClientController) {
   @MockBean
   private lateinit var userApprovedClientService: UserApprovedClientService
 
