@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.health
 
-import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.HealthIndicator
@@ -24,4 +23,3 @@ class AuthHealthInfo(@Qualifier("hmppsAuthHealthWebClient") webClient: WebClient
 
 @Component("prisonerApi")
 class PrisonApiHealthInfo(@Qualifier("prisonApiHealthWebClient") webClient: WebClient, buildProperties: BuildProperties) : HealthPingCheck(webClient)
-
