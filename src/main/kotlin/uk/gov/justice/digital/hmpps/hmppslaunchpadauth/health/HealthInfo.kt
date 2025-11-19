@@ -23,21 +23,5 @@ class HealthInfo(buildProperties: BuildProperties) : HealthIndicator {
 class AuthHealthInfo(@Qualifier("hmppsAuthHealthWebClient") webClient: WebClient, buildProperties: BuildProperties) : HealthPingCheck(webClient)
 
 @Component("prisonerApi")
-class PrisonApiHealthInfo(
-  @Qualifier("prisonApiHealthWebClient") webClient: WebClient,
-  buildProperties: BuildProperties,
-  private val telemetryClient: TelemetryClient,
-) : HealthPingCheck(webClient) {
+class PrisonApiHealthInfo(@Qualifier("prisonApiHealthWebClient") webClient: WebClient, buildProperties: BuildProperties) : HealthPingCheck(webClient)
 
-  override fun health(): Health {
-    val health = super.health()
-    if (health.status.code != "UP") {
-      telemetryClient.trackException(
-        Exception("PrisonApi health check failed"),
-        mapOf("component" to "prisonerApi", "status" to health.status.code),
-        null,
-      )
-    }
-    return health
-  }
-}
