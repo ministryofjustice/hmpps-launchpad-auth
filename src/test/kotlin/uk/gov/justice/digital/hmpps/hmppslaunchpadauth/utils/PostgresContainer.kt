@@ -10,7 +10,7 @@ object PostgresContainer {
 
   private fun startPostgresqlContainer(): PostgreSQLContainer<Nothing>? {
     if (isPostgresRunning()) {
-      return null
+      //return null
     }
     return PostgreSQLContainer<Nothing>("postgres:17").apply {
       withEnv("HOSTNAME_EXTERNAL", "localhost")
