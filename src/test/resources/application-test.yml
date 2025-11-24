@@ -35,14 +35,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: false
     generate-ddl: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
-    url: launchpad-test
-    user: launchpad
-    password: launchpad
     clean-disabled: false
   security:
     oauth2:
