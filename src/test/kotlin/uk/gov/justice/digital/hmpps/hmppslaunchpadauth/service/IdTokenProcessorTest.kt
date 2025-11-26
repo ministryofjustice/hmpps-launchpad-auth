@@ -3,14 +3,12 @@ package uk.gov.justice.digital.hmpps.hmppslaunchpadauth.service
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.validator.UserIdValidator
@@ -18,9 +16,8 @@ import java.time.Instant
 import java.util.*
 
 @SpringBootTest(classes = [IdTokenProcessor::class, UserIdValidator::class])
-@EnableAutoConfiguration
-@ExtendWith(SpringExtension::class)
 @ActiveProfiles("test")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class IdTokenProcessorTest(@Autowired private var idTokenProcessor: IdTokenProcessor) {
 
   @Value("\${launchpad.auth.private-key}")
