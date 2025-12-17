@@ -1,7 +1,7 @@
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.2.0"
-  kotlin("plugin.spring") version "2.2.21"
-  kotlin("plugin.jpa") version "2.2.21"
+  kotlin("plugin.spring") version "2.3.0"
+  kotlin("plugin.jpa") version "2.3.0"
   id("org.owasp.dependencycheck") version "12.1.9"
 }
 
@@ -39,7 +39,7 @@ dependencies {
   testImplementation("io.swagger.parser.v3:swagger-parser:2.1.36") {
     exclude(group = "io.swagger.core.v3")
   }
-  testImplementation("org.testcontainers:postgresql:1.21.3")
+  testImplementation("org.testcontainers:postgresql:1.21.4")
   testImplementation("org.wiremock:wiremock-standalone:3.13.2")
 }
 
