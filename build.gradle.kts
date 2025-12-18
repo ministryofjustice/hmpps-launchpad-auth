@@ -19,7 +19,7 @@ dependencies {
   implementation("io.jsonwebtoken:jjwt-impl:0.13.0")
   implementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
   implementation("org.json:json:20250517")
-  implementation("org.flywaydb:flyway-core:11.19.0")
+  implementation("org.flywaydb:flyway-core:11.19.1")
   implementation("org.postgresql:postgresql:42.7.8")
   implementation("org.ehcache:ehcache:3.11.1")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14") {
@@ -31,12 +31,12 @@ dependencies {
   implementation("com.fasterxml.uuid:java-uuid-generator:5.2.0")
   implementation("com.nimbusds:nimbus-jose-jwt:10.6")
 
-  runtimeOnly("org.flywaydb:flyway-database-postgresql:11.19.0")
+  runtimeOnly("org.flywaydb:flyway-database-postgresql:11.19.1")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.8.2")
   testImplementation("org.springframework.boot:spring-boot-starter-webflux")
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.36") {
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.37") {
     exclude(group = "io.swagger.core.v3")
   }
   testImplementation("org.testcontainers:postgresql:1.21.4")
