@@ -10,6 +10,8 @@ generic-service:
 
   ingress:
     host: launchpad-auth-dev.hmpps.service.justice.gov.uk
+    # Use internal ingress controller for API Gateway access via VPC Link
+    className: nginx-internal-non-prod
     modsecurity_enabled: false
 
   scheduledDowntime:
