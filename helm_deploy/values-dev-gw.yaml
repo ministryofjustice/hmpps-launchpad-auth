@@ -1,5 +1,5 @@
 ---
-# Per environment values which override defaults in hmpps-launchpad-auth/values.yaml
+# For dev environment with API Gateway access via VPC Link
 
 purge_inactive_users_schedule: "0 13 * * 1-5"
 
@@ -9,8 +9,14 @@ generic-service:
   replicaCount: 2
 
   ingress:
-    host: launchpad-auth-dev.hmpps.service.justice.gov.uk
+    host: launchpad-auth-dev.internal-non-prod.cloud-platform.service.justice.gov.uk
+
+    # Use internal ingress controller for API Gateway access via VPC Link
+    className: internal-non-prod
     modsecurity_enabled: false
+    #annotations:
+      # Disable SSL redirect to allow HTTP traffic from API Gateway via VPC Link
+      #nginx.ingress.kubernetes.io/ssl-redirect: "false"
 
   scheduledDowntime:
     enabled: true
@@ -21,12 +27,9 @@ generic-service:
     ENVIRONMENT_NAME: "dev"
 
   allowlist:
-    nutrition-app-dev: 90.220.101.100
-    nutrition-app-staging: 3.10.88.156
-    uservision-accessibility-testers: 5.181.59.114/32
-    appsec-testers: 80.195.27.199
-    groups:
-      - internal
+    unrestricted: "0.0.0.0/0"
+#    groups:
+#      - internal
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 # See https://user-guide.cloud-platform.service.justice.gov.uk/documentation/monitoring-an-app/how-to-create-alarms.html#creating-your-own-custom-alerts
