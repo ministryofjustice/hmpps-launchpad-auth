@@ -11,7 +11,7 @@ generic-service:
   ingress:
     host: launchpad-auth-dev.hmpps.service.justice.gov.uk
     # Use internal ingress controller for API Gateway access via VPC Link
-    className: internal-non-prod
+    # className: internal-non-prod
     modsecurity_enabled: false
     annotations:
       # Disable SSL redirect to allow HTTP traffic from API Gateway via VPC Link
