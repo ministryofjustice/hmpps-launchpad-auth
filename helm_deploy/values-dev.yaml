@@ -13,7 +13,7 @@ generic-service:
   # Primary ingress: Frontend HTTPS access
   ingress:
     enabled: true
-    host: app-hostname.local # override per environment
+    host: launchpad-auth-dev.hmpps.service.justice.gov.uk
     tlsSecretName: hmpps-launchpad-auth-cert
     modsecurity_enabled: true
 
@@ -38,6 +38,8 @@ apiGatewayIngress:
   enabled: true
   host: launchpad-auth-dev.internal-non-prod.cloud-platform.service.justice.gov.uk
   className: internal-non-prod
+  allowlist:
+    unrestricted:"0.0.0.0/0
   annotations:
     # Disable SSL redirect to allow HTTP traffic from API Gateway via VPC Link
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -58,6 +60,7 @@ apiGatewayIngress:
       proxy_set_header X-Forwarded-Proto "http";
       proxy_set_header X-Forwarded-Ssl "off";
       proxy_set_header X-Forwarded-Port "80";
+    nginx.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
 
     # Override server snippet to block admin endpoints
     nginx.ingress.kubernetes.io/server-snippet: |

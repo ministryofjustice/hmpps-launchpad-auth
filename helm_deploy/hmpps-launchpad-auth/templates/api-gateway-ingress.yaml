@@ -7,10 +7,17 @@ metadata:
   name: {{ $fullName }}-api-gateway
   labels:
     {{- include "generic-service.labels" . | nindent 4 }}
-  {{- with index .Values "generic-service" "apiGatewayIngress" "annotations" }}
   annotations:
+    {{- with index .Values "generic-service" "apiGatewayIngress" "allowlist" }}
+    {{- $allowlist := list -}}
+    {{- range $key, $value := . }}
+    {{- $allowlist = append $allowlist $value -}}
+    {{- end }}
+    nginx.ingress.kubernetes.io/whitelist-source-range: {{ join "," $allowlist | quote }}
+    {{- end }}
+    {{- with index .Values "generic-service" "apiGatewayIngress" "annotations" }}
     {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- end }}
 spec:
   {{- if index .Values "generic-service" "apiGatewayIngress" "className" }}
   ingressClassName: {{ index .Values "generic-service" "apiGatewayIngress" "className" }}
