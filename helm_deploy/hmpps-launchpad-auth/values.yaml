@@ -66,5 +66,12 @@ generic-service:
     groups:
       - internal
 
+  apiGatewayIngress:
+    enabled: false
+    className: ""
+    host: ""
+    allowlist: {}
+    annotations: {}
+
 generic-prometheus-alerts:
   targetApplication: hmpps-launchpad-auth
