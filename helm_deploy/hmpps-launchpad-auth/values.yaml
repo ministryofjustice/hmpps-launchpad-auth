@@ -70,6 +70,7 @@ generic-service:
     enabled: false
     className: ""
     host: ""
+    allowlist: {}
     annotations: {}
 
 generic-prometheus-alerts:
