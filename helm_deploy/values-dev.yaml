@@ -1,7 +1,5 @@
 ---
-# Unified dev environment configuration
-# Supports BOTH frontend HTTPS access AND API Gateway HTTP access
-# with a SINGLE deployment and TWO ingress resources
+# Per environment values which override defaults in hmpps-launchpad-auth/values.yaml
 
 purge_inactive_users_schedule: "0 13 * * 1-5"
 
@@ -10,71 +8,29 @@ purge_stale_sso_tokens_schedule: "05-55/10 07-21 * * 1-5"
 generic-service:
   replicaCount: 2
 
-  # Primary ingress: Frontend HTTPS access
   ingress:
-    enabled: true
     host: launchpad-auth-dev.hmpps.service.justice.gov.uk
-    tlsSecretName: hmpps-launchpad-auth-cert
-    modsecurity_enabled: true
+    modsecurity_enabled: false
 
   scheduledDowntime:
     enabled: true
 
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
-    SPRING_PROFILES_ACTIVE: "dev-unified"
+    SPRING_PROFILES_ACTIVE: "dev"
     ENVIRONMENT_NAME: "dev"
 
   allowlist:
-    nutrition-app-dev: 90.220.101.100
-    nutrition-app-staging: 3.10.88.156
-    uservision-accessibility-testers: 5.181.59.114/32
-    appsec-testers: 80.195.27.199
-    groups:
-      - internal
-
-# Secondary ingress: API Gateway HTTP access
-apiGatewayIngress:
-  enabled: true
-  host: launchpad-auth-dev.internal-non-prod.cloud-platform.service.justice.gov.uk
-  className: internal-non-prod
-  allowlist:
-    unrestricted:"0.0.0.0/0
-  annotations:
-    # Disable SSL redirect to allow HTTP traffic from API Gateway via VPC Link
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
-
-    # Specify backend protocol as HTTP
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-
-    # Disable HSTS
-    nginx.ingress.kubernetes.io/hsts: "false"
-
-    # Disable use of forwarded headers from upstream
-    nginx.ingress.kubernetes.io/use-forwarded-headers: "false"
-
-    # Override X-Forwarded-Proto header to prevent Spring Boot from redirecting
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      # Force X-Forwarded-Proto to http to prevent Spring Boot 308 redirects
-      proxy_set_header X-Forwarded-Proto "http";
-      proxy_set_header X-Forwarded-Ssl "off";
-      proxy_set_header X-Forwarded-Port "80";
-    nginx.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
-
-    # Override server snippet to block admin endpoints
-    nginx.ingress.kubernetes.io/server-snippet: |
-      server_tokens off;
-      location /v1/admin/ {
-        deny all;
-        return 401;
-      }
-      location ~* /(etc|tmp|var|xampp|winnt|usr|proc|php)/ {
-        deny all;
-        return 401;
-      }
+    unrestricted:"0.0.0.0/0":
+    #nutrition-app-dev: 90.220.101.100
+    #nutrition-app-staging: 3.10.88.156
+    #uservision-accessibility-testers: 5.181.59.114/32
+    #appsec-testers: 80.195.27.199
+      #groups:
+    #- internal
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
+# See https://user-guide.cloud-platform.service.justice.gov.uk/documentation/monitoring-an-app/how-to-create-alarms.html#creating-your-own-custom-alerts
 generic-prometheus-alerts:
   alertSeverity: hmpps-launchpad-nonprod
   businessHoursOnly: true
