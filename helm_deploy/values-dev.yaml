@@ -33,47 +33,6 @@ generic-service:
     groups:
       - internal
 
-# Secondary ingress: API Gateway HTTP access
-apiGatewayIngress:
-  enabled: true
-  host: launchpad-auth-dev.internal-non-prod.cloud-platform.service.justice.gov.uk
-  className: internal-non-prod
-  allowlist:
-    unrestricted:"0.0.0.0/0
-  annotations:
-    # Disable SSL redirect to allow HTTP traffic from API Gateway via VPC Link
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
-
-    # Specify backend protocol as HTTP
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-
-    # Disable HSTS
-    nginx.ingress.kubernetes.io/hsts: "false"
-
-    # Disable use of forwarded headers from upstream
-    nginx.ingress.kubernetes.io/use-forwarded-headers: "false"
-
-    # Override X-Forwarded-Proto header to prevent Spring Boot from redirecting
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      # Force X-Forwarded-Proto to http to prevent Spring Boot 308 redirects
-      proxy_set_header X-Forwarded-Proto "http";
-      proxy_set_header X-Forwarded-Ssl "off";
-      proxy_set_header X-Forwarded-Port "80";
-    nginx.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
-
-    # Override server snippet to block admin endpoints
-    nginx.ingress.kubernetes.io/server-snippet: |
-      server_tokens off;
-      location /v1/admin/ {
-        deny all;
-        return 401;
-      }
-      location ~* /(etc|tmp|var|xampp|winnt|usr|proc|php)/ {
-        deny all;
-        return 401;
-      }
-
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
   alertSeverity: hmpps-launchpad-nonprod
