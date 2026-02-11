@@ -22,7 +22,7 @@ generic-service:
 
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
-    SPRING_PROFILES_ACTIVE: "dev-unified"
+    SPRING_PROFILES_ACTIVE: "dev"
     ENVIRONMENT_NAME: "dev"
 
   allowlist:
