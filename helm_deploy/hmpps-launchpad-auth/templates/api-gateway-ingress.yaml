@@ -4,6 +4,7 @@
 {{- if $genericService }}
 {{- $apiGatewayIngress := index $genericService "apiGatewayIngress" }}
 {{- if and $apiGatewayIngress (index $apiGatewayIngress "enabled") }}
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -19,8 +20,9 @@ metadata:
   annotations:
     external-dns.alpha.kubernetes.io/set-identifier: {{ $fullName }}-api-gateway-{{ $.Release.Namespace }}-green
     external-dns.alpha.kubernetes.io/aws-weight: "100"
-  {{- toYaml (index $apiGatewayIngress "annotations") | nindent 4 }}
-  {{- end }}
+    {{ toYaml (index $apiGatewayIngress "annotations") }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   {{- if and (index $apiGatewayIngress "className") (ne (index $apiGatewayIngress "className") "") }}
   ingressClassName: {{ index $apiGatewayIngress "className" }}
