@@ -20,7 +20,7 @@ metadata:
   annotations:
     external-dns.alpha.kubernetes.io/set-identifier: {{ $fullName }}-api-gateway-{{ $.Release.Namespace }}-green
     external-dns.alpha.kubernetes.io/aws-weight: "100"
-    {{ toYaml (index $apiGatewayIngress "annotations") }}
+    {{- with index $apiGatewayIngress "annotations" }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
