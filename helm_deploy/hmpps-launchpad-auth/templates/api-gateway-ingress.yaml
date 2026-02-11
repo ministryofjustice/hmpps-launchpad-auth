@@ -1,3 +1,4 @@
+# For gateway ingress
 {{- if index .Values "generic-service" "apiGatewayIngress" "enabled" -}}
 {{- $fullName := include "generic-service.fullname" . -}}
 {{- $svcPort := index .Values "generic-service" "image" "port" -}}
@@ -6,7 +7,15 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-api-gateway
   labels:
-    {{- include "generic-service.labels" . | nindent 4 }}
+{{- with index .Values "generic-service" -}}
+{{- $imageWithTag := dict "tag" "" }}
+{{- if index . "image" }}
+{{- $imageWithTag = merge $imageWithTag (index . "image") }}
+{{- end }}
+{{- $genericValues := merge . (dict "image" $imageWithTag) -}}
+{{- $genericCtx := dict "Values" $genericValues "Release" $.Release "Chart" $.Chart "Files" $.Files "Capabilities" $.Capabilities "Template" $.Template -}}
+{{ include "generic-service.labels" $genericCtx | nindent 4 }}
+{{- end }}
   {{- with index .Values "generic-service" "apiGatewayIngress" "annotations" }}
   annotations:
     {{- toYaml . | nindent 4 }}
