@@ -8,7 +8,12 @@ metadata:
   name: {{ $fullName }}-api-gateway
   labels:
 {{- with index .Values "generic-service" -}}
-{{- $genericCtx := dict "Values" . "Release" $.Release "Chart" $.Chart "Files" $.Files "Capabilities" $.Capabilities "Template" $.Template -}}
+{{- $imageWithTag := dict "tag" "" }}
+{{- if index . "image" }}
+{{- $imageWithTag = merge $imageWithTag (index . "image") }}
+{{- end }}
+{{- $genericValues := merge . (dict "image" $imageWithTag) -}}
+{{- $genericCtx := dict "Values" $genericValues "Release" $.Release "Chart" $.Chart "Files" $.Files "Capabilities" $.Capabilities "Template" $.Template -}}
 {{ include "generic-service.labels" $genericCtx | nindent 4 }}
 {{- end }}
   {{- with index .Values "generic-service" "apiGatewayIngress" "annotations" }}
