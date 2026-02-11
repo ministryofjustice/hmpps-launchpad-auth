@@ -1,0 +1,46 @@
+# Spring profile for API Gateway access (dev environment)
+# This profile disables forward-headers-strategy to prevent 308 redirects
+# when accessed via API Gateway with HTTP (not HTTPS)
+
+# Override server configuration to disable forward headers processing
+server:
+  forward-headers-strategy: none
+  tomcat:
+    remoteip:
+      # Disable protocol header to prevent HTTPS redirect
+      protocol-header: ""
+      # Keep remote IP header for logging purposes
+      remote-ip-header: x-forwarded-for
+
+# Azure redirect URI for API Gateway access
+azure:
+  launchpad-redirectUri: http://launchpad-auth-dev.internal-non-prod.cloud-platform.service.justice.gov.uk/v1/oauth2/callback
+
+# Launchpad issuer URL for API Gateway access
+launchpad:
+  auth:
+    iss-url: http://launchpad-auth-dev.internal-non-prod.cloud-platform.service.justice.gov.uk
+    # Keep shorter token validity for dev testing
+    id-token-validity-seconds: 300
+    access-token-validity-seconds: 600
+    refresh-token-validity-seconds: 900
+
+# Use dev environment configurations for external services
+hmpps:
+  auth:
+    url: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
+  prison-api:
+    url: https://prison-api-dev.prison.service.justice.gov.uk
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://sign-in-dev.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json
+      client:
+        provider:
+          hmpps-auth:
+            token-uri: https://sign-in-dev.hmpps.service.justice.gov.uk/auth/oauth/token
+  flyway:
+    locations: classpath:db/migration/dev
