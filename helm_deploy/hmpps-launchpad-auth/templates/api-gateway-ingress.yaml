@@ -1,3 +1,4 @@
+# For gateway ingress
 {{- if index .Values "generic-service" "apiGatewayIngress" "enabled" -}}
 {{- $fullName := include "generic-service.fullname" . -}}
 {{- $svcPort := index .Values "generic-service" "image" "port" -}}
