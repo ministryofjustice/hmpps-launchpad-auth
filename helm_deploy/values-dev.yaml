@@ -43,6 +43,7 @@ generic-service:
     annotations:
       # Accept HTTPS from API Gateway (port 443)
       nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
 
       # Backend pods speak HTTP
       nginx.ingress.kubernetes.io/backend-protocol: "HTTP"

@@ -1,9 +1,9 @@
 {{- $genericService := index .Values "generic-service" }}
+{{- $fullName := include "generic-service.fullname" . }}
+{{- $svcPort := index $genericService "image" "port" | default 8080 }}
 {{- if $genericService }}
 {{- $apiGatewayIngress := index $genericService "apiGatewayIngress" }}
 {{- if and $apiGatewayIngress (index $apiGatewayIngress "enabled") }}
-{{- $fullName := include "generic-service.fullname" . }}
-{{- $svcPort := index $genericService "image" "port" | default 8080 }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -17,10 +17,12 @@ metadata:
     {{- $genericValues := merge $genericService (dict "image" $imageWithTag) }}
     {{- $genericCtx := dict "Values" $genericValues "Release" $.Release "Chart" $.Chart "Files" $.Files "Capabilities" $.Capabilities "Template" $.Template }}
     {{- include "generic-service.labels" $genericCtx | nindent 4 }}
-  {{- if index $apiGatewayIngress "annotations" }}
   annotations:
-    {{- toYaml (index $apiGatewayIngress "annotations") | nindent 4 }}
-  {{- end }}
+    external-dns.alpha.kubernetes.io/set-identifier: {{ $fullName }}-api-gateway-{{ $.Release.Namespace }}-green
+    external-dns.alpha.kubernetes.io/aws-weight: "100"
+    {{- with index $apiGatewayIngress "annotations" }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   {{- if and (index $apiGatewayIngress "className") (ne (index $apiGatewayIngress "className") "") }}
   ingressClassName: {{ index $apiGatewayIngress "className" }}
