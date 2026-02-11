@@ -39,34 +39,31 @@ apiGatewayIngress:
   host: launchpad-auth-dev.internal-non-prod.cloud-platform.service.justice.gov.uk
   className: internal-non-prod
   annotations:
-    # Disable SSL redirect to allow HTTP traffic from API Gateway via VPC Link
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # Don't force SSL redirect (API Gateway already uses HTTPS)
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
 
-    # Specify backend protocol as HTTP
+    # Specify backend protocol as HTTP (API Gateway -> HTTPS -> Ingress, Ingress -> HTTP -> Pod)
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
 
-    # Disable HSTS
-    nginx.ingress.kubernetes.io/hsts: "false"
+    # Enable HSTS for HTTPS
+    # nginx.ingress.kubernetes.io/hsts: "true"
+    # nginx.ingress.kubernetes.io/hsts-max-age: "31536000"
 
-    # Disable use of forwarded headers from upstream
-    nginx.ingress.kubernetes.io/use-forwarded-headers: "false"
+    # Trust X-Forwarded headers from API Gateway
+    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
 
-    # Override X-Forwarded-Proto header to prevent Spring Boot from redirecting
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      # Force X-Forwarded-Proto to http to prevent Spring Boot 308 redirects
-      proxy_set_header X-Forwarded-Proto "http";
-      proxy_set_header X-Forwarded-Ssl "off";
-      proxy_set_header X-Forwarded-Port "80";
+    # Accept HTTPS connections and preserve protocol information
+      # nginx.ingress.kubernetes.io/configuration-snippet: |
+      # Preserve HTTPS protocol information from API Gateway
+      # Spring Boot will see this as HTTPS and won't redirect
+      # if ($http_x_forwarded_proto = "https") {
+      #  set $forwarded_proto "https";
+      # }
 
     # Override server snippet to block admin endpoints
     nginx.ingress.kubernetes.io/server-snippet: |
       server_tokens off;
       location /v1/admin/ {
-        deny all;
-        return 401;
-      }
-      location ~* /(etc|tmp|var|xampp|winnt|usr|proc|php)/ {
         deny all;
         return 401;
       }
