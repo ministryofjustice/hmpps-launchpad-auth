@@ -17,9 +17,10 @@ metadata:
     {{- $genericValues := merge $genericService (dict "image" $imageWithTag) }}
     {{- $genericCtx := dict "Values" $genericValues "Release" $.Release "Chart" $.Chart "Files" $.Files "Capabilities" $.Capabilities "Template" $.Template }}
     {{- include "generic-service.labels" $genericCtx | nindent 4 }}
-  {{- if index $apiGatewayIngress "annotations" }}
   annotations:
-    {{- toYaml (index $apiGatewayIngress "annotations") | nindent 4 }}
+    external-dns.alpha.kubernetes.io/set-identifier: {{ $fullName }}-api-gateway-{{ $.Release.Namespace }}-green
+    external-dns.alpha.kubernetes.io/aws-weight: "100"
+  {{- toYaml (index $apiGatewayIngress "annotations") | nindent 4 }}
   {{- end }}
 spec:
   {{- if and (index $apiGatewayIngress "className") (ne (index $apiGatewayIngress "className") "") }}
