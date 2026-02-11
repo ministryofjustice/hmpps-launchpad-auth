@@ -7,11 +7,11 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-api-gateway
   labels:
-{{- include "generic-service.labels" . | nindent 4 }}
-{{- with index .Values "generic-service" "apiGatewayIngress" "annotations" }}
+{{ include "generic-service.labels" . | nindent 4 }}
+  {{- with index .Values "generic-service" "apiGatewayIngress" "annotations" }}
   annotations:
-{{- toYaml . | nindent 4 }}
-{{- end }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- if index .Values "generic-service" "apiGatewayIngress" "className" }}
   ingressClassName: {{ index .Values "generic-service" "apiGatewayIngress" "className" }}
