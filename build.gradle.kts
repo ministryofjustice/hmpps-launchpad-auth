@@ -1,8 +1,8 @@
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.3.0"
-  kotlin("plugin.spring") version "2.3.0"
-  kotlin("plugin.jpa") version "2.3.0"
-  id("org.owasp.dependencycheck") version "12.1.9"
+  kotlin("plugin.spring") version "2.3.10"
+  kotlin("plugin.jpa") version "2.3.10"
+  id("org.owasp.dependencycheck") version "12.2.0"
 }
 
 configurations {
@@ -19,19 +19,19 @@ dependencies {
   implementation("io.jsonwebtoken:jjwt-impl:0.13.0")
   implementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
   implementation("org.json:json:20250517")
-  implementation("org.flywaydb:flyway-core:11.20.0")
-  implementation("org.postgresql:postgresql:42.7.8")
+  implementation("org.flywaydb:flyway-core:11.20.3")
+  implementation("org.postgresql:postgresql:42.7.10")
   implementation("org.ehcache:ehcache:3.11.1")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14") {
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.15") {
     exclude(group = "org.yaml", module = "snakeyaml")
   }
 
   implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.8.2")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("com.fasterxml.uuid:java-uuid-generator:5.2.0")
-  implementation("com.nimbusds:nimbus-jose-jwt:10.6")
+  implementation("com.nimbusds:nimbus-jose-jwt:10.7")
 
-  runtimeOnly("org.flywaydb:flyway-database-postgresql:11.20.0")
+  runtimeOnly("org.flywaydb:flyway-database-postgresql:11.20.3")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.8.2")
