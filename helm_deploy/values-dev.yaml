@@ -14,8 +14,7 @@ generic-service:
   ingress:
     enabled: true
     host: launchpad-auth-dev.hmpps.service.justice.gov.uk
-    tlsSecretName: hmpps-launchpad-auth-cert
-    modsecurity_enabled: true
+    modsecurity_enabled: false
 
   scheduledDowntime:
     enabled: true
