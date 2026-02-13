@@ -191,6 +191,11 @@ launchpad:
       name: wetherby
       displayName: HMYOI Wetherby
       youth: true
+     BFI:
+      agencyId: BFI
+      name: bedford
+      displayName: HMP Bedford
+      youth: false
 azure:
   oauth2-base-url: https://login.microsoftonline.com
   oauth2-api-path: oauth2/v2.0/authorize
