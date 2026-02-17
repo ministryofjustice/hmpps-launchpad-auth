@@ -10,7 +10,10 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-api-gateway
   labels:
-    {{- include "generic-service.labels" . | nindent 4 }}
+    app: {{ $fullName }}
+    app.kubernetes.io/name: {{ index $genericService "nameOverride" | default "hmpps-launchpad-auth" }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
   annotations:
     external-dns.alpha.kubernetes.io/set-identifier: {{ $fullName }}-api-gateway-{{ $.Release.Namespace }}-green
     external-dns.alpha.kubernetes.io/aws-weight: "100"
