@@ -9,8 +9,10 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.config.TestCacheConfig
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.SsoException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
@@ -24,6 +26,7 @@ import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 @DataJpaTest()
+@Import(TestCacheConfig::class)
 class ClientServiceTest : BaseIntegrationTest() {
   @Mock
   lateinit var clientRepository: ClientRepository

@@ -352,7 +352,7 @@ class AdminEndpointIntegrationTest(
       .toEntity(object : ParameterizedTypeReference<ResponseEntity<Void>>() {})
       .block()
 
-    Assertions.assertEquals(HttpStatus.ACCEPTED.value(), response.statusCode.value())
+    Assertions.assertEquals(HttpStatus.ACCEPTED.value(), response?.statusCode?.value())
     Assertions.assertEquals(1, ssoRequestRepository.findAll().size)
   }
 
@@ -369,7 +369,7 @@ class AdminEndpointIntegrationTest(
       .toEntity(object : ParameterizedTypeReference<ResponseEntity<Void>>() {})
       .block()
 
-    Assertions.assertEquals(HttpStatus.ACCEPTED.value(), response.statusCode.value())
+    Assertions.assertEquals(HttpStatus.ACCEPTED.value(), response?.statusCode?.value())
     Assertions.assertEquals(3, userApprovedClientRepository.findAll().size)
   }
 
@@ -404,7 +404,7 @@ class AdminEndpointIntegrationTest(
       .toEntity(object : ParameterizedTypeReference<ResponseEntity<Void>>() {})
       .block()
 
-    Assertions.assertEquals(HttpStatus.ACCEPTED.value(), response.statusCode.value())
+    Assertions.assertEquals(HttpStatus.ACCEPTED.value(), response?.statusCode?.value())
     Assertions.assertEquals(2, userApprovedClientRepository.findAll().size)
   }
 
@@ -438,7 +438,7 @@ class AdminEndpointIntegrationTest(
       .retrieve()
       .toEntity(object : ParameterizedTypeReference<ResponseEntity<Void>>() {})
       .block()
-    Assertions.assertEquals(HttpStatus.ACCEPTED.value(), response.statusCode.value())
+    Assertions.assertEquals(HttpStatus.ACCEPTED.value(), response?.statusCode?.value())
     Assertions.assertEquals(0, userApprovedClientRepository.findAll().size)
   }
 }

@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class OpenApiConfiguration(buildProperties: BuildProperties) {
-  private val version: String = buildProperties.version
+  private val version: String? = buildProperties.version
 
   @Value("\${launchpad.auth.base-url.dev}")
   private lateinit var devUrl: String

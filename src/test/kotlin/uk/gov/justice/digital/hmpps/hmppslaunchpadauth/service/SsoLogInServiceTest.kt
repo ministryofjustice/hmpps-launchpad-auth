@@ -11,9 +11,9 @@ import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.servlet.view.RedirectView
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.AuthorizationGrantType
@@ -33,16 +33,16 @@ import java.util.*
 @SpringBootTest(classes = [SsoLogInService::class])
 @ActiveProfiles("test")
 class SsoLogInServiceTest(@Autowired private var ssoLoginService: SsoLogInService) {
-  @MockBean
+  @MockitoBean
   private lateinit var ssoRequestService: SsoRequestService
 
-  @MockBean
+  @MockitoBean
   private lateinit var clientService: ClientService
 
-  @MockBean
+  @MockitoBean
   private lateinit var tokenProcessor: TokenProcessor
 
-  @MockBean
+  @MockitoBean
   private lateinit var userApprovedClientService: UserApprovedClientService
 
   @Value("\${launchpad.auth.private-key}")

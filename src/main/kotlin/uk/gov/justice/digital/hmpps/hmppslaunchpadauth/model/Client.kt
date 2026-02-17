@@ -15,7 +15,7 @@ data class Client(
   val id: UUID,
 
   @Column(name = "secret")
-  val secret: String,
+  val secret: String?,
 
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "scopes")

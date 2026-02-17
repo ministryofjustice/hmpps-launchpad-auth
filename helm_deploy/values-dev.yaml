@@ -34,7 +34,7 @@ generic-service:
 
   # Secondary ingress: API Gateway HTTPS access via Internal NLB
   apiGatewayIngress:
-    enabled: false
+    enabled: true
     host: launchpad-auth-dev.internal-non-prod.cloud-platform.service.justice.gov.uk
     className: internal-non-prod
     # No TLS secret needed - API Gateway handles TLS termination

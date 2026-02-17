@@ -46,7 +46,7 @@ class HmppsAuthClient(private var webClientBuilder: WebClient.Builder) {
         .block()!!
 
       if (response.statusCode.is2xxSuccessful && response.body != null) {
-        return "Bearer ${response.body.accessToken}"
+        return "Bearer ${response.body?.accessToken}"
       } else {
         throw ApiException(
           "Response code ${response.statusCode.value()} making request to Hmpps auth for access token",

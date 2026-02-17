@@ -86,7 +86,7 @@ class SsoLogInService(
       ssoRequestService.updateSsoRequest(ssoRequest)
       return updateSsoRequestSandboxClient(ssoRequest.id)
     } else {
-      return UriComponentsBuilder.fromHttpUrl(builtAzureOauth2Url())
+      return UriComponentsBuilder.fromUriString(builtAzureOauth2Url())
         .queryParam("response_type", "id_token")
         .queryParam("client_id", launchpadClientId)
         .queryParam("scope", UriUtils.encode("openid email profile", StandardCharsets.UTF_8))
@@ -183,12 +183,12 @@ class SsoLogInService(
     return RedirectView(url)
   }
 
-  private fun buildClientRedirectUrl(ssoRequest: SsoRequest): String = UriComponentsBuilder.fromHttpUrl(ssoRequest.client.redirectUri)
+  private fun buildClientRedirectUrl(ssoRequest: SsoRequest): String = UriComponentsBuilder.fromUriString(ssoRequest.client.redirectUri)
     .queryParam("code", ssoRequest.authorizationCode)
     .queryParamIfPresent("state", Optional.ofNullable(getEncodedValue(ssoRequest.client.state)))
     .build(true).toUriString()
 
-  private fun buildClientRedirectUrlAccessForNotApproved(ssoRequest: SsoRequest): String = UriComponentsBuilder.fromHttpUrl(ssoRequest.client.redirectUri)
+  private fun buildClientRedirectUrlAccessForNotApproved(ssoRequest: SsoRequest): String = UriComponentsBuilder.fromUriString(ssoRequest.client.redirectUri)
     .queryParam("error", ApiErrorTypes.ACCESS_DENIED.toString())
     .queryParam("error_description", ACCESS_DENIED_MSG)
     .queryParamIfPresent("state", Optional.ofNullable(getEncodedValue(ssoRequest.client.state)))
@@ -197,7 +197,7 @@ class SsoLogInService(
   private fun getEncodedValue(value: String?): String? {
     var encodedValue: String? = null
     if (StringUtils.hasText(value)) {
-      encodedValue = UriUtils.encode(value, StandardCharsets.UTF_8)
+      encodedValue = UriUtils.encode(value.toString(), StandardCharsets.UTF_8)
     }
     return encodedValue
   }

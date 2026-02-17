@@ -24,8 +24,8 @@ spring:
     baseline-on-migrate: true
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"
-    serialization:
-      WRITE_DATES_AS_TIMESTAMPS: false
+    #serialization:
+      #WRITE_DATES_AS_TIMESTAMPS: false
   thymeleaf:
     prefix: classpath:/templates/
 

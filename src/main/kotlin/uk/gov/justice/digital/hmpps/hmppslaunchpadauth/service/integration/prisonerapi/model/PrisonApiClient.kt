@@ -42,7 +42,7 @@ class PrisonApiClient(
     } catch (e: WebClientResponseException) {
       var message: String
       if (e.statusCode.value() == HttpStatus.UNAUTHORIZED.value()) {
-        cacheManager.getCache(HMPPS_AUTH_ACCESS_TOKEN_CACHE).clear()
+        cacheManager.getCache(HMPPS_AUTH_ACCESS_TOKEN_CACHE)?.clear()
         message = "Invalid or Expired access token sent to Prison API"
       } else if (e.statusCode.value() == HttpStatus.NOT_FOUND.value()) {
         message = "Record for offender id: $offenderId  do not exist"
@@ -63,8 +63,8 @@ class PrisonApiClient(
   }
 
   private fun handlePrisonApiResponse(offenderId: String, response: ResponseEntity<OffenderBooking>): OffenderBooking {
-    if (response.statusCode.is2xxSuccessful && response.body != null) {
-      return response.body
+    if (response != null && response.statusCode.is2xxSuccessful && response.body != null && response.body as OffenderBooking != null) {
+      return response.body as OffenderBooking
     } else if (response.statusCode.value() == HttpStatus.NOT_FOUND.value()) {
       val message = "Record for offender id: $offenderId  do not exist"
       throw ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorTypes.SERVER_ERROR.toString(), INTERNAL_SERVER_ERROR_MSG)

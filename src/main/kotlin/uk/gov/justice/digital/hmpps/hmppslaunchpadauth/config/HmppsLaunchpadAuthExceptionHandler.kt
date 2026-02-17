@@ -39,7 +39,7 @@ class HmppsLaunchpadAuthExceptionHandler {
   @ExceptionHandler(SsoException::class)
   fun handleSingleSignOnException(e: SsoException): RedirectView {
     log.error("Single sign on exception: {}", e.message)
-    val url = UriComponentsBuilder.fromHttpUrl(e.redirectUri)
+    val url = UriComponentsBuilder.fromUriString(e.redirectUri)
       .queryParam("error", e.error)
       .queryParam("error_description", e.errorDescription)
       .queryParamIfPresent("state", Optional.ofNullable(e.state))
@@ -100,7 +100,7 @@ class HmppsLaunchpadAuthExceptionHandler {
   }
 
   @ExceptionHandler(java.lang.Exception::class)
-  fun handleException(e: java.lang.Exception): ResponseEntity<ApiError?>? {
+  fun handleException(e: java.lang.Exception): ResponseEntity<ApiError>? {
     if (e is MethodArgumentTypeMismatchException) {
       log.error("MethodArgumentTypeMismatchException due to invalid request {}", e.message)
       return ResponseEntity
