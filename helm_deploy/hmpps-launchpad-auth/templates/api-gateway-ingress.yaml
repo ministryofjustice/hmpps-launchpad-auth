@@ -10,13 +10,7 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-api-gateway
   labels:
-    {{- $imageWithTag := dict "tag" "" }}
-    {{- if index $genericService "image" }}
-    {{- $imageWithTag = merge $imageWithTag (index $genericService "image") }}
-    {{- end }}
-    {{- $genericValues := merge $genericService (dict "image" $imageWithTag) }}
-    {{- $genericCtx := dict "Values" $genericValues "Release" $.Release "Chart" $.Chart "Files" $.Files "Capabilities" $.Capabilities "Template" $.Template }}
-    {{- include "generic-service.labels" $genericCtx | nindent 4 }}
+    {{- include "generic-service.labels" . | nindent 4 }}
   annotations:
     external-dns.alpha.kubernetes.io/set-identifier: {{ $fullName }}-api-gateway-{{ $.Release.Namespace }}-green
     external-dns.alpha.kubernetes.io/aws-weight: "100"
