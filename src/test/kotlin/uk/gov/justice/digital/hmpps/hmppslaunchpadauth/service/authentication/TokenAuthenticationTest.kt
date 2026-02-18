@@ -70,6 +70,7 @@ class TokenAuthenticationTest(
   private val clientId = UUID.randomUUID()
   private val userId = USER_ID
   private val userApprovedScopes = setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ)
+  private val encodedPassword: String = encoder.encode(password) as String
 
   @BeforeEach
   fun setUp() {
@@ -160,7 +161,7 @@ class TokenAuthenticationTest(
 
   private fun buildClient(enabled: Boolean): Client = Client(
     clientId,
-    encoder.encode(password),
+    encodedPassword,
     scopes,
     grants,
     setOf(redirectUri),

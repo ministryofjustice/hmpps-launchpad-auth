@@ -84,6 +84,9 @@ class TokenControllerIntegrationTest(
 
   @BeforeEach
   fun beforeEach() {
+    @Suppress("UNCHECKED_CAST")
+    val encodedSecret = encoder.encode(clientSecret.toString()) as String
+
     wiremock.start()
     WireMock.configureFor("localhost", wiremock.port())
     WireMock.stubFor(
@@ -124,7 +127,7 @@ class TokenControllerIntegrationTest(
     userApprovedClientRepository.deleteAll()
     clientDBOne = Client(
       clientId,
-      encoder.encode(clientSecret.toString()),
+      encodedSecret,
       setOf(
         Scope.USER_CLIENTS_READ,
         Scope.USER_BASIC_READ,

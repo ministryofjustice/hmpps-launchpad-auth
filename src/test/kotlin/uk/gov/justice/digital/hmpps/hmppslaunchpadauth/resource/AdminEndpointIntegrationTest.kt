@@ -82,6 +82,9 @@ class AdminEndpointIntegrationTest(
   private val clientSecret = UUID.randomUUID()
   private val clientNonce: String = "client_nonce"
 
+  @Suppress("UNCHECKED_CAST")
+  private var encodedClientSecret = encoder.encode(clientSecret.toString()) as String
+
   @BeforeEach
   fun beforeEach() {
     clientRepository.deleteAll()
@@ -90,7 +93,7 @@ class AdminEndpointIntegrationTest(
 
     clientDBOne = Client(
       clientIdOne,
-      encoder.encode(clientSecret.toString()),
+      encodedClientSecret,
       setOf(
         Scope.USER_CLIENTS_READ,
         Scope.USER_BASIC_READ,
@@ -108,7 +111,7 @@ class AdminEndpointIntegrationTest(
     )
     clientDBSecond = Client(
       clientIdOne,
-      encoder.encode(clientSecret.toString()),
+      encodedClientSecret,
       setOf(
         Scope.USER_CLIENTS_READ,
         Scope.USER_BASIC_READ,
@@ -126,7 +129,7 @@ class AdminEndpointIntegrationTest(
     )
     clientDBSecond = Client(
       clientIdOne,
-      encoder.encode(clientSecret.toString()),
+      encodedClientSecret,
       setOf(
         Scope.USER_CLIENTS_READ,
         Scope.USER_BASIC_READ,

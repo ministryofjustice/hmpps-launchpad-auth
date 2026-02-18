@@ -28,11 +28,17 @@ class BasicAuthenticationTest {
 
   private lateinit var encoder: BCryptPasswordEncoder
   private lateinit var basicAuthentication: BasicAuthentication
+  private var encodedPassword: String = ""
+  private var password: String = ""
 
   @BeforeEach
   fun setUp() {
     encoder = BCryptPasswordEncoder()
     basicAuthentication = BasicAuthentication(clientService, encoder)
+    password = UUID.randomUUID().toString()
+
+    @Suppress("UNCHECKED_CAST")
+    encodedPassword = encoder.encode(password) as String
   }
 
   @AfterEach
@@ -41,7 +47,6 @@ class BasicAuthenticationTest {
 
   @Test
   fun `authenticate valid username and password`() {
-    val password = UUID.randomUUID().toString()
     val scopes = setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ)
     val grants = setOf(AuthorizationGrantType.AUTHORIZATION_CODE)
     val redirectUri = REDIRECT_URI
@@ -49,7 +54,7 @@ class BasicAuthenticationTest {
     val id = UUID.randomUUID()
     val client = Client(
       id,
-      encoder.encode(password),
+      encodedPassword,
       scopes,
       grants,
       setOf(redirectUri),
@@ -68,7 +73,6 @@ class BasicAuthenticationTest {
 
   @Test
   fun `authenticate invalid username and password`() {
-    val password = UUID.randomUUID().toString()
     val scopes = setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ)
     val grants = setOf(AuthorizationGrantType.AUTHORIZATION_CODE)
     val redirectUri = REDIRECT_URI
@@ -76,7 +80,7 @@ class BasicAuthenticationTest {
     val id = UUID.randomUUID()
     val client = Client(
       id,
-      encoder.encode(password),
+      encodedPassword,
       scopes,
       grants,
       setOf(redirectUri),
@@ -98,7 +102,6 @@ class BasicAuthenticationTest {
 
   @Test
   fun `authenticate when client do not exist`() {
-    val password = UUID.randomUUID().toString()
     val scopes = setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ)
     val grants = setOf(AuthorizationGrantType.AUTHORIZATION_CODE)
     val redirectUri = REDIRECT_URI
@@ -106,7 +109,7 @@ class BasicAuthenticationTest {
     val id = UUID.randomUUID()
     val client = Client(
       id,
-      encoder.encode(password),
+      encodedPassword,
       scopes,
       grants,
       setOf(redirectUri),
@@ -127,7 +130,6 @@ class BasicAuthenticationTest {
 
   @Test
   fun `authenticate when client is not enabled`() {
-    val password = UUID.randomUUID().toString()
     val scopes = setOf(Scope.USER_BASIC_READ, Scope.USER_BOOKING_READ)
     val grants = setOf(AuthorizationGrantType.AUTHORIZATION_CODE)
     val redirectUri = REDIRECT_URI
@@ -135,7 +137,7 @@ class BasicAuthenticationTest {
     val id = UUID.randomUUID()
     val client = Client(
       id,
-      encoder.encode(password),
+      encodedPassword,
       scopes,
       grants,
       setOf(redirectUri),
