@@ -32,7 +32,7 @@ dependencies {
   implementation("com.fasterxml.uuid:java-uuid-generator:5.2.0")
   implementation("com.nimbusds:nimbus-jose-jwt:10.7")
 
-  runtimeOnly("org.flywaydb:flyway-database-postgresql")
+  runtimeOnly("org.flywaydb:flyway-database-postgresql:12.0.1")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")

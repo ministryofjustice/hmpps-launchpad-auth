@@ -13,7 +13,7 @@ import uk.gov.justice.hmpps.kotlin.health.HealthPingCheck
  */
 @Component
 class HealthInfo(buildProperties: BuildProperties) : HealthIndicator {
-  private val version: String = buildProperties.version.toString()
+  private val version: String = buildProperties.version as String
 
   override fun health(): Health = Health.up().withDetail("version", version).build()
 }

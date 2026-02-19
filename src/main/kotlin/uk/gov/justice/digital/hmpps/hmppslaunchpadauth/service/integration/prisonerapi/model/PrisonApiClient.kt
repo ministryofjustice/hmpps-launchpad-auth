@@ -63,7 +63,7 @@ class PrisonApiClient(
   }
 
   private fun handlePrisonApiResponse(offenderId: String, response: ResponseEntity<OffenderBooking>): OffenderBooking {
-    if (response != null && response.statusCode.is2xxSuccessful && response.body != null && response.body as OffenderBooking != null) {
+    if (response.statusCode.is2xxSuccessful && response.body != null && response.body as OffenderBooking != null) {
       return response.body as OffenderBooking
     } else if (response.statusCode.value() == HttpStatus.NOT_FOUND.value()) {
       val message = "Record for offender id: $offenderId  do not exist"

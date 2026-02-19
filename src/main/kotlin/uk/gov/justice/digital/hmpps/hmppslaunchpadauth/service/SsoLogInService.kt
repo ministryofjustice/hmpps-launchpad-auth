@@ -197,7 +197,7 @@ class SsoLogInService(
   private fun getEncodedValue(value: String?): String? {
     var encodedValue: String? = null
     if (StringUtils.hasText(value)) {
-      encodedValue = UriUtils.encode(value.toString(), StandardCharsets.UTF_8)
+      encodedValue = UriUtils.encode(value as String, StandardCharsets.UTF_8)
     }
     return encodedValue
   }
