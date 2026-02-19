@@ -35,7 +35,7 @@ class CacheConfig {
     val cachingProvider = Caching.getCachingProvider()
     val cacheManager = cachingProvider.cacheManager
     val configuration = Eh107Configuration.fromEhcacheCacheConfiguration(cacheConfiguration)
-    if (cacheManager.getCache(HMPPS_AUTH_ACCESS_TOKEN_CACHE, String::class.java, String::class.java) == null) {
+    cacheManager.getCache(HMPPS_AUTH_ACCESS_TOKEN_CACHE, String::class.java, String::class.java) ?: run {
       cacheManager.createCache(HMPPS_AUTH_ACCESS_TOKEN_CACHE, configuration)
     }
     return JCacheCacheManager(cacheManager)
