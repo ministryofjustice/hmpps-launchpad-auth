@@ -58,6 +58,13 @@ generic-service:
           return 401;
         }
 
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Port 443;
+
+      # NLB IpAddresses to allow access to API Gateway ingress
+      nginx.ingress.kubernetes.io/whitelist-source-range: "172.20.103.178/32,172.20.143.89/32,172.20.95.25/32"
+
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
   alertSeverity: hmpps-launchpad-nonprod
