@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: nginx-proxy-headers
-  namespace: hmpps-launchpad-dev
-data:
-  X-Forwarded-Proto: "https"
-  X-Forwarded-Port: "443"
