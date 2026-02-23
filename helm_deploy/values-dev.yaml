@@ -47,9 +47,6 @@ generic-service:
       # Backend pods speak HTTP
       nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
 
-      # Trust X-Forwarded headers from API Gateway
-      #nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
-
       # Block admin endpoints for security
       nginx.ingress.kubernetes.io/server-snippet: |
         server_tokens off;
@@ -57,12 +54,6 @@ generic-service:
           deny all;
           return 401;
         }
-
-      #nginx.ingress.kubernetes.io/configuration-snippet: |
-      #  proxy_set_header X-Forwarded-Proto https;
-      #  proxy_set_header X-Forwarded-Port 443;
-
-      nginx.ingress.kubernetes.io/proxy-set-headers: "hmpps-launchpad-dev/nginx-proxy-headers"
 
       # NLB IpAddresses to allow access to API Gateway ingress
       nginx.ingress.kubernetes.io/whitelist-source-range: "172.20.103.178/32,172.20.143.89/32,172.20.95.25/32"
