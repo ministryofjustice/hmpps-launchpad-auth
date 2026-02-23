@@ -15,6 +15,10 @@ generic-service:
     enabled: true
     host: launchpad-auth-dev.hmpps.service.justice.gov.uk
     modsecurity_enabled: false
+    # additionalHosts entry matches default NLB TLS cert (CN=*.apps.live.cloud-platform.service.justice.gov.uk)
+    # Required so NGINX can route API Gateway VPC Link traffic to this pod
+    additionalHosts:
+      - hmpps-launchpad-auth.apps.live.cloud-platform.service.justice.gov.uk
 
   scheduledDowntime:
     enabled: true
