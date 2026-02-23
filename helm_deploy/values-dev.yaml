@@ -25,38 +25,19 @@ generic-service:
     ENVIRONMENT_NAME: "dev"
 
   allowlist:
-    nutrition-app-dev: 90.220.101.100
-    nutrition-app-staging: 3.10.88.156
-    uservision-accessibility-testers: 5.181.59.114/32
-    appsec-testers: 80.195.27.199
+    # TEMPORARY - allow all IPs for initial API Gateway testing
+    # TODO: restore original entries once testing is complete:
+    #   nutrition-app-dev: 90.220.101.100
+    #   nutrition-app-staging: 3.10.88.156
+    #   uservision-accessibility-testers: 5.181.59.114/32
+    #   appsec-testers: 80.195.27.199
+    #   api-gateway-nlb-1: 172.20.10.60/32
+    #   api-gateway-nlb-2: 172.20.1.210/32
+    #   api-gateway-nlb-3: 172.20.4.213/32
+    allow-all: 0.0.0.0/0
     groups:
       - internal
 
-  # Secondary ingress: API Gateway HTTPS access via Internal NLB
-  apiGatewayIngress:
-    enabled: true
-    host: launchpad-auth-dev.internal-non-prod.cloud-platform.service.justice.gov.uk
-    className: internal-non-prod
-    # No TLS secret needed - API Gateway handles TLS termination
-    # No ModSecurity needed - API Gateway already validates API keys
-    annotations:
-      # Accept HTTPS from API Gateway (port 443)
-      nginx.ingress.kubernetes.io/ssl-redirect: "false"
-      nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
-
-      # Backend pods speak HTTP
-      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-
-      # Block admin endpoints for security
-      nginx.ingress.kubernetes.io/server-snippet: |
-        server_tokens off;
-        location /v1/admin/ {
-          deny all;
-          return 401;
-        }
-
-      # NLB IpAddresses to allow access to API Gateway ingress
-      nginx.ingress.kubernetes.io/whitelist-source-range: "172.20.103.178/32,172.20.143.89/32,172.20.95.25/32"
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
