@@ -24,6 +24,12 @@ spec:
   {{- if and (index $apiGatewayIngress "className") (ne (index $apiGatewayIngress "className") "") }}
   ingressClassName: {{ index $apiGatewayIngress "className" }}
   {{- end }}
+  tls:
+    - hosts:
+        - {{ index $apiGatewayIngress "host" | quote }}
+      {{- if index $apiGatewayIngress "tlsSecretName" }}
+      secretName: {{ index $apiGatewayIngress "tlsSecretName" }}
+      {{- end }}
   rules:
     - host: {{ index $apiGatewayIngress "host" | quote }}
       http:
