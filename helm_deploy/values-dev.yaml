@@ -23,12 +23,10 @@ generic-service:
   # hostname matches default NLB TLS cert CN=*.apps.live.cloud-platform.service.justice.gov.uk
   apiGatewayIngress:
     enabled: true
-    className: default
+    className: default-non-prod
     host: hmpps-launchpad-auth.apps.live.cloud-platform.service.justice.gov.uk
     annotations:
       nginx.ingress.kubernetes.io/backend-protocol: HTTP
-      nginx.ingress.kubernetes.io/ssl-redirect: "false"
-      nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
 
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
