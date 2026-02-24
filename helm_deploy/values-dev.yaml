@@ -15,13 +15,20 @@ generic-service:
     enabled: true
     host: launchpad-auth-dev.hmpps.service.justice.gov.uk
     modsecurity_enabled: false
-    # additionalHosts entry matches default NLB TLS cert (CN=*.apps.live.cloud-platform.service.justice.gov.uk)
-    # Required so NGINX can route API Gateway VPC Link traffic to this pod
-    additionalHosts:
-      - hmpps-launchpad-auth.apps.live.cloud-platform.service.justice.gov.uk
-
   scheduledDowntime:
     enabled: true
+
+
+  # Secondary ingress: API Gateway VPC Link traffic
+  # hostname matches default NLB TLS cert CN=*.apps.live.cloud-platform.service.justice.gov.uk
+  apiGatewayIngress:
+    enabled: true
+    className: default
+    host: hmpps-launchpad-auth.apps.live.cloud-platform.service.justice.gov.uk
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: HTTP
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
 
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
