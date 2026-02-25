@@ -18,7 +18,7 @@ generic-service:
   scheduledDowntime:
     enabled: true
 
-  # Secondary ingress: API Gateway VPC Link traffic
+  # Secondary ingress for API Gateway VPC Link traffic
   # hostname matches default NLB TLS cert CN=*.apps.live.cloud-platform.service.justice.gov.uk
   apiGatewayIngress:
     enabled: true
@@ -26,33 +26,22 @@ generic-service:
     host: hmpps-launchpad-auth.apps.live.cloud-platform.service.justice.gov.uk
     annotations:
       nginx.ingress.kubernetes.io/backend-protocol: HTTP
-      # allowlist block does not apply to apiGatewayIngress - must be set explicitly here
-      # TEMPORARY - allow all IPs for initial testing
-      # TODO: restrict to NLB IPs once confirmed working:
-      #   172.20.10.60/32,172.20.1.210/32,172.20.4.213/32
-      nginx.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
-      #      nginx.ingress.kubernetes.io/whitelist-source-range: "172.20.10.60/32,172.20.1.210/32,172.20.4.213/32"
-
+      # NLB IPs for API Gateway
+      nginx.ingress.kubernetes.io/whitelist-source-range: "172.20.10.60/32,172.20.1.210/32,172.20.4.213/32"
 
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     SPRING_PROFILES_ACTIVE: "dev"
     ENVIRONMENT_NAME: "dev"
 
+  # Applicable only for default Ingress
   allowlist:
-    # TEMPORARY - allow all IPs for initial API Gateway testing
-    # TODO: restore original entries once testing is complete:
-    #   nutrition-app-dev: 90.220.101.100
-    #   nutrition-app-staging: 3.10.88.156
-    #   uservision-accessibility-testers: 5.181.59.114/32
-    #   appsec-testers: 80.195.27.199
-    #   api-gateway-nlb-1: 172.20.10.60/32
-    #   api-gateway-nlb-2: 172.20.1.210/32
-    #   api-gateway-nlb-3: 172.20.4.213/32
-    allow-all: 0.0.0.0/0
+    nutrition-app-dev: 90.220.101.100
+    nutrition-app-staging: 3.10.88.156
+    uservision-accessibility-testers: 5.181.59.114/32
+    appsec-testers: 80.195.27.199
     groups:
       - internal
-
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
