@@ -34,7 +34,7 @@ dependencies {
   runtimeOnly("org.flywaydb:flyway-database-postgresql:11.20.3")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.8.2")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:2.0.2")
   testImplementation("org.springframework.boot:spring-boot-starter-webflux")
   testImplementation("io.swagger.parser.v3:swagger-parser:2.1.37") {
     exclude(group = "io.swagger.core.v3")
