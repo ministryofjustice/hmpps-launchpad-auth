@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.0.2"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.0.4"
   kotlin("plugin.spring") version "2.3.10"
   kotlin("plugin.jpa") version "2.3.10"
   id("org.owasp.dependencycheck") version "12.2.0"
@@ -26,13 +26,13 @@ dependencies {
     exclude(group = "org.yaml", module = "snakeyaml")
   }
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:2.0.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:2.0.2")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("com.fasterxml.uuid:java-uuid-generator:5.2.0")
   implementation("com.nimbusds:nimbus-jose-jwt:10.7")
 
-  runtimeOnly("org.flywaydb:flyway-database-postgresql:12.0.1")
+  runtimeOnly("org.flywaydb:flyway-database-postgresql:12.0.2")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")

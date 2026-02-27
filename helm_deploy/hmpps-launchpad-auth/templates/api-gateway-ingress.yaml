@@ -1,6 +1,6 @@
 {{- $genericService := index .Values "generic-service" }}
 {{- $fullName := include "generic-service.fullname" . }}
-{{- $svcPort := index $genericService "image" "port" | default 8080 }}
+{{- $svcPort := index $genericService "service" "port" | default 80 }}
 {{- if $genericService }}
 {{- $apiGatewayIngress := index $genericService "apiGatewayIngress" }}
 {{- if and $apiGatewayIngress (index $apiGatewayIngress "enabled") }}
@@ -24,12 +24,18 @@ spec:
   {{- if and (index $apiGatewayIngress "className") (ne (index $apiGatewayIngress "className") "") }}
   ingressClassName: {{ index $apiGatewayIngress "className" }}
   {{- end }}
+  tls:
+    - hosts:
+        - {{ index $apiGatewayIngress "host" | quote }}
+      {{- if index $apiGatewayIngress "tlsSecretName" }}
+      secretName: {{ index $apiGatewayIngress "tlsSecretName" }}
+      {{- end }}
   rules:
     - host: {{ index $apiGatewayIngress "host" | quote }}
       http:
         paths:
           - path: /
-            pathType: ImplementationSpecific
+            pathType: Prefix
             backend:
               service:
                 name: {{ $fullName }}

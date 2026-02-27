@@ -24,6 +24,7 @@ generic-service:
     SPRING_PROFILES_ACTIVE: "dev"
     ENVIRONMENT_NAME: "dev"
 
+  # Applicable only for default Ingress
   allowlist:
     nutrition-app-dev: 90.220.101.100
     nutrition-app-staging: 3.10.88.156
@@ -32,31 +33,16 @@ generic-service:
     groups:
       - internal
 
-  # Secondary ingress: API Gateway HTTPS access via Internal NLB
+  # Secondary ingress for API Gateway VPC Link traffic
+  # hostname matches default NLB TLS cert CN=*.apps.live.cloud-platform.service.justice.gov.uk
   apiGatewayIngress:
     enabled: true
-    host: launchpad-auth-dev.internal-non-prod.cloud-platform.service.justice.gov.uk
-    className: internal-non-prod
-    # No TLS secret needed - API Gateway handles TLS termination
-    # No ModSecurity needed - API Gateway already validates API keys
+    className: default-non-prod
+    host: hmpps-launchpad-auth.apps.live.cloud-platform.service.justice.gov.uk
     annotations:
-      # Accept HTTPS from API Gateway (port 443)
-      nginx.ingress.kubernetes.io/ssl-redirect: "false"
-      nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
-
-      # Backend pods speak HTTP
-      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-
-      # Trust X-Forwarded headers from API Gateway
-      nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
-
-      # Block admin endpoints for security
-      nginx.ingress.kubernetes.io/server-snippet: |
-        server_tokens off;
-        location /v1/admin/ {
-          deny all;
-          return 401;
-        }
+      nginx.ingress.kubernetes.io/backend-protocol: HTTP
+      # NLB IPs for API Gateway
+      nginx.ingress.kubernetes.io/whitelist-source-range: "172.20.10.60/32,172.20.1.210/32,172.20.4.213/32"
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
