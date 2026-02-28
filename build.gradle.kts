@@ -22,7 +22,7 @@ dependencies {
   implementation("org.flywaydb:flyway-core:11.20.3")
   implementation("org.postgresql:postgresql:42.7.10")
   implementation("org.ehcache:ehcache:3.11.1")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.15") {
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2") {
     exclude(group = "org.yaml", module = "snakeyaml")
   }
 
