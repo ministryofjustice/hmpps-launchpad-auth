@@ -25,8 +25,6 @@ generic-service:
 
   # Applicable only for default Ingress
   allowlist:
-    nutrition-app-dev: 90.220.101.100
-    nutrition-app-staging: 3.10.88.156
     uservision-accessibility-testers: 5.181.59.114/32
     appsec-testers: 80.195.27.199
     groups:
@@ -37,7 +35,7 @@ generic-service:
   apiGatewayIngress:
     enabled: true
     className: default-non-prod
-    host: hmpps-launchpad-auth.apps.live.cloud-platform.service.justice.gov.uk
+    host: hmpps-launchpad-auth-dev.apps.live.cloud-platform.service.justice.gov.uk
     annotations:
       nginx.ingress.kubernetes.io/backend-protocol: HTTP
       # NLB IPs for API Gateway
