@@ -6,12 +6,14 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.domain.EntityScan
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
+import org.springframework.boot.persistence.autoconfigure.EntityScan
+import org.springframework.context.annotation.Import
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.test.context.ActiveProfiles
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.config.TestCacheConfig
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.UserApprovedClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.BaseIntegrationTest
@@ -24,6 +26,7 @@ import java.util.*
 @EnableJpaRepositories(basePackages = ["uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository"])
 @EntityScan("uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model")
 @ActiveProfiles("test")
+@Import(TestCacheConfig::class)
 class UserApprovedClientRepositoryTest(@Autowired private var userApprovedClientRepository: UserApprovedClientRepository) : BaseIntegrationTest() {
   private val dateAndTimeInUTC = LocalDateTime.now(ZoneOffset.UTC)
   private val userId = "G2320VD"

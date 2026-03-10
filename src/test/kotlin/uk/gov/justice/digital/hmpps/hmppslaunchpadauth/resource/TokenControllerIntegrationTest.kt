@@ -84,6 +84,9 @@ class TokenControllerIntegrationTest(
 
   @BeforeEach
   fun beforeEach() {
+    @Suppress("UNCHECKED_CAST")
+    val encodedSecret = encoder.encode(clientSecret.toString()) as String
+
     wiremock.start()
     WireMock.configureFor("localhost", wiremock.port())
     WireMock.stubFor(
@@ -124,7 +127,7 @@ class TokenControllerIntegrationTest(
     userApprovedClientRepository.deleteAll()
     clientDBOne = Client(
       clientId,
-      encoder.encode(clientSecret.toString()),
+      encodedSecret,
       setOf(
         Scope.USER_CLIENTS_READ,
         Scope.USER_BASIC_READ,
@@ -196,7 +199,7 @@ class TokenControllerIntegrationTest(
       .toEntity(Token::class.java)
       .block()
 
-    var token: Token = response.body
+    var token: Token = response?.body as Token
     Assertions.assertNotNull(token.idToken)
     Assertions.assertNotNull(token.accessToken)
     Assertions.assertNotNull(token.refreshToken)
@@ -217,7 +220,7 @@ class TokenControllerIntegrationTest(
       .toEntity(Token::class.java)
       .block()
 
-    token = response.body
+    token = response?.body as Token
     assertResponseHeaders(response.headers)
     Assertions.assertNotNull(token.idToken)
     Assertions.assertNotNull(token.accessToken)
@@ -253,7 +256,7 @@ class TokenControllerIntegrationTest(
               null,
             )
           } else {
-            throw WebClientResponseException(HttpStatus.BAD_REQUEST.value(), ex.message, null, null, null, null)
+            ex.message?.let { throw WebClientResponseException(HttpStatus.BAD_REQUEST.value(), it, null, null, null, null) }
           }
         }
         .block()
@@ -301,7 +304,7 @@ class TokenControllerIntegrationTest(
               null,
             )
           } else {
-            throw WebClientResponseException(HttpStatus.BAD_REQUEST.value(), ex.message, null, null, null, null)
+            ex.message?.let { throw WebClientResponseException(HttpStatus.BAD_REQUEST.value(), it, null, null, null, null) }
           }
         }
         .block()
@@ -331,7 +334,7 @@ class TokenControllerIntegrationTest(
               null,
             )
           } else {
-            throw WebClientResponseException(HttpStatus.BAD_REQUEST.value(), ex.message, null, null, null, null)
+            ex.message?.let { throw WebClientResponseException(HttpStatus.BAD_REQUEST.value(), it, null, null, null, null) }
           }
         }
         .block()

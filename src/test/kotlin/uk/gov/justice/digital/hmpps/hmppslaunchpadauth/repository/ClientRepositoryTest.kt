@@ -5,10 +5,12 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.domain.EntityScan
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
+import org.springframework.boot.persistence.autoconfigure.EntityScan
+import org.springframework.context.annotation.Import
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.test.context.ActiveProfiles
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.config.TestCacheConfig
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Client
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.BaseIntegrationTest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.DataGenerator
@@ -18,6 +20,7 @@ import java.util.*
 @EnableJpaRepositories(basePackages = ["uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository"])
 @EntityScan("uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model")
 @ActiveProfiles("test")
+@Import(TestCacheConfig::class)
 class ClientRepositoryTest(@Autowired var clientRepository: ClientRepository) : BaseIntegrationTest() {
   @BeforeEach
   fun setUp() {

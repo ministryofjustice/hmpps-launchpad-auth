@@ -5,10 +5,12 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.domain.EntityScan
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
+import org.springframework.boot.persistence.autoconfigure.EntityScan
+import org.springframework.context.annotation.Import
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.test.context.ActiveProfiles
+import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.config.TestCacheConfig
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoClient
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.SsoRequest
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.utils.BaseIntegrationTest
@@ -19,6 +21,7 @@ import java.util.UUID
 @EnableJpaRepositories(basePackages = ["uk.gov.justice.digital.hmpps.hmppslaunchpadauth.repository"])
 @EntityScan("uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model")
 @ActiveProfiles("test")
+@Import(TestCacheConfig::class)
 class SsoRequestRepositoryTest(@Autowired private var ssoRequestRepository: SsoRequestRepository) : BaseIntegrationTest() {
   @BeforeEach
   fun setUp() {

@@ -128,7 +128,7 @@ class UserApprovedClientIntegrationTest(
       .toEntity(object : ParameterizedTypeReference<PagedResult<UserApprovedClientDto>>() {})
       .block()
 
-    val pagedResult = response.body as PagedResult<UserApprovedClientDto>
+    val pagedResult = (response?.body ?: null) as PagedResult<UserApprovedClientDto>
     val userApprovedClientDtos = pagedResult.content
     val clientOne = userApprovedClientDtos[0]
     val scopes: List<uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.Scope> = clientOne.scopes
@@ -157,7 +157,7 @@ class UserApprovedClientIntegrationTest(
       .retrieve()
       .toEntity(object : ParameterizedTypeReference<ResponseEntity<Void>>() {})
       .block()
-    assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
+    assertEquals(HttpStatus.NO_CONTENT, response?.statusCode)
     assertTrue(userApprovedClientRepository.findUserApprovedClientByUserIdAndClientId(userID, clientId).isEmpty)
   }
 }

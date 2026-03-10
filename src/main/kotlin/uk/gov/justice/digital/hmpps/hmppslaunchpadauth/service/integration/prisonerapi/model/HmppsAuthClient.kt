@@ -45,8 +45,9 @@ class HmppsAuthClient(private var webClientBuilder: WebClient.Builder) {
         .toEntity(HmppsAuthAccessToken::class.java)
         .block()!!
 
-      if (response.statusCode.is2xxSuccessful && response.body != null) {
-        return "Bearer ${response.body.accessToken}"
+      val body = response.body
+      if (response.statusCode.is2xxSuccessful && body != null) {
+        return "Bearer ${body.accessToken}"
       } else {
         throw ApiException(
           "Response code ${response.statusCode.value()} making request to Hmpps auth for access token",

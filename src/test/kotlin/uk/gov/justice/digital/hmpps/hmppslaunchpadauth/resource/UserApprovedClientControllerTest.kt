@@ -9,8 +9,8 @@ import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto.PagedResult
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
@@ -24,10 +24,10 @@ import java.util.*
 @SpringBootTest(classes = [UserApprovedClientController::class, UserIdValidator::class])
 @ActiveProfiles("test")
 class UserApprovedClientControllerTest(@Autowired private var userApprovedClientController: UserApprovedClientController) {
-  @MockBean
+  @MockitoBean
   private lateinit var userApprovedClientService: UserApprovedClientService
 
-  @MockBean
+  @MockitoBean
   @Qualifier("tokenAuthentication")
   private lateinit var tokenAuthentication: Authentication
 

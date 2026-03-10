@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.servlet.view.RedirectView
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.exception.ApiException
 import uk.gov.justice.digital.hmpps.hmppslaunchpadauth.model.Scope
@@ -27,7 +27,7 @@ import java.util.*
 @ActiveProfiles("test")
 class AuthControllerTest(@Autowired private var authController: AuthController) {
 
-  @MockBean
+  @MockitoBean
   private lateinit var ssoLoginService: SsoLogInService
 
   @BeforeEach
