@@ -27,6 +27,7 @@ generic-service:
     enabled: true
     className: default-non-prod
     host: hmpps-launchpad-auth-prod.apps.live.cloud-platform.service.justice.gov.uk
+    tlsSecretName: hmpps-launchpad-auth-cert
     annotations:
       nginx.ingress.kubernetes.io/backend-protocol: HTTP
       # NLB IPs for API Gateway
