@@ -21,18 +21,6 @@ generic-service:
     SPRING_PROFILES_ACTIVE: "preprod"
     ENVIRONMENT_NAME: "preprod"
 
-  # Secondary ingress for API Gateway VPC Link traffic
-  # hostname matches default NLB TLS cert CN=*.apps.live.cloud-platform.service.justice.gov.uk
-  apiGatewayIngress:
-    enabled: true
-    className: default-non-prod
-    host: hmpps-launchpad-auth-preprod.apps.live.cloud-platform.service.justice.gov.uk
-    tlsSecretName: hmpps-launchpad-auth-cert
-    annotations:
-      nginx.ingress.kubernetes.io/backend-protocol: HTTP
-      # NLB IPs for API Gateway
-      nginx.ingress.kubernetes.io/whitelist-source-range: "172.20.10.60/32,172.20.1.210/32,172.20.4.213/32"
-
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 # See https://user-guide.cloud-platform.service.justice.gov.uk/documentation/monitoring-an-app/how-to-create-alarms.html#creating-your-own-custom-alerts
 generic-prometheus-alerts:
