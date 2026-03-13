@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.0.4"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.0.5"
   kotlin("plugin.spring") version "2.3.10"
   kotlin("plugin.jpa") version "2.3.10"
   id("org.owasp.dependencycheck") version "12.2.0"
@@ -22,7 +22,7 @@ dependencies {
   implementation("org.json:json:20250517")
   implementation("org.postgresql:postgresql:42.7.10")
   implementation("org.ehcache:ehcache:3.11.1")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1") {
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2") {
     exclude(group = "org.yaml", module = "snakeyaml")
   }
 
@@ -30,15 +30,15 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("com.fasterxml.uuid:java-uuid-generator:5.2.0")
-  implementation("com.nimbusds:nimbus-jose-jwt:10.7")
+  implementation("com.nimbusds:nimbus-jose-jwt:10.8")
 
-  runtimeOnly("org.flywaydb:flyway-database-postgresql:12.0.2")
+  runtimeOnly("org.flywaydb:flyway-database-postgresql:12.1.0")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:2.0.0")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:2.0.2")
   testImplementation("org.springframework.boot:spring-boot-starter-webflux")
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.37") {
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.39") {
     exclude(group = "io.swagger.core.v3")
   }
   testImplementation("org.testcontainers:postgresql:1.21.4")
