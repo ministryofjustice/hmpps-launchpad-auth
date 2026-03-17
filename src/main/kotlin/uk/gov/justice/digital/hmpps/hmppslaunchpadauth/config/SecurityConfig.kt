@@ -10,7 +10,6 @@ class SecurityConfig {
   @Bean
   fun webSecurityCustomizer(): WebSecurityCustomizer? = WebSecurityCustomizer { web: WebSecurity ->
     web.ignoring().requestMatchers("/v1/**")
-    // Uncomment the line below to expose public key endpoint
-    // web.ignoring().requestMatchers("/.well-known/jwks.json")
+    web.ignoring().requestMatchers("/.well-known/jwks.json")
   }
 }
