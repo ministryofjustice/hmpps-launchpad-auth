@@ -26,7 +26,7 @@ generic-service:
   # Applicable only for default Ingress
   allowlist:
     uservision-accessibility-testers: 5.181.59.114/32
-    appsec-testers: 80.195.27.199
+    appsec-testers: 195.68.59.74
     groups:
       - internal
 
