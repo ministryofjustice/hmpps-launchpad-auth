@@ -195,6 +195,16 @@ launchpad:
       name: bedford
       displayName: HMP Bedford
       youth: false
+     WCI:
+       agencyId: WCI
+       name: Winchester
+       displayName: HMP Winchester
+       youth: false
+     BLI:
+       agencyId: BLI
+       name: Bristol
+       displayName: HMP Bristol
+       youth: false
 azure:
   oauth2-base-url: https://login.microsoftonline.com
   oauth2-api-path: oauth2/v2.0/authorize
