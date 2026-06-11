@@ -197,12 +197,12 @@ launchpad:
       youth: false
      WCI:
        agencyId: WCI
-       name: Winchester
+       name: winchester
        displayName: HMP Winchester
        youth: false
      BLI:
        agencyId: BLI
-       name: Bristol
+       name: bristol
        displayName: HMP Bristol
        youth: false
 azure:
