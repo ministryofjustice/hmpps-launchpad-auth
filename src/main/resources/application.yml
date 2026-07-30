@@ -37,6 +37,8 @@ spring:
 springdoc:
   packages-to-scan: uk.gov.justice.digital.hmpps.hmppslaunchpadauth.dto, uk.gov.justice.digital.hmpps.hmppslaunchpadauth.resource
   swagger-ui:
+    enabled: false
+    version: 5.32.11
     default-model-expand-depth: -1
     tags-sorter: alpha
 server:
