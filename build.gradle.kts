@@ -19,7 +19,7 @@ dependencies {
   implementation("io.jsonwebtoken:jjwt-api:0.13.0")
   implementation("io.jsonwebtoken:jjwt-impl:0.13.0")
   implementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
-  implementation("org.json:json:20260719")
+  implementation("org.json:json:20260814")
   implementation("org.postgresql:postgresql:42.7.13")
   implementation("org.ehcache:ehcache:3.12.0")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.0") {
