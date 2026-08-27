@@ -37,7 +37,6 @@ jobs:
     secrets: inherit
   build:
     name: Build docker image from hmpps-github-actions
-    if: github.ref == 'refs/heads/main'
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/docker_build.yml@v2 # WORKFLOW_VERSION
     needs:
       - kotlin_validate
@@ -49,7 +48,6 @@ jobs:
       docker_multiplatform: true
   deploy_dev:
     name: Deploy to the dev environment
-    if: github.ref == 'refs/heads/main'
     needs:
     - build
     - helm_lint
@@ -61,6 +59,7 @@ jobs:
       helm_timeout: '5m'
   deploy_preprod:
     name: Deploy to the preprod environment
+    if: github.ref == 'refs/heads/main'
     needs:
     - build
     - helm_lint
@@ -73,6 +72,7 @@ jobs:
       helm_timeout: '5m'
   deploy_prod:
     name: Deploy to the prod environment
+    if: github.ref == 'refs/heads/main'
     needs:
     - build
     - helm_lint
