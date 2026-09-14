@@ -13,6 +13,9 @@ import org.springframework.context.annotation.Configuration
 class OpenApiConfiguration(buildProperties: BuildProperties) {
   private val version: String? = buildProperties.version
 
+  @Value("http://localhost:8080")
+  private lateinit var localUrl: String
+
   @Value("\${launchpad.auth.base-url.dev}")
   private lateinit var devUrl: String
 
@@ -24,6 +27,10 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
 
   @Bean
   fun defineOpenApi(): OpenAPI? {
+    val local = Server()
+    local.url(localUrl)
+    local.description("Local")
+
     val dev = Server()
     dev.url(devUrl)
     dev.description("Dev")
@@ -43,6 +50,6 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
       .version(version)
       .description("Microservice that provides Single Sign-On (SSO) capabilities to prisoner-facing clients that integrate with the Launchpad.")
       .contact(contact)
-    return OpenAPI().info(information).servers(listOf(dev, preprod, prod))
+    return OpenAPI().info(information).servers(listOf(local, dev, preprod, prod))
   }
 }
