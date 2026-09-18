@@ -30,7 +30,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("com.fasterxml.uuid:java-uuid-generator:5.2.0")
-  implementation("com.nimbusds:nimbus-jose-jwt:10.9.1")
+  implementation("com.nimbusds:nimbus-jose-jwt:10.10")
 
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
 
