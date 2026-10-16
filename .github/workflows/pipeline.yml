@@ -84,7 +84,6 @@ jobs:
   deploy_staging:
     name: Deploy to the staging environment
     needs:
-      - build
       - deploy_dev
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
@@ -96,8 +95,7 @@ jobs:
   deploy_preprod:
     name: Deploy to the preprod environment
     needs:
-    - build
-    - deploy_dev
+      - deploy_dev
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
     with:
@@ -107,8 +105,7 @@ jobs:
   deploy_prod:
     name: Deploy to the prod environment
     needs:
-    - build
-    - deploy_preprod
+      - deploy_preprod
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
     with:
