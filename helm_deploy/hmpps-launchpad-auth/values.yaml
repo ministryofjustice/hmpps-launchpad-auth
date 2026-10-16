@@ -36,7 +36,6 @@ generic-service:
     JAVA_OPTS: "-Xmx512m"
     SERVER_PORT: "8080"
     SPRING_PROFILES_ACTIVE: "logstash"
-    APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY)"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
 
   # Pre-existing kubernetes secrets to load as environment variables in the deployment.
@@ -45,13 +44,14 @@ generic-service:
   #     [name of environment variable as seen by app]: [key of kubernetes secret to load]
 
   namespace_secrets:
+    hmpps-launchpad-auth-application-insights:
+      APPLICATIONINSIGHTS_CONNECTION_STRING: "APPLICATIONINSIGHTS_CONNECTION_STRING"
     hmpps-launchpad-auth:
-      APPINSIGHTS_INSTRUMENTATIONKEY: "APPINSIGHTS_INSTRUMENTATIONKEY"
       HMPPS_AUTH_CLIENT_ID: "HMPPS_AUTH_CLIENT_ID"
       HMPPS_AUTH_CLIENT_SECRET: "HMPPS_AUTH_CLIENT_SECRET"
       AZURE_TENANT_ID: "AZURE_TENANT_ID"
       AZURE_CLIENT_ID: "AZURE_CLIENT_ID"
-      LAUNCHPAD_AUTH_SECRET: "LAUNCHPAD_AUTH_SECRET"
+#      LAUNCHPAD_AUTH_SECRET: "LAUNCHPAD_AUTH_SECRET" -- doesn't seem to be used
       PRIVATE_KEY: "PRIVATE_KEY"
       PUBLIC_KEY: "PUBLIC_KEY"
       KID: "KID"

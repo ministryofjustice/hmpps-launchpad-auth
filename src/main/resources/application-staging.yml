@@ -1,0 +1,24 @@
+azure:
+  launchpad-redirectUri: https://launchpad-auth-staging.hmpps.service.justice.gov.uk/v1/oauth2/callback
+launchpad:
+  auth:
+    iss-url: https://launchpad-auth-staging.hmpps.service.justice.gov.uk
+    id-token-validity-seconds: 300
+    access-token-validity-seconds: 600
+    refresh-token-validity-seconds: 900
+hmpps:
+  auth:
+    url: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
+  prison-api:
+    url: https://prison-api-dev.prison.service.justice.gov.uk
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://sign-in-dev.hmpps.service.justice.gov.uk/auth/.well-known/jwks.json
+      client:
+        provider:
+          hmpps-auth:
+            token-uri: https://sign-in-dev.hmpps.service.justice.gov.uk/auth/oauth/token

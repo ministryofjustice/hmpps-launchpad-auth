@@ -79,6 +79,7 @@ launchpad:
   auth:
     base-url:
       dev: https://launchpad-auth-dev.hmpps.service.justice.gov.uk
+      staging: https://launchpad-auth-staging.hmpps.service.justice.gov.uk
       preprod: https://launchpad-auth-preprod.hmpps.service.justice.gov.uk
       prod: https://launchpad-auth.hmpps.service.justice.gov.uk
     inactive-users-per-page: 200
